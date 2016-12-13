@@ -53,7 +53,12 @@ class SubscriptionObserver(object):
             owner = self.ref()
             engine = owner._d_engine
             if engine is not None:
-                engine.update(owner, self.name)
+                print('SubscriptionObserver', owner, self.name)
+                try:
+                    engine.update(owner, self.name)
+                except Exception as e:
+                    print('Exception in SubscriptionObserver', owner, self.name, repr(e))
+                    raise
 
 
 class StandardTracer(CodeTracer):

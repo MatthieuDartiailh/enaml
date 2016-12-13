@@ -98,7 +98,10 @@ class StandardTracedReadHandler(ReadHandler, HandlerMixin):
         f_locals = self.get_locals(owner)
         tr = StandardTracer(owner, name)
         scope = DynamicScope(owner, f_locals, f_globals, f_builtins, None, tr)
-        return call_func(func, (tr,), {}, scope)
+        print('Standard traced handler', owner, name)
+        res = call_func(func, (tr,), {}, scope)
+        print('Standard traced handler return', owner, name, res)
+        return res
 
 
 class StandardInvertedWriteHandler(WriteHandler, HandlerMixin):

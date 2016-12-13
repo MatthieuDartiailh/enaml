@@ -229,6 +229,8 @@ class ExpressionEngine(Atom):
             The name of the relevant bound expression.
 
         """
+        import sys
+        print('Enter ExpressionEngine.update for {}, {}'.format(owner, name))
         handler = self._handlers.get(name)
         if handler is not None:
             pair = handler.read_pair
@@ -238,7 +240,22 @@ class ExpressionEngine(Atom):
                 if key not in guards:
                     guards.add(key)
                     try:
-                        setattr(owner, name, pair.reader(owner, name))
+                        print('PairReader', pair.reader)
+                        # import dis
+                        # dis.dis(pair.reader.func.__code__)
+                        #raise RuntimeError()
+#                        if name == 'objects':
+#                            raise RuntimeError()
+                        val = pair.reader(owner, name)
+                        print('PairReader returned')
+                        #if name == 'objects':
+                            #raise RuntimeError()
+                    #if name == 'items' and isinstance(val, list) and len(val) < 5:
+                        setattr(owner, name, val)
+                    except Exception as e:
+                        print('Exception in ExpressionEngine.update for ', owner, name, repr(e))
+                        sys.stdout.flush()
+                        raise
                     finally:
                         guards.remove(key)
 

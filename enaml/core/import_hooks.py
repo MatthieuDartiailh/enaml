@@ -350,24 +350,24 @@ class EnamlImporter(AbstractEnamlImporter):
         # it was deleted between then and now, an IOError is more
         # informative than an ImportError.
         file_info = self.file_info
-        if not os.path.exists(file_info.src_path):
-            code = self._load_cache(file_info)
-            return (code, file_info.src_path)
+#        if not os.path.exists(file_info.src_path):
+#            code = self._load_cache(file_info)
+#            return (code, file_info.src_path)
 
         # Use the cached file if it exists and is current
         src_mod_time = int(os.path.getmtime(file_info.src_path))
-        if os.path.exists(file_info.cache_path):
-            magic, ts = self._get_magic_info(file_info)
-            if magic == MAGIC and src_mod_time <= ts:
-                code = self._load_cache(file_info)
-                return (code, file_info.src_path)
+#        if os.path.exists(file_info.cache_path):
+#            magic, ts = self._get_magic_info(file_info)
+#            if magic == MAGIC and src_mod_time <= ts:
+#                code = self._load_cache(file_info)
+#                return (code, file_info.src_path)
 
         # Otherwise, compile from source and attempt to cache
         with open(file_info.src_path, 'rU') as src_file:
             src = src_file.read()
         ast = parse(src)
         code = EnamlCompiler.compile(ast, file_info.src_path)
-        self._write_cache(code, src_mod_time, file_info)
+        #self._write_cache(code, src_mod_time, file_info)
         return (code, file_info.src_path)
 
 
