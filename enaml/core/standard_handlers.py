@@ -6,6 +6,7 @@
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
 from types import FunctionType
+import sys
 
 from atom.api import Atom, Typed
 
@@ -99,8 +100,10 @@ class StandardTracedReadHandler(ReadHandler, HandlerMixin):
         tr = StandardTracer(owner, name)
         scope = DynamicScope(owner, f_locals, f_globals, f_builtins, None, tr)
         print('Standard traced handler', owner, name)
+        sys.stdout.flush()
         res = call_func(func, (tr,), {}, scope)
         print('Standard traced handler return', owner, name, res)
+        sys.stdout.flush()
         return res
 
 

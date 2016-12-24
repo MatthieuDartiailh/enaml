@@ -5,6 +5,7 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
+import sys
 from past.builtins import basestring
 from atom.api import Atom, atomref
 
@@ -40,6 +41,7 @@ class SubscriptionObserver(object):
         tests boolean False.
 
         """
+        print('Testing trueness of ', self, bool(self.ref))
         return bool(self.ref)
 
     def __call__(self, change):
@@ -54,10 +56,12 @@ class SubscriptionObserver(object):
             engine = owner._d_engine
             if engine is not None:
                 print('SubscriptionObserver', owner, self.name)
+                sys.stdout.flush()
                 try:
                     engine.update(owner, self.name)
                 except Exception as e:
                     print('Exception in SubscriptionObserver', owner, self.name, repr(e))
+                    sys.stdout.flush()
                     raise
 
 
@@ -117,6 +121,8 @@ class StandardTracer(CodeTracer):
         # invalidate the old observer so that it can be collected
         old_observer = storage.get(key)
         if old_observer is not None:
+#            for obj, d_name in self.items:
+#                obj.unobserve(d_name, old_observer)
             old_observer.ref = None
 
         # create a new observer and subscribe it to the dependencies
@@ -125,6 +131,7 @@ class StandardTracer(CodeTracer):
             storage[key] = observer
             for obj, d_name in self.items:
                 obj.observe(d_name, observer)
+        print('Finalizing tracer (items, old)', self.items, old_observer)
 
     #--------------------------------------------------------------------------
     # AbstractScopeListener Interface

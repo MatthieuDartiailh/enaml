@@ -231,6 +231,7 @@ class ExpressionEngine(Atom):
         """
         import sys
         print('Enter ExpressionEngine.update for {}, {}'.format(owner, name))
+        sys.stdout.flush()
         handler = self._handlers.get(name)
         if handler is not None:
             pair = handler.read_pair
@@ -241,16 +242,14 @@ class ExpressionEngine(Atom):
                     guards.add(key)
                     try:
                         print('PairReader', pair.reader)
-                        # import dis
-                        # dis.dis(pair.reader.func.__code__)
-                        #raise RuntimeError()
-#                        if name == 'objects':
-#                            raise RuntimeError()
                         val = pair.reader(owner, name)
-                        print('PairReader returned')
-                        #if name == 'objects':
-                            #raise RuntimeError()
-                    #if name == 'items' and isinstance(val, list) and len(val) < 5:
+                        val = getattr(owner, name)
+                        if name == 'items' and getattr(owner, 'switch', None):
+                            val = val[:] + ['e']
+                            from dis import dis
+                            print(pair.reader.func.__code__.co_stacksize)
+                            dis(pair.reader.func.__code__)
+                        print('PairReader returned %s' % val)
                         setattr(owner, name, val)
                     except Exception as e:
                         print('Exception in ExpressionEngine.update for ', owner, name, repr(e))
