@@ -734,6 +734,10 @@ def add_decl_function(node, func, is_override):
     d_func = DeclarativeFunction(func, node.scope_key)
     setattr(klass, name, d_func)
 
+# XXX add a helper to call a comprehension function in the proper scope
+#     pass it the scope that should be cloned, the function made by
+#     MAKE_FUNCTION or MAKE_CLOSURE and the iterable that the function expects
+
 
 __compiler_helpers = {
     'add_alias': add_alias,

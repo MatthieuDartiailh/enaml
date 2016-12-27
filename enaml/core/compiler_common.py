@@ -156,6 +156,8 @@ def count_nodes(node):
 def has_list_comp(pyast):
     """ Determine whether a Python expression has a list comprehension.
 
+    This function is only used under Python 2.
+
     Parameters
     ----------
     pyast : Expression
@@ -341,8 +343,9 @@ def safe_eval_ast(cg, node, name, lineno, local_names):
 
     This method will eval the python code represented by the ast
     in the local namespace. If the code would have the side effect
-    of storing a value in the namespace, such as a list comp, then
-    the expression will be evaluated in it's own namespace.
+    of storing a value in the namespace, such as a list comp under
+    Python 2, then the expression will be evaluated in it's own
+    namespace.
 
     Parameters
     ----------
@@ -362,7 +365,7 @@ def safe_eval_ast(cg, node, name, lineno, local_names):
         The set of fast local names available to the code object.
 
     """
-    if has_list_comp(node):
+    if not IS_PY3 and has_list_comp(node):
         expr_cg = CodeGenerator()
         expr_cg.filename = cg.filename
         expr_cg.name = name
@@ -372,8 +375,6 @@ def safe_eval_ast(cg, node, name, lineno, local_names):
         call_args = expr_cg.rewrite_to_fast_locals(local_names)
         expr_code = expr_cg.to_code()
         cg.load_const(expr_code)
-        if IS_PY3:
-            cg.load_const(None)
         cg.make_function()
         for arg in call_args:
             if arg in local_names:
@@ -416,25 +417,6 @@ def rewrite_globals_access(code, global_vars):
     for idx, (op, op_arg) in enumerate(inner_ops):
         if op == bp.LOAD_GLOBAL and op_arg not in global_vars:
             inner_ops[idx] = (bp.LOAD_NAME, op_arg)
-
-
-def _ids():
-    """Generator producing unique ids.
-
-    """
-    i = 0
-    while True:
-        i += 1
-        yield i
-
-_ids = _ids()
-
-
-def new_name(name):
-    """Provide a unique name for a variable used in a comprehension.
-
-    """
-    return '_comprehension_var%s_%s' % (next(_ids), name)
 
 
 def _rewrite_comprehension(code):
@@ -482,22 +464,21 @@ def _rewrite_comprehension(code):
         ops.append((op, op_arg))
 
     code.code = ops
-    inline_comprehensions(code)
+    run_comprehensions_in_dynamic_scope(code)
 
     return build_op, code.code
 
-
-def inline_comprehensions(code):
-    """Inline all list/dict/set comprehensions to avoid scoping issues.
+# XXX at the beginning fecth the helpers
+# XXX After a GET_ITER followed by CALL_FUNCTION insert before the GET_ITER
+# XXX a load_helpers('run_comprehensions'), a ROT_TWO and a load_fast('_[scope]')
+def run_comprehensions_in_dynamic_scope(code):
+    """Run all list/dict/set comprehensions in the proper dynamic scope.
 
     Parameters
     ----------
     code :
-        Code object in which comprehension should be inlined.
-
-    globs : set
-        True global variables in the scope, the others used inside the
-        comprehensions will be rewritten to use LOAD_NAME and STORE_NAME
+        Code object in which comprehension should be called in their own
+        dynamic namespace.
 
     """
     # New op codes generated for the code.
@@ -757,7 +738,7 @@ def gen_operator_binding(cg, node, index, name):
 
     if has_comp:
         b_code = bp.Code.from_code(code)
-        inline_comprehensions(b_code)
+        run_comprehensions_in_dynamic_scope(b_code)
         rewrite_globals_access(b_code, global_vars)
         code = b_code.to_code()
 
@@ -880,7 +861,7 @@ def _insert_decl_function(cg, funcdef):
     # On Python 3 all comprehensions use a function call (on Python 2 only dict
     # and set). To avoid scoping issues the function call is inlined.
     if has_comp:
-        inline_comprehensions(inner)
+        run_comprehensions_in_dynamic_scope(inner)
 
     rewrite_globals_access(inner, global_vars)
 
