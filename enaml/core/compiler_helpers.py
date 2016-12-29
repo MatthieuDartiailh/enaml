@@ -19,6 +19,7 @@ from .enamldef_meta import EnamlDefMeta
 from .expression_engine import ExpressionEngine
 from .operators import __get_operators
 from .template import Template
+from .funchelper import call_func
 
 
 def resolve_alias(node, alias):
@@ -734,10 +735,6 @@ def add_decl_function(node, func, is_override):
     d_func = DeclarativeFunction(func, node.scope_key)
     setattr(klass, name, d_func)
 
-# XXX add a helper to call a comprehension function in the proper scope
-#     pass it the scope that should be cloned, the function made by
-#     MAKE_FUNCTION or MAKE_CLOSURE and the iterable that the function expects
-
 
 __compiler_helpers = {
     'add_alias': add_alias,
@@ -758,4 +755,5 @@ __compiler_helpers = {
     'validate_spec': validate_spec,
     'validate_template': validate_template,
     'validate_unpack_size': validate_unpack_size,
+    'call_func': call_func,
 }
