@@ -63,7 +63,7 @@ static PyObject*
 _Invoke( PyObject* func, PyObject* key, PyObject* self, PyObject* args,
          PyObject* kwargs )
 {
-    PyObjectPtr pfunc( func );
+    PyObjectPtr pfunc( newref( func ) );
     PyDictPtr f_globals( pfunc.getattr("__globals__") );
     if( !f_globals )
         return py_no_attr_fail( pfunc.get(), "__globals__" );
@@ -76,24 +76,25 @@ _Invoke( PyObject* func, PyObject* key, PyObject* self, PyObject* args,
         );
         return 0;
     }
-    PyObjectPtr pself( self );
+    PyObjectPtr pself( newref( self ) );
     PyDictPtr d_storage( pself.getattr("_d_storage") );
     if( !d_storage )
         return py_no_attr_fail( pself.get(), "_d_storage" );
-    PyObjectPtr f_locals( d_storage.get_item( key ) );
-    if( !f_locals )
-        PyObjectPtr f_locals( PyDict_New() );
-        if( !f_locals )
-            return py_bad_internal_call("Failed to create dict");
-    PyDictPtr scope(
+
+    PyObjectPtr empty( PyDict_New() );
+    PyObjectPtr f_locals( PyObject_CallMethod( d_storage.get(), "get", "OO", key, empty.get() ) );
+    PyObjectPtr scope(
         PyObject_CallFunctionObjArgs( DynamicScope, self, f_locals.get(),
                                       f_globals.get(),
                                       f_builtins.get(), 0 )
         );
-    if( !scope.set_item( "super", super_disallowed ) )
+    if( PyMapping_SetItemString( scope.get(), "super", newref( super_disallowed ) ) == -1 )
         return py_bad_internal_call("Failed to set key super in dynamic scope");
-    return PyObject_CallFunctionObjArgs( call_func, func, args, kwargs, scope, 0 );
 
+    PyObjectPtr pkw( xnewref( kwargs ) );
+    if( !pkw )
+        pkw.set( PyDict_New() );
+    return PyObject_CallFunctionObjArgs( call_func, func, args, pkw.get(), scope.get(), 0 );
 }
 
 

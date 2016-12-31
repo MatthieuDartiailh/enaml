@@ -49,19 +49,22 @@ def test_declarative_function_get_and_call():
     source = dedent("""\
     from enaml.widgets.window import Window
 
-    enamldef MyWindow(Window):
+    enamldef MyWindow(Window): main:
 
         func call(arg, kwarg=1):
-            return self
+            assert main is self
+            return main
 
     """)
     tester = compile_source(source, 'MyWindow')()
     bdmethod = tester.call
     assert isinstance(bdmethod, BoundDeclarativeMethod)
-    assert bdmethod() is tester
+    assert bdmethod(1) is tester
+    assert bdmethod(1) is tester
     func = type(tester).call
     assert isinstance(func, DeclarativeFunction)
-    assert func(tester) is tester
+    assert func(tester, 1) is tester
+    assert func(tester, 1) is tester
 
 if __name__ == '__main__':
     test_bound_declarative_method()
