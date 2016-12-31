@@ -176,7 +176,7 @@ static PyObject*
 DFunc__call__( DFunc* self, PyObject* args, PyObject* kwargs )
 {
     PyTuplePtr argsptr( args );
-    if( argsptr.size() == 1 )
+    if( argsptr.size() == 0 )
     {
         std::ostringstream ostr;
         ostr << "DeclarativeFunction.__call__() takes at least 1 argument (";

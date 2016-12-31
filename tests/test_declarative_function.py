@@ -55,6 +55,9 @@ def test_declarative_function_get_and_call():
             assert main is self
             return main
 
+        func call2():
+            return main
+
     """)
     tester = compile_source(source, 'MyWindow')()
     bdmethod = tester.call
@@ -65,6 +68,10 @@ def test_declarative_function_get_and_call():
     assert isinstance(func, DeclarativeFunction)
     assert func(tester, 1) is tester
     assert func(tester, 1) is tester
+    func = type(tester).call2
+    assert isinstance(func, DeclarativeFunction)
+    assert func(tester) is tester
+    assert func(tester) is tester
 
 if __name__ == '__main__':
     test_bound_declarative_method()
