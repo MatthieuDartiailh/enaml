@@ -42,7 +42,10 @@ class SubscriptionObserver(object):
 
         """
         print('Testing trueness of ', self, bool(self.ref))
+        sys.stdout.flush()
         return bool(self.ref)
+
+    __nonzero__ = __bool__
 
     def __call__(self, change):
         """ The handler for the change notification.
