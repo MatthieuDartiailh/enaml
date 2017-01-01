@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -11,7 +11,7 @@ from enaml.qt.QtCore import (
     Qt, QSize, QPoint, QRect, QMargins, QEvent, QObject, QPropertyAnimation,
     Signal
 )
-from enaml.qt.QtGui import (
+from enaml.qt.QtWidgets import (
     QBoxLayout, QSizePolicy, QFrame, QPushButton, QStyle, QStyleOption,
     QStylePainter, QStyleOptionButton, QApplication, QVBoxLayout, QHBoxLayout,
     QLayout

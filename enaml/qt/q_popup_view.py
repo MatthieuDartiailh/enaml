@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -11,10 +11,8 @@ from .QtCore import (
     Qt, QPoint, QPointF, QSize, QRect,QMargins, QPropertyAnimation, QTimer,
     QEvent, Signal
 )
-from .QtGui import (
-    QApplication, QWidget, QLayout, QPainter, QPainterPath, QRegion, QPen,
-    QCursor
-)
+from .QtGui import QPainter, QPainterPath, QRegion, QPen, QCursor
+from .QtWidgets import QApplication, QWidget, QLayout
 
 from .q_single_widget_layout import QSingleWidgetLayout
 

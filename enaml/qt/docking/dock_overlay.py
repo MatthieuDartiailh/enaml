@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -9,7 +9,8 @@ from atom.api import Atom, Bool, Int, Float, Typed
 
 from enaml.qt import QT_API
 from enaml.qt.QtCore import Qt, QPoint, QRect, QTimer, QPropertyAnimation
-from enaml.qt.QtGui import QWidget, QStyle, QStyleOption, QPainter
+from enaml.qt.QtGui import QPainter
+from enaml.qt.QtWidgets import QWidget, QStyle, QStyleOption
 
 from .q_guide_rose import QGuideRose
 from .q_dock_bar import QDockBar

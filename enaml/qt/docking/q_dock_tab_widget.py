@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -9,8 +9,11 @@ from weakref import ref
 
 from enaml.qt.QtCore import Qt, QPoint, QSize, QMetaObject, QEvent
 from enaml.qt.QtGui import (
-    QApplication, QTabBar, QTabWidget, QMouseEvent, QResizeEvent, QStyle,
-    QCursor, QStylePainter, QStyleOptionTabV3, QPixmap, QPainter
+    QMouseEvent, QResizeEvent, QCursor, QPainter, QPixmap
+)
+from enaml.qt.QtGui import (
+    QApplication, QTabBar, QTabWidget, QStyle, QStylePainter,
+    QStyleOptionTabV3
 )
 
 from .event_types import QDockItemEvent, DockTabSelected
