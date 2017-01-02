@@ -498,7 +498,7 @@ class QDockBarManager(QObject):
             animation.stop()
             animation.finished.disconnect()
         else:
-            animation = QPropertyAnimation(item, 'geometry')
+            animation = QPropertyAnimation(item, b'geometry')
             item.setAnimation(animation)
         return animation
 

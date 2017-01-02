@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 from enaml.qt.QtCore import Qt, QSize, QEvent
 from enaml.qt.QtGui import QPainter
-from enaml.qt.QtGui import QFrame
+from enaml.qt.QtWidgets import QFrame
 
 
 class QTextLabel(QFrame):

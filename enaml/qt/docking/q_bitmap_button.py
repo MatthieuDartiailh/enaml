@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 from enaml.qt.QtCore import QPoint, QRect, QEvent
 from enaml.qt.QtGui import QPainter, QColor
-from enaml.qt.QtGui import (
+from enaml.qt.QtWidgets import (
     QAbstractButton, QStyle, QStyleOption, QToolTip
 )
 

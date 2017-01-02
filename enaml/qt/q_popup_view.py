@@ -11,7 +11,9 @@ from .QtCore import (
     Qt, QPoint, QPointF, QSize, QRect,QMargins, QPropertyAnimation, QTimer,
     QEvent, Signal
 )
-from .QtGui import QPainter, QPainterPath, QRegion, QPen, QCursor
+from .QtGui import (
+    QPainter, QPainterPath, QRegion, QPen, QCursor, ID_TRANS
+)
 from .QtWidgets import QApplication, QWidget, QLayout
 
 from .q_single_widget_layout import QSingleWidgetLayout
@@ -102,10 +104,10 @@ class PopupState(Atom):
         """
         fade_in = self.fade_in_animator
         fade_in.setTargetObject(widget)
-        fade_in.setPropertyName('windowOpacity')
+        fade_in.setPropertyName(b'windowOpacity')
         fade_out = self.fade_out_animator
         fade_out.setTargetObject(widget)
-        fade_out.setPropertyName('windowOpacity')
+        fade_out.setPropertyName(b'windowOpacity')
         fade_out.finished.connect(widget.close)
         close_timer = self.close_timer
         close_timer.setSingleShot(True)
@@ -992,7 +994,7 @@ class QPopupView(QWidget):
 
         # Store the path for painting and update the widget mask.
         state.path = path
-        mask = QRegion(path.toFillPolygon().toPolygon())
+        mask = QRegion(path.toFillPolygon(ID_TRANS).toPolygon())
         self.setMask(mask)
 
         # Set the geometry of the view and update. The update is needed
