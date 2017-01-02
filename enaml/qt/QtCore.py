@@ -5,7 +5,8 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
-from . import QT_API, PYQT4_API, PYQT5_API, QT_VERSION
+from qtpy import QT_VERSION
+from . import QT_API, PYQT4_API, PYQT5_API
 
 __version__ = QT_VERSION
 __version_info__ = tuple(map(int, QT_VERSION.split('.')))
