@@ -5,6 +5,4 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
-import os
-
 from qtpy import API as QT_API, PYQT5_API, PYQT4_API, PYSIDE_API

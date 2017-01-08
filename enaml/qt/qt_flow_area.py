@@ -10,7 +10,7 @@ from atom.api import Typed
 from enaml.widgets.flow_area import ProxyFlowArea
 
 from .QtCore import QEvent, QPoint, QRect
-from .QtGui import QPainter, QPalette,
+from .QtGui import QPainter, QPalette
 from .QtWidgets import QScrollArea, QWidget, QApplication
 
 from .qt_frame import QtFrame
