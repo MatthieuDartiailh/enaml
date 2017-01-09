@@ -50,6 +50,11 @@ ext_modules = [
         'enaml.core.alias',
         ['enaml/src/alias.cpp'],
         language='c++',
+    ),
+    Extension(
+        'enaml.core.declarative_function',
+        ['enaml/src/declfunction.cpp'],
+        language='c++',
     )
 ]
 

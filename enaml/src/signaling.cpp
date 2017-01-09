@@ -910,7 +910,7 @@ MOD_INIT_FUNC(signaling)
     if( !cr_mod )
         INITERROR;
     PyObjectPtr cr_cls( cr_mod.get_attr( "CallableRef" ) );
-    if( !cr_mod )
+    if( !cr_cls )
         INITERROR;
 
     PyObjectPtr key( Py23Str_FromString( "_[signals]" ) );
