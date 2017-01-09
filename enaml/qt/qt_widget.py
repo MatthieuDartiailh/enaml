@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -12,7 +12,8 @@ from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 
 from .QtCore import Qt, QSize, QPoint
-from .QtGui import QFont, QWidget, QWidgetAction, QApplication, QDrag, QPixmap
+from .QtGui import QFont, QDrag, QPixmap
+from .QtWidgets import QWidget, QWidgetAction, QApplication
 
 from . import focus_registry
 from .q_resource_helpers import (
