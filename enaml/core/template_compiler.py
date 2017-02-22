@@ -324,7 +324,7 @@ class TemplateCompiler(cmn.CompilerBase):
         # Load and invoke the first pass code object.
         cg.load_const(first_code)
         if IS_PY3:
-            cg.load_const(None)
+            cg.load_const(None)  # XXX better qualified name
         cg.make_function()
         for arg in first_args:
             cg.load_fast(arg)
@@ -336,7 +336,7 @@ class TemplateCompiler(cmn.CompilerBase):
         # Load and invoke the second pass code object.
         cg.load_const(second_code)
         if IS_PY3:
-            cg.load_const(None)
+            cg.load_const(None)  # XXX better qualified name
         cg.make_function()
         for arg in second_args:
             cg.load_fast(arg)

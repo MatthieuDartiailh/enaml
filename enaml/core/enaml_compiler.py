@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 import sys
 
-from ..compat import IS_PY3
+from ..compat import IS_PY3, USE_WORDCODE
 from . import compiler_common as cmn
 from .enaml_ast import Module
 from .enamldef_compiler import EnamlDefCompiler
@@ -131,7 +131,8 @@ from .template_compiler import TemplateCompiler
 #     This updates the arrow functions to use "=>" instead of "->".
 # 23 : Support for Python 3 and inlining of comprehensions.
 # 24 : Call comprehension functions in the proper scope rather than inlining
-COMPILER_VERSION = 24
+# 25 : Support for Python 3.6
+COMPILER_VERSION = 25
 
 
 # Code that will be executed at the top of every enaml module
@@ -218,7 +219,7 @@ class EnamlCompiler(cmn.CompilerBase):
         code = EnamlDefCompiler.compile(node, cg.filename)
         cg.load_const(code)
         if IS_PY3:
-            cg.load_const(None)
+            cg.load_const(None)  # XXX better qualified name
         cg.make_function()
         cg.call_function()
         cg.store_global(node.typename)
@@ -251,12 +252,22 @@ class EnamlCompiler(cmn.CompilerBase):
                     cg, param.default.ast, node.name, param.lineno, set()
                 )
 
+            # Under Python 3.6+ default positional arguments are passed as a
+            # single tuple and MAKE_FUNCTION is passed the flag 0x01 to
+            # indicate that there is default positional arguments.
+            if USE_WORDCODE:
+                cg.build_tuple(len(node.parameters.keywords))
+
             # Generate the template code and function
             code = TemplateCompiler.compile(node, cg.filename)
             cg.load_const(code)
+
+            # Under Python 3 function have a qualified name
+            # XXX improve qualified name
             if IS_PY3:
                 cg.load_const(None)
-            cg.make_function(len(node.parameters.keywords))
+            cg.make_function(0x01 if USE_WORDCODE else
+                             len(node.parameters.keywords))
 
             # Load and call the helper which will build the template
             cmn.load_helper(cg, 'make_template', from_globals=True)

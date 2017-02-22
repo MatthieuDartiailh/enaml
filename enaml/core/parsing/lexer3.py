@@ -118,3 +118,14 @@ class Python35EnamlLexer(Python34EnamlLexer):
         """
         if not async_depth:
             tok.type = 'NAME'
+
+
+class Python36EnamlLexer(Python35EnamlLexer):
+    """Lexer specialized for Python 3.6.
+
+    Support for _ in numeric literals (comes from stdlib tokenize.NUMBER)
+
+    TODO Add support for f-strings
+
+    """
+    pass

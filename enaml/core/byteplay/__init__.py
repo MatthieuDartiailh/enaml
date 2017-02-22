@@ -5,9 +5,11 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
-from ...compat import IS_PY3
+from ...compat import IS_PY3, USE_WORDCODE
 
-if not IS_PY3:
+if USE_WORDCODE:
+    from .wbyteplay import *
+elif not IS_PY3:
     from .byteplay2 import *
 else:
     from .byteplay3 import *

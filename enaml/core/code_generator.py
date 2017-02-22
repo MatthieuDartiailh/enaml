@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 from atom.api import Atom, Bool, Int, List, Str
 
-from ..compat import IS_PY3
+from ..compat import IS_PY3, USE_WORDCODE
 from . import byteplay as bp
 
 
@@ -271,18 +271,35 @@ class CodeGenerator(Atom):
         """ Call a function on the TOS with the given args and kwargs.
 
         """
-        argspec = ((n_kwds & 0xFF) << 8) + (n_args & 0xFF)
-        self.code_ops.append(                           # TOS -> func -> args -> kwargs
-            (bp.CALL_FUNCTION, argspec),                # TOS -> retval
-        )
+        if USE_WORDCODE:
+            if n_kwds:
+                # kwargs_name should be a tuple listing the keyword
+                # arguments names
+                # TOS -> func -> args -> kwargs -> kwargs_names
+                op, arg = bp.CALL_FUNCTION_KW, n_args+n_kwds
+            else:
+                op, arg = bp.CALL_FUNCTION, n_args
+        else:
+            argspec = ((n_kwds & 0xFF) << 8) + (n_args & 0xFF)
+            op, arg = bp.CALL_FUNCTION, argspec  # TOS -> func -> args -> kwargs
+
+        self.code_ops.append((op, arg))          # TOS -> retval
 
     def call_function_var(self, n_args=0, n_kwds=0):
         """ Call a var function on the TOS with the given args and kwargs.
 
         """
-        argspec = ((n_kwds & 0xFF) << 8) + (n_args & 0xFF)
+        if USE_WORDCODE:
+            # Under Python 3.6 positional arguments should always be stored
+            # in a tuple and keywords in a mapping.
+            argspec = 1 if n_kwds else 0
+        else:
+            argspec = ((n_kwds & 0xFF) << 8) + (n_args & 0xFF)
+
+        opcode = (bp.CALL_FUNCTION_EX if USE_WORDCODE else
+                  bp.CALL_FUNCTION_VAR)
         self.code_ops.append(                           # TOS -> func -> args -> kwargs -> varargs
-            (bp.CALL_FUNCTION_VAR, argspec),            # TOS -> retval
+            (opcode, argspec),                          # TOS -> retval
         )
 
     def pop_top(self):

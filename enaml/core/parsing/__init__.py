@@ -22,9 +22,12 @@ else:
     elif py_version[1] == 4:
         from .parser34 import Python34EnamlParser
         _parser = Python34EnamlParser()
-    else:
+    elif py_version[1] == 5:
         from .parser35 import Python35EnamlParser
         _parser = Python35EnamlParser()
+    else:
+        from .parser36 import Python36EnamlParser
+        _parser = Python36EnamlParser()
 
 
 def parse(enaml_source, filename='Enaml'):
