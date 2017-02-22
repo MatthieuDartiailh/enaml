@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -8,3 +8,5 @@
 import sys
 
 IS_PY3 = sys.version_info >= (3,)
+
+USE_WORDCODE = sys.version_info >= (3, 6)
