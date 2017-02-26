@@ -79,7 +79,7 @@ STOP_CODE = -1
 from dis import stack_effect
 
 # Fix bug in Python 3.6.0 (fixed in 3.6.1)
-if version_info == (3, 6, 0):
+if (3, 6, 0) <= version_info < (3, 6, 1):
     def stack_effect(o, arg):
         return (stack_effect(o, arg) if o != CALL_FUNCTION_EX else
                 -2 if arg else -1)
