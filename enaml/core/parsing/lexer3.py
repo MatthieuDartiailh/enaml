@@ -128,4 +128,4 @@ class Python36EnamlLexer(Python35EnamlLexer):
     TODO Add support for f-strings
 
     """
-    pass
+    lex_id = '36'
