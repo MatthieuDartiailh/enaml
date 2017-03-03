@@ -99,8 +99,9 @@ setup(
     description='Declarative DSL for building rich user interfaces in Python',
     long_description=open('README.rst').read(),
     requires=['atom', 'PyQt', 'ply', 'kiwisolver', 'qtpy'],
-    install_requires=['setuptools', 'future', 'atom >= 0.3.8',
-                      'kiwisolver >= 0.1.2', 'ply >= 3.4', 'qtpy'],
+    install_requires=['setuptools', 'future', 'atom >= 0.4.0.dev',
+                      'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy',
+                      'PyQt5'],
     packages=find_packages(),
     package_data={
         'enaml.applib': ['*.enaml'],

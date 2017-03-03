@@ -503,7 +503,7 @@ MOD_INIT_FUNC(declarative_function)
 #if PY_MAJOR_VERSION >= 3
     PyObjectPtr mod( PyModule_Create(&moduledef) );
 #else
-    PyObjectPtr mod( Py_InitModule( "declarative_function", declarative_function_methods ), true );
+    PyObjectPtr mod( Py_InitModule( "declarative_function", declarative_function_methods ) );
 #endif
     if( !mod )
         INITERROR;
