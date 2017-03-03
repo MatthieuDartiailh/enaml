@@ -92,7 +92,7 @@ class BuildExt(build_ext):
 
 setup(
     name='enaml',
-    version='0.9.8',
+    version='0.10.0.dev',
     author='The Nucleic Development Team',
     author_email='sccolbert@gmail.com',
     url='https://github.com/nucleic/enaml',

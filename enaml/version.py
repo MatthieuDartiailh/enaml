@@ -23,6 +23,7 @@ MINOR = 10
 # The micro release number. The micro release number is incremented
 # for bug fix releases and small feature additions.
 MICRO = 0
+
 # The status indicate if this is a development or pre-release version
 STATUS = 'dev'
 
