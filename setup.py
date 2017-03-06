@@ -53,7 +53,7 @@ ext_modules = [
     ),
     Extension(
         'enaml.core.declarative_function',
-        ['enaml/src/declfunction.cpp'],
+        ['enaml/src/declarative_function.cpp'],
         language='c++',
     )
 ]
@@ -100,8 +100,7 @@ setup(
     long_description=open('README.rst').read(),
     requires=['atom', 'PyQt', 'ply', 'kiwisolver', 'qtpy'],
     install_requires=['setuptools', 'future', 'atom >= 0.4.0.dev',
-                      'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy',
-                      'PyQt5'],
+                      'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy']
     packages=find_packages(),
     package_data={
         'enaml.applib': ['*.enaml'],

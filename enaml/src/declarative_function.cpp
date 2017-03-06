@@ -5,6 +5,11 @@
 |
 | The full license is in the file COPYING.txt, distributed with this software.
 |----------------------------------------------------------------------------*/
+#include <iostream>
+#include <sstream>
+#include "pythonhelpersex.h"
+#include "py23compat.h"
+
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
 #endif
@@ -13,16 +18,8 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #endif
 
-#include <cstdio>
-#include <iostream>
-#include <sstream>
-#include "pythonhelpersex.h"
-#include "py23compat.h"
-
-
 using namespace PythonHelpers;
 
-extern "C" {
 
 PyObject* DynamicScope;
 PyObject* call_func;
@@ -228,7 +225,7 @@ DFunc_getset[] = {
 
 PyTypeObject DFunc_Type = {
     PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-    "declfunction.DeclarativeFunction",       /* tp_name */
+    "declarative_function.DeclarativeFunction",       /* tp_name */
     sizeof( DFunc ),                        /* tp_basicsize */
     0,                                      /* tp_itemsize */
     (destructor)DFunc_dealloc,              /* tp_dealloc */
@@ -374,8 +371,8 @@ BoundDMethod_getset[] = {
 
 
 PyTypeObject BoundDMethod_Type = {
-     PyVarObject_HEAD_INIT( &PyType_Type, 0 )
-    "declfunction.BoundDeclarativeMethod",  /* tp_name */
+    PyVarObject_HEAD_INIT( &PyType_Type, 0 )
+    "declarative_function.BoundDeclarativeMethod",  /* tp_name */
     sizeof( BoundDMethod ),                 /* tp_basicsize */
     0,                                      /* tp_itemsize */
     (destructor)BoundDMethod_dealloc,       /* tp_dealloc */
@@ -383,11 +380,11 @@ PyTypeObject BoundDMethod_Type = {
     (getattrfunc)0,                         /* tp_getattr */
     (setattrfunc)0,                         /* tp_setattr */
 #if PY_VERSION_HEX >= 0x03050000
-	( PyAsyncMethods* )0,                   /* tp_as_async */
+	( PyAsyncMethods* )0,                 /* tp_as_async */
 #elif PY_VERSION_HEX >= 0x03000000
-	( void* ) 0,                            /* tp_reserved */
+	( void* ) 0,                          /* tp_reserved */
 #else
-	( cmpfunc )0,                           /* tp_compare */
+	( cmpfunc )0,                         /* tp_compare */
 #endif
     (reprfunc)BoundDMethod_repr,            /* tp_repr */
     (PyNumberMethods*)0,                    /* tp_as_number */
@@ -417,7 +414,7 @@ PyTypeObject BoundDMethod_Type = {
     0,                                      /* tp_dictoffset */
     (initproc)0,                            /* tp_init */
     (allocfunc)PyType_GenericAlloc,         /* tp_alloc */
-    (newfunc)0,              /* tp_new */
+    (newfunc)0,                             /* tp_new */
     (freefunc)PyObject_GC_Del,              /* tp_free */
     (inquiry)0,                             /* tp_is_gc */
     0,                                      /* tp_bases */
@@ -459,9 +456,9 @@ struct module_state {
 
 static PyMethodDef
 declarative_function_methods[] = {
-    {"_super_disallowed", (PyCFunction)_SuperDisallowed,
+    {"_super_disallowed", ( PyCFunction )_SuperDisallowed,
      METH_VARARGS | METH_KEYWORDS, "Forbid use of super in declarative function"},
-    {NULL, NULL, 0, NULL}  // Sentinel
+    { 0 }  // Sentinel
 };
 
 #if PY_MAJOR_VERSION >= 3
@@ -501,9 +498,9 @@ static struct module_state _state;
 MOD_INIT_FUNC(declarative_function)
 {
 #if PY_MAJOR_VERSION >= 3
-    PyObjectPtr mod( PyModule_Create(&moduledef) );
+    PyObjectPtr mod( xnewref( PyModule_Create(&moduledef) ) );
 #else
-    PyObjectPtr mod( Py_InitModule( "declarative_function", declarative_function_methods ) );
+    PyObjectPtr mod( xnewref( Py_InitModule( "declarative_function", declarative_function_methods ) ) );
 #endif
     if( !mod )
         INITERROR;
@@ -531,21 +528,17 @@ MOD_INIT_FUNC(declarative_function)
     call_func = fh_cls.release();
     super_disallowed = sup.release();
 
-    if( PyType_Ready( &DFunc_Type ) )
+    if( PyType_Ready( &DFunc_Type ) < 0 )
         INITERROR;
-    if( PyType_Ready( &BoundDMethod_Type ) )
+    if( PyType_Ready( &BoundDMethod_Type ) < 0 )
         INITERROR;
 
-    PyObjectPtr dfunc_type( reinterpret_cast<PyObject*>( &DFunc_Type ) );
-    if( PyModule_AddObject( mod.get(), "DeclarativeFunction", dfunc_type.release() ) == -1 )
+    if( PyModule_AddObject( mod.get(), "DeclarativeFunction", newref( pyobject_cast( &DFunc_Type ) ) ) == -1 )
         INITERROR;
-    PyObjectPtr bdmethod_type( reinterpret_cast<PyObject*>( &BoundDMethod_Type ) );
-    if( PyModule_AddObject( mod.get(), "BoundDeclarativeMethod", bdmethod_type.release() ) == -1 )
+    if( PyModule_AddObject( mod.get(), "BoundDeclarativeMethod", newref( pyobject_cast( &BoundDMethod_Type ) ) ) == -1 )
         INITERROR;
 
 #if PY_MAJOR_VERSION >= 3
     return mod.get();
 #endif
 }
-
-} // extern C

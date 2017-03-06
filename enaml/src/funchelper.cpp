@@ -142,7 +142,7 @@ static int funchelper_clear(PyObject *m) {
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "weakmethod",
+        "funchelper",
         NULL,
         sizeof(struct module_state),
         funchelper_methods,
