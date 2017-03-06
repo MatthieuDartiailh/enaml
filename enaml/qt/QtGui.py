@@ -5,7 +5,5 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
-from . import QT_API, PYQT5_API
 from qtpy.QtGui import *
 
-ID_TRANS = QTransform() if QT_API in PYQT5_API else QMatrix()
