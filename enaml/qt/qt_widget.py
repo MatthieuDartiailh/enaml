@@ -12,7 +12,7 @@ from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 
 from .QtCore import Qt, QSize, QPoint,  __version_info__
-from .QtGui import QFont, QDrag, QPixmap
+from .QtGui import QFont, QDrag, QPixmap, QCursor
 from .QtWidgets import QWidget, QWidgetAction, QApplication
 
 from . import focus_registry
@@ -348,6 +348,11 @@ class QtWidget(QtToolkitObject, ProxyWidget):
                 qdrag.setPixmap(QPixmap.grabWidget(widget))
             else:
                 qdrag.setPixmap(widget.grab())
+        if drag_data.hotspot:
+            qdrag.setHotSpot(QPoint(*drag_data.hotspot))
+        else:
+            cursor_position = widget.mapFromGlobal(QCursor.pos())
+            qdrag.setHotSpot(cursor_position)
         default = Qt.DropAction(drag_data.default_drop_action)
         supported = Qt.DropActions(drag_data.supported_actions)
         qresult = qdrag.exec_(supported, default)
