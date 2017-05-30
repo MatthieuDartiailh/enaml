@@ -11,7 +11,7 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 
-from .QtCore import Qt, QSize, QPoint
+from .QtCore import Qt, QSize, QPoint,  __version_info__
 from .QtGui import QFont, QDrag, QPixmap
 from .QtWidgets import QWidget, QWidgetAction, QApplication
 
@@ -344,7 +344,11 @@ class QtWidget(QtToolkitObject, ProxyWidget):
             qimg = get_cached_qimage(drag_data.image)
             qdrag.setPixmap(QPixmap.fromImage(qimg))
         else:
-            qdrag.setPixmap(widget.grab())
+            qt_major_version = __version_info__[0]
+            if qt_major_version < 5:
+                qdrag.setPixmap(QPixmap.grabWidget(widget))
+            else:
+                qdrag.setPixmap(widget.grab())
         default = Qt.DropAction(drag_data.default_drop_action)
         supported = Qt.DropActions(drag_data.supported_actions)
         qresult = qdrag.exec_(supported, default)
