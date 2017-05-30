@@ -344,8 +344,7 @@ class QtWidget(QtToolkitObject, ProxyWidget):
             qimg = get_cached_qimage(drag_data.image)
             qdrag.setPixmap(QPixmap.fromImage(qimg))
         else:
-            qt_major_version = __version_info__[0]
-            if qt_major_version < 5:
+            if __version_info__ < (5, ):
                 qdrag.setPixmap(QPixmap.grabWidget(widget))
             else:
                 qdrag.setPixmap(widget.grab())
