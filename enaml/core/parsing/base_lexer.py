@@ -604,7 +604,6 @@ class BaseEnamlLexer(object):
             s = "".join(tok.value for tok in string_toks)
             quote_type = start_tok.value.lower()
             s, t = self.format_string(s, quote_type)
-            print(t)
             start_tok.type = t
             start_tok.value = s
 
