@@ -105,7 +105,7 @@ enamldef Main(Window):
             data = b'small\ndata'
         DragLabel: lbl2:
             text = 'Drag Me 2'
-            data = b'\n'.join([bytes(i) for i in range(100)])
+            data = b'\n'.join([bytes(str(i), 'utf-8') for i in range(100)])
         DropField: target:
             hug_width = 'strong'
             read_only = True
