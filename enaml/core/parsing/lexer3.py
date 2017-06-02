@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -29,16 +29,15 @@ class Python3EnamlLexer(BaseEnamlLexer):
         """Python support u, r and b as quote type.
 
         """
-        if quote_type == "" or quote_type == "u" or quote_type == "ur":
+        if quote_type == "" or quote_type == "u":
             u8 = string.encode('utf-8')
-            if quote_type == "ur":
-                aux = u8.decode('raw_unicode_escape')
-            else:
-                aux = u8.decode('unicode_escape')
-            return aux.encode('latin-1').decode('utf-8'), 'STRING'
+            return u8.decode('unicode_escape'), 'STRING'
         elif quote_type == "r":
             return string, 'STRING'
-        elif quote_type in ("b", "rb"):
+        elif quote_type == "b":
+            u8 = string.encode('utf-8')
+            return bytes(u8.decode('unicode_escape'), 'utf-8'), 'BYTES'
+        elif quote_type == "br":
             return bytes(string, 'utf-8'), 'BYTES'
         else:
             msg = 'Unknown string quote type: %r' % quote_type

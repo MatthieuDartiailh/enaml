@@ -337,7 +337,7 @@ class BaseEnamlLexer(object):
     # TRIPLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q1_string(self, t):
-        r"[uU]?[rR]?[bB]?'''"
+        r"[uU]?[bB]?[rR]?'''"
         t.lexer.push_state("TRIPLEQ1")
         t.type = "STRING_START_TRIPLE"
         if "r" in t.value or "R" in t.value:
@@ -373,7 +373,7 @@ class BaseEnamlLexer(object):
     # TRIPLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q2_string(self, t):
-        r'[uU]?[rR]?[bB]?"""'
+        r'[uU]?[bB]?[rR]?"""'
         t.lexer.push_state("TRIPLEQ2")
         t.type = "STRING_START_TRIPLE"
         if "r" in t.value or "R" in t.value:
@@ -409,7 +409,7 @@ class BaseEnamlLexer(object):
     # SINGLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q1_string(self, t):
-        r"[uU]?[rR]?[bB]?'"
+        r"[uU]?[bB]?[rR]?'"
         t.lexer.push_state("SINGLEQ1")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:
@@ -439,7 +439,7 @@ class BaseEnamlLexer(object):
     # SINGLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q2_string(self, t):
-        r'[uU]?[rR]?[bB]?"'
+        r'[uU]?[bB]?[rR]?"'
         t.lexer.push_state("SINGLEQ2")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:

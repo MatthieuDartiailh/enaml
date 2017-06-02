@@ -25,13 +25,13 @@ class Python2EnamlLexer(BaseEnamlLexer):
         """Python 2 support only u, b and r as quote type.
 
         """
-        if quote_type == "":
+        if quote_type == "" or quote_type == "b":
             return string.decode("string_escape"), 'STRING'
         elif quote_type == "u":
             return string.decode("unicode_escape"), 'STRING'
         elif quote_type == "ur":
             return string.decode("raw_unicode_escape"), 'STRING'
-        elif quote_type == "r" or quote_type == "b":
+        elif quote_type == "r":
             return string, 'STRING'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
