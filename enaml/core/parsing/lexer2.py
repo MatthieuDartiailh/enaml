@@ -22,17 +22,17 @@ class Python2EnamlLexer(BaseEnamlLexer):
                     )
 
     def format_string(self, string, quote_type):
-        """Python 2 support only u and r as quote type.
+        """Python 2 support only u, b and r as quote type.
 
         """
         if quote_type == "":
-            return string.decode("string_escape")
+            return string.decode("string_escape"), 'STRING'
         elif quote_type == "u":
-            return string.decode("unicode_escape")
+            return string.decode("unicode_escape"), 'STRING'
         elif quote_type == "ur":
-            return string.decode("raw_unicode_escape")
+            return string.decode("raw_unicode_escape"), 'STRING'
         elif quote_type == "r" or quote_type == "b":
-            return string
+            return string, 'STRING'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)

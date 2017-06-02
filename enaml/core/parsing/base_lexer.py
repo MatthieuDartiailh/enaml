@@ -10,6 +10,8 @@ import tokenize
 
 import ply.lex as lex
 
+from ...compat import IS_PY3
+
 
 #------------------------------------------------------------------------------
 # Lexing Helpers
@@ -601,15 +603,18 @@ class BaseEnamlLexer(object):
 
             s = "".join(tok.value for tok in string_toks)
             quote_type = start_tok.value.lower()
-            s = self.format_string(s, quote_type)
-
-            start_tok.type = "STRING"
+            s, t = self.format_string(s, quote_type)
+            print(t)
+            start_tok.type = t
             start_tok.value = s
 
             yield start_tok
 
     def format_string(self, string, quote_type):
         """Format a string according to the leading quote_type (u, r, b).
+
+        Also determine the type of the token that should be associated with the
+        string.
 
         """
         raise NotImplementedError()

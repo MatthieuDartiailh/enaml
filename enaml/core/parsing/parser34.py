@@ -19,15 +19,15 @@ class Python34EnamlParser(Python3EnamlParser):
 
     lexer = Python34EnamlLexer
 
-    def p_atom12(self, p):
+    def p_atom13(self, p):
         ''' atom : NONE '''
         p[0] = ast.NameConstant(None)
 
-    def p_atom13(self, p):
+    def p_atom14(self, p):
         ''' atom : FALSE '''
         p[0] = ast.NameConstant(False)
 
-    def p_atom14(self, p):
+    def p_atom15(self, p):
         ''' atom : TRUE '''
         p[0] = ast.NameConstant(True)
 

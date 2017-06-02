@@ -16,6 +16,8 @@ class Python3EnamlLexer(BaseEnamlLexer):
     """
     operators = BaseEnamlLexer.operators + ((r'->', 'RETURNARROW'),)
 
+    delimiters = BaseEnamlLexer.delimiters + ('BYTES',)
+
     t_RETURNARROW = r'->'
 
     reserved = dict(list(BaseEnamlLexer.reserved.items()) +
@@ -24,7 +26,7 @@ class Python3EnamlLexer(BaseEnamlLexer):
                     )
 
     def format_string(self, string, quote_type):
-        """Python support u r and b as quote type.
+        """Python support u, r and b as quote type.
 
         """
         if quote_type == "" or quote_type == "u" or quote_type == "ur":
@@ -33,11 +35,11 @@ class Python3EnamlLexer(BaseEnamlLexer):
                 aux = u8.decode('raw_unicode_escape')
             else:
                 aux = u8.decode('unicode_escape')
-            return aux.encode('latin-1').decode('utf-8')
+            return aux.encode('latin-1').decode('utf-8'), 'STRING'
         elif quote_type == "r":
-            return string
-        elif quote_type == "b":
-            return bytes(string)
+            return string, 'STRING'
+        elif quote_type in ("b", "rb"):
+            return bytes(string, 'utf-8'), 'BYTES'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)
