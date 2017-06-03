@@ -8,6 +8,7 @@
 import sys
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
+from setuptools.command.install import install
 
 
 ext_modules = [
@@ -89,6 +90,14 @@ class BuildExt(build_ext):
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
 
+class Install(install):
+    """ Calls the parser to construct a lex and parse table specific
+        to the system before installation.
+    """
+
+    def run(self):
+        import enaml.core.parsing
+        install.run(self)
 
 setup(
     name='enaml',
@@ -115,5 +124,6 @@ setup(
     },
     entry_points={'console_scripts': ['enaml-run = enaml.runner:main']},
     ext_modules=ext_modules,
-    cmdclass={'build_ext': BuildExt},
+    cmdclass={'build_ext': BuildExt,
+              'install': Install},
 )
