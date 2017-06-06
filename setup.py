@@ -95,20 +95,24 @@ class BuildExt(build_ext):
 class Install(install):
     """ Calls the parser to construct a lex and parse table specific
         to the system before installation.
+
     """
 
     def run(self):
-        import enaml.core.parsing
+        from enaml.core.parsing import write_tables
+        write_tables()
         install.run(self)
 
 
 class Develop(develop):
     """ Calls the parser to construct a lex and parse table specific
         to the system before installation.
+
     """
 
     def run(self):
-        import enaml.core.parsing
+        from enaml.core.parsing import write_tables
+        write_tables()
         develop.run(self)
 
 
