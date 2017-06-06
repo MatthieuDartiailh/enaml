@@ -28,17 +28,17 @@ class Python3EnamlLexer(BaseEnamlLexer):
     def format_string(self, string, quote_type):
         """Python support u, r and b as quote type.
 
+
         """
         if quote_type == "" or quote_type == "u":
-            u8 = string.encode('utf-8')
-            return u8.decode('unicode_escape'), 'STRING'
+            # Turn escaped characters into what they should be.
+            return string.replace('\\\\', '\\'), 'STRING'
         elif quote_type == "r":
             return string, 'STRING'
         elif quote_type == "b":
-            u8 = string.encode('utf-8')
-            return bytes(u8.decode('unicode_escape'), 'utf-8'), 'BYTES'
+            return bytes(string.replace('\\\\', '\\'), self.encoding), 'BYTES'
         elif quote_type == "br":
-            return bytes(string, 'utf-8'), 'BYTES'
+            return bytes(string, self.encoding), 'BYTES'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)
