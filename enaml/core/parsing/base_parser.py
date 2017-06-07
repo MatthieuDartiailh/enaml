@@ -13,7 +13,7 @@ import ply.yacc as yacc
 from ...compat import IS_PY3
 from .. import enaml_ast
 from .base_lexer import (syntax_error, syntax_warning, BaseEnamlLexer,
-                          ParsingError)
+                         ParsingError)
 
 # -----------------------------------------------------------------------------
 # Parsing Helpers
@@ -206,8 +206,7 @@ class BaseEnamlParser(object):
     def __init__(self):
         self.tokens = self.lexer().tokens
         # Get a save directory for the lex and parse tables
-        parse_dir = os.path.join(os.path.dirname(__file__), 'parse_tab')
-        parse_mod = 'enaml.core.parsing.parse_tab.parsetab%s' % self.parser_id
+        parse_dir, parse_mod = self._tables_location()
         self.parser = yacc.yacc(
             method='LALR',
             module=self,
@@ -217,6 +216,27 @@ class BaseEnamlParser(object):
             optimize=1,
             debug=0,
             errorlog=yacc.NullLogger())
+
+    def write_tables(self):
+        """Write the parser and lexer tables.
+
+        """
+        parse_dir, parse_mod = self._tables_location()
+        # Using optimized = 0 force yacc to compare the parser signature to the
+        # parse_tab signature and will update it if necessary.
+        yacc.yacc(method='LALR',
+                  module=self,
+                  start='enaml',
+                  tabmodule=parse_mod,
+                  outputdir=parse_dir,
+                  optimize=0,
+                  debug=0,
+                  errorlog=yacc.NullLogger())
+
+    def _tables_location(self):
+        parse_dir = os.path.join(os.path.dirname(__file__), 'parse_tab')
+        parse_mod = 'enaml.core.parsing.parse_tab.parsetab%s' % self.parser_id
+        return parse_dir, parse_mod
 
     def parse(self, source, filename='Enaml'):
         """Parse source string and create abstract syntax tree (AST)."""

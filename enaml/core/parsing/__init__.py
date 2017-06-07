@@ -30,6 +30,11 @@ else:
         _parser = Python36EnamlParser()
 
 
+def write_tables():
+    _parser.lexer().write_tables()
+    _parser.write_tables()
+
+
 def parse(enaml_source, filename='Enaml'):
     # All errors in the parsing and lexing rules are raised as a custom
     # ParsingError. This exception object can be called to return the

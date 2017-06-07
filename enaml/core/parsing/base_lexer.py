@@ -480,8 +480,7 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     def __init__(self, filename='Enaml'):
 
-        _lex_dir = os.path.join(os.path.dirname(__file__), 'parse_tab')
-        _lex_module = 'enaml.core.parsing.parse_tab.lextab%s' % self.lex_id
+        _lex_dir, _lex_module = self._tables_location()
 
         self.tokens = (self.delimiters +
                        tuple(val[1] for val in self.operators) +
@@ -503,6 +502,14 @@ class BaseEnamlLexer(object):
         # will be set on the error token. Since we need the filename in
         # that function, we add it as an attribute on both lexers.
         self.lexer.filename = filename
+
+    def write_tables(self):
+        """Write the lexer tables.
+
+        """
+        _lex_dir, _lex_module = self._tables_location()
+        lexobj = lex.lex(module=self)
+        lexobj.writetab(_lex_module, _lex_dir)
 
     def input(self, txt):
         self.lexer.input(txt)
@@ -655,7 +662,7 @@ class BaseEnamlLexer(object):
                 token.must_indent = False
 
             elif token.type == "WS":
-                assert token.at_line_start == True
+                assert token.at_line_start is True
                 at_line_start = True
                 token.must_indent = False
 
@@ -762,3 +769,8 @@ class BaseEnamlLexer(object):
         end_marker.lexpos = -1
         end_marker.lexer = self.lexer
         yield end_marker
+
+    def _tables_location(self):
+        _lex_dir = os.path.join(os.path.dirname(__file__), 'parse_tab')
+        _lex_module = 'enaml.core.parsing.parse_tab.lextab%s' % self.lex_id
+        return _lex_dir, _lex_module
