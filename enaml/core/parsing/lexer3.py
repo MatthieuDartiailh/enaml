@@ -5,9 +5,18 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
+import codecs
+
 from future.builtins import bytes
 
 from .base_lexer import BaseEnamlLexer
+
+
+def process_escape(string):
+    """Process a string literal by interpreting the escaped characters.
+
+    """
+    return codecs.escape_decode(string.encode('utf-8'))[0].decode('utf-8')
 
 
 class Python3EnamlLexer(BaseEnamlLexer):
@@ -32,13 +41,17 @@ class Python3EnamlLexer(BaseEnamlLexer):
         """
         if quote_type == "" or quote_type == "u":
             # Turn escaped characters into what they should be.
-            return string.replace('\\\\', '\\'), 'STRING'
+            return process_escape(string), 'STRING'
         elif quote_type == "r":
             return string, 'STRING'
         elif quote_type == "b":
-            return bytes(string.replace('\\\\', '\\'), self.encoding), 'BYTES'
-        elif quote_type == "br":
-            return bytes(string, self.encoding), 'BYTES'
+            # Only ascii characters are allowed in byte string literals so this
+            # is safe, and handle correctly \u0394\n by only processing escaped
+            # characters that can be represented in ascii
+            return bytes(string, 'raw_unicode_escape'), 'BYTES'
+        elif quote_type in ('br', 'rb'):
+            # Only ascii characters are allowed in byte string literals
+            return bytes(string, 'ascii'), 'BYTES'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)

@@ -13,13 +13,14 @@ USE_WORDCODE = sys.version_info >= (3, 6)
 
 if IS_PY3:
     import tokenize
-    def detect_encoding(filename):
-        pass
+    open_source = tokenize.open
+
 else:
     # Adapted from https://stackoverflow.com/questions/38374489/
     # get-encoding-specified-in-magic-line-shebang-from-within-module
     import re
     from codecs import lookup, BOM_UTF8
+    from contextlib import contextmanager
 
     cookie_re = re.compile(r'^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)')
     blank_re = re.compile(br'^[ \t\f]*(?:[#\r\n]|$)')
@@ -81,3 +82,10 @@ else:
         if not second:
             return default
         return find_cookie(second) or default
+
+    @contextmanager
+    def open_source(filename):
+        enc = detect_encoding(filename)
+        f = open(filename, 'rU', encoding=enc)
+        yield f
+        f.close()
