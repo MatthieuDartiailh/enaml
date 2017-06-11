@@ -8,6 +8,7 @@
 import os
 import tokenize
 
+from future.builtins import str
 import ply.lex as lex
 
 from ...compat import IS_PY3
@@ -237,13 +238,18 @@ class BaseEnamlLexer(object):
     # Default Rules
     #--------------------------------------------------------------------------
     t_COMMA = r','
-    t_NUMBER = tokenize.Number
     t_PRAGMA = r'\$pragma'
 
     # Generate the token matching rules for the operators
     for tok_pattern, tok_name in operators:
         tok_name = 't_' + tok_name
         locals()[tok_name] = tok_pattern
+
+    # Define NUMBER as a function so that it as the proper precedence over NAME
+    def t_NUMBER(self, t):
+        return t
+
+    t_NUMBER.__doc__ = tokenize.Number
 
     def t_comment(self, t):
         r'[ ]*\#[^\r\n]*'
@@ -470,9 +476,13 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     # This is placed after the string rules so r"" is not matched as a name.
     def t_NAME(self, t):
-        r'[a-zA-Z_][a-zA-Z0-9_]*'
         t.type = self.reserved.get(t.value, "NAME")
+        if not str.isidentifier(t.value):
+            msg = '{} is not a valid Python identifier (found in {}, line {}'
+            raise ValueError(msg.format(t.value, self.filename, t.lineno))
         return t
+
+    t_NAME.__doc__ = tokenize.Name
 
     def t_error(self, t):
         syntax_error('invalid syntax', t)
