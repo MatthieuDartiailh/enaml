@@ -106,13 +106,15 @@ def indentation_error(message, token):
     _parsing_error(IndentationError, message, token)
 
 
+# Matches all string prefixes even potentially non-valid ones as those are
+# filtered later on.
+STRING_PREFIX = r"(([fF]?[uU]?[bB]?[rR]?)|([rR]?[fF]?[uU]?[bB]?))"
+
 #------------------------------------------------------------------------------
 # Enaml Lexer
 #------------------------------------------------------------------------------
 class BaseEnamlLexer(object):
     """Base lexer for enaml file.
-
-    Compatible with Python 3.3 and 3.4
 
     """
 
@@ -343,13 +345,15 @@ class BaseEnamlLexer(object):
     # TRIPLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q1_string(self, t):
-        r"[uU]?[bB]?[rR]?'''"
         t.lexer.push_state("TRIPLEQ1")
         t.type = "STRING_START_TRIPLE"
+        print(t.value)
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split("'", 1)[0]
         return t
+
+    t_start_triple_quoted_q1_string.__doc__ = STRING_PREFIX + r"'''"
 
     def t_TRIPLEQ1_simple(self, t):
         r"[^'\\]+"
@@ -379,13 +383,14 @@ class BaseEnamlLexer(object):
     # TRIPLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q2_string(self, t):
-        r'[uU]?[bB]?[rR]?"""'
         t.lexer.push_state("TRIPLEQ2")
         t.type = "STRING_START_TRIPLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split('"', 1)[0]
         return t
+
+    t_start_triple_quoted_q2_string.__doc__ = STRING_PREFIX + r'"""'
 
     def t_TRIPLEQ2_simple(self, t):
         r'[^"\\]+'
@@ -415,13 +420,14 @@ class BaseEnamlLexer(object):
     # SINGLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q1_string(self, t):
-        r"[uU]?[bB]?[rR]?'"
         t.lexer.push_state("SINGLEQ1")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split("'", 1)[0]
         return t
+
+    t_start_single_quoted_q1_string.__doc__ = STRING_PREFIX + r"'"
 
     def t_SINGLEQ1_simple(self, t):
         r"[^'\\\n]+"
@@ -445,13 +451,14 @@ class BaseEnamlLexer(object):
     # SINGLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q2_string(self, t):
-        r'[uU]?[bB]?[rR]?"'
         t.lexer.push_state("SINGLEQ2")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split('"', 1)[0]
         return t
+
+    t_start_single_quoted_q2_string.__doc__ = STRING_PREFIX + r'"'
 
     def t_SINGLEQ2_simple(self, t):
         r'[^"\\\n]+'

@@ -7,6 +7,7 @@
 #------------------------------------------------------------------------------
 from textwrap import dedent
 from utils import compile_source
+from enaml.compat import IS_PY3
 
 
 def test_unicode_literal():
@@ -50,14 +51,17 @@ def test_bytes_literal():
     from enaml.widgets.api import Window
 
     enamldef MyWindow(Window): win:
-        attr test = b'I also do bytes with\\nescapes'
+        attr test = b'I also do bytes with\\nescapes: \\785 and \\x12'
+        attr test2 = b'And handle unicode escapes \\u0320 gracefully'
     """)
     myWindow = compile_source(source, 'MyWindow')()
-    bytes_literal = b'I also do bytes with\nescapes'
+    bytes_literal = b'I also do bytes with\nescapes: \785 and \x12'
     assert bytes_literal == myWindow.test
+    bytes_literal = b'And handle unicode escapes \u0320 gracefully'
+    assert bytes_literal == myWindow.test2
 
 
-def test_raw_bytes_literal():
+def test_raw_bytes_literal1():
     source = dedent("""\
     from enaml.widgets.api import Window
 
@@ -78,6 +82,7 @@ def test_unicode_identifier():
 
     enamldef MyWindow(Window): win:
         attr 𠁒 = 'test'
+        attr a = 1.e6 # Check we do not mistake this for an invalid identifier
     """)
     myWindow = compile_source(source, 'MyWindow')()
     𠁒 = 'test'

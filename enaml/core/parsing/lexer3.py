@@ -5,6 +5,7 @@
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
+import re
 import codecs
 
 from future.builtins import bytes
@@ -12,11 +13,35 @@ from future.builtins import bytes
 from .base_lexer import BaseEnamlLexer
 
 
-def process_escape(string):
-    """Process a string literal by interpreting the escaped characters.
+STRING_ESCAPE_SEQUENCE_RE = re.compile(r'''
+    ( \\U........      # 8-digit hex escapes
+    | \\u....          # 4-digit hex escapes
+    | \\x..            # 2-digit hex escapes
+    | \\[0-7]{1,3}     # Octal escapes
+    | \\N\{[^}]+\}     # Unicode characters by name
+    | \\[\\'"abfnrtv]  # Single-character escapes
+    )''', re.UNICODE | re.VERBOSE)
 
-    """
-    return codecs.escape_decode(string.encode('utf-8'))[0].decode('utf-8')
+
+BYTES_ESCAPE_SEQUENCE_RE = re.compile(r'''
+    ( \\x..            # 2-digit hex escapes
+    | \\[0-7]{1,3}     # Octal escapes
+    | \\[\\'"abfnrtv]  # Single-character escapes
+    )''', re.UNICODE | re.VERBOSE)
+
+
+def decode_escapes(s):
+    def decode_match(match):
+        return codecs.decode(match.group(0), 'unicode-escape')
+
+    return STRING_ESCAPE_SEQUENCE_RE.sub(decode_match, s)
+
+
+def encode_escapes(s):
+    def decode_match(match):
+        return codecs.decode(match.group(0), 'unicode-escape')
+
+    return bytes(BYTES_ESCAPE_SEQUENCE_RE.sub(decode_match, s), 'ascii')
 
 
 class Python3EnamlLexer(BaseEnamlLexer):
@@ -41,14 +66,14 @@ class Python3EnamlLexer(BaseEnamlLexer):
         """
         if quote_type == "" or quote_type == "u":
             # Turn escaped characters into what they should be.
-            return process_escape(string), 'STRING'
+            return decode_escapes(string), 'STRING'
         elif quote_type == "r":
             return string, 'STRING'
         elif quote_type == "b":
             # Only ascii characters are allowed in byte string literals so this
             # is safe, and handle correctly \u0394\n by only processing escaped
             # characters that can be represented in ascii
-            return bytes(string, 'raw_unicode_escape'), 'BYTES'
+            return encode_escapes(string), 'BYTES'
         elif quote_type in ('br', 'rb'):
             # Only ascii characters are allowed in byte string literals
             return bytes(string, 'ascii'), 'BYTES'
