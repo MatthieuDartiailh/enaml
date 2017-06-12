@@ -54,8 +54,6 @@ def test_bytes_literal():
     """)
     myWindow = compile_source(source, 'MyWindow')()
     bytes_literal = b'I also do bytes with\nescapes'
-    print(bytes_literal.decode('utf-8'))
-    print(myWindow.test.decode('utf-8'))
     assert bytes_literal == myWindow.test
 
 
