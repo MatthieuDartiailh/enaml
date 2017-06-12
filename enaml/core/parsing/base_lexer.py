@@ -347,7 +347,6 @@ class BaseEnamlLexer(object):
     def t_start_triple_quoted_q1_string(self, t):
         t.lexer.push_state("TRIPLEQ1")
         t.type = "STRING_START_TRIPLE"
-        print(t.value)
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split("'", 1)[0]
@@ -484,7 +483,7 @@ class BaseEnamlLexer(object):
     # This is placed after the string rules so r"" is not matched as a name.
     def t_NAME(self, t):
         t.type = self.reserved.get(t.value, "NAME")
-        if not str.isidentifier(t.value):
+        if IS_PY3 and not str.isidentifier(t.value):
             msg = '{} is not a valid Python identifier (found in {}, line {}'
             raise ValueError(msg.format(t.value, self.filename, t.lineno))
         return t
@@ -497,7 +496,7 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     # Normal Class Items
     #--------------------------------------------------------------------------
-    def __init__(self, filename='Enaml'):
+    def __init__(self, filename='Enaml', encoding='utf-8'):
 
         _lex_dir, _lex_module = self._tables_location()
 
@@ -511,6 +510,7 @@ class BaseEnamlLexer(object):
         )
         self.token_stream = None
         self.filename = filename
+        self.encoding = encoding
 
         # Ply has a bit of an inconsistency when using a class as a
         # lexer instead of a module. The .lexer attribute of tokens

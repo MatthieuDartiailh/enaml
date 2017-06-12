@@ -35,7 +35,7 @@ def write_tables():
     _parser.write_tables()
 
 
-def parse(enaml_source, filename='Enaml'):
+def parse(enaml_source, filename='Enaml', encoding='utf-8'):
     # All errors in the parsing and lexing rules are raised as a custom
     # ParsingError. This exception object can be called to return the
     # actual exception instance that should be raised. This is done
@@ -45,6 +45,6 @@ def parse(enaml_source, filename='Enaml'):
     # stop parsing immediately and then re-raise the errors outside
     # of the control of Ply.
     try:
-        return _parser.parse(enaml_source, filename)
+        return _parser.parse(enaml_source, filename, encoding)
     except ParsingError as parse_error:
         raise parse_error()

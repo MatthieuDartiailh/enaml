@@ -238,10 +238,10 @@ class BaseEnamlParser(object):
         parse_mod = 'enaml.core.parsing.parse_tab.parsetab%s' % self.parser_id
         return parse_dir, parse_mod
 
-    def parse(self, source, filename='Enaml'):
+    def parse(self, source, filename='Enaml', encoding='utf-8'):
         """Parse source string and create abstract syntax tree (AST)."""
         try:
-            lexer = self.lexer(filename)
+            lexer = self.lexer(filename, encoding)
             return self.parser.parse(source, debug=0, lexer=lexer)
         except ParsingError as parse_error:
             raise parse_error()
