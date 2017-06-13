@@ -1,9 +1,11 @@
 Enaml Release Notes
 ===================
 
-0.10.0 - unreleased
+0.10.1.dev - unreleased
 -------------------
 - Fix handling of b-strings under Python 3
+- Fix handling of source file encoding
+- Fix handling of generic unicode
 
 
 0.10.0.dev - 01/03/2017
