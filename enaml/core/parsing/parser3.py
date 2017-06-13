@@ -143,6 +143,19 @@ class Python3EnamlParser(BaseEnamlParser):
         ''' atom : ELLIPSIS '''
         p[0] = ast.Ellipsis()
 
+    def p_atom12(self, p):
+        ''' atom : atom_bytes_list '''
+        s = ast.Bytes(s=p[1])
+        p[0] = s
+
+    def p_atom_bytes_list1(self, p):
+        ''' atom_bytes_list : BYTES '''
+        p[0] = p[1]
+
+    def p_atom_bytes_list2(self, p):
+        ''' atom_bytes_list : atom_bytes_list BYTES '''
+        p[0] = p[1] + p[2]
+
     def _make_args(self, args, defaults=[], vararg=None, kwonlyargs=[],
                    kw_defaults=[], kwarg=None):
         """Build an ast node for function arguments.

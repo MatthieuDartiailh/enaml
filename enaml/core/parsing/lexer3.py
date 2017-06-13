@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -8,6 +8,7 @@
 from future.builtins import bytes
 
 from .base_lexer import BaseEnamlLexer
+from ...compat import decode_escapes, encode_escapes
 
 
 class Python3EnamlLexer(BaseEnamlLexer):
@@ -15,6 +16,8 @@ class Python3EnamlLexer(BaseEnamlLexer):
 
     """
     operators = BaseEnamlLexer.operators + ((r'->', 'RETURNARROW'),)
+
+    delimiters = BaseEnamlLexer.delimiters + ('BYTES',)
 
     t_RETURNARROW = r'->'
 
@@ -24,20 +27,23 @@ class Python3EnamlLexer(BaseEnamlLexer):
                     )
 
     def format_string(self, string, quote_type):
-        """Python support u r and b as quote type.
+        """Python support u, r and b as quote type.
+
 
         """
-        if quote_type == "" or quote_type == "u" or quote_type == "ur":
-            u8 = string.encode('utf-8')
-            if quote_type == "ur":
-                aux = u8.decode('raw_unicode_escape')
-            else:
-                aux = u8.decode('unicode_escape')
-            return aux.encode('latin-1').decode('utf-8')
+        if quote_type == "" or quote_type == "u":
+            # Turn escaped characters into what they should be.
+            return decode_escapes(string), 'STRING'
         elif quote_type == "r":
-            return string
+            return string, 'STRING'
         elif quote_type == "b":
-            return bytes(string)
+            # Only ascii characters are allowed in byte string literals so this
+            # is safe, and handle correctly \u0394\n by only processing escaped
+            # characters that can be represented in ascii
+            return encode_escapes(string), 'BYTES'
+        elif quote_type in ('br', 'rb'):
+            # Only ascii characters are allowed in byte string literals
+            return bytes(string, 'ascii'), 'BYTES'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)

@@ -18,6 +18,7 @@ from future.utils import with_metaclass, exec_
 
 from .enaml_compiler import EnamlCompiler, COMPILER_VERSION
 from .parsing import parse
+from ..compat import open_source, detect_encoding
 
 
 # The magic number as symbols for the current Python interpreter. These
@@ -363,9 +364,10 @@ class EnamlImporter(AbstractEnamlImporter):
                 return (code, file_info.src_path)
 
         # Otherwise, compile from source and attempt to cache
-        with open(file_info.src_path, 'rU') as src_file:
+        encoding = detect_encoding(file_info.src_path)
+        with open_source(file_info.src_path) as src_file:
             src = src_file.read()
-        ast = parse(src)
+        ast = parse(src, encoding)
         code = EnamlCompiler.compile(ast, file_info.src_path)
         self._write_cache(code, src_mod_time, file_info)
         return (code, file_info.src_path)

@@ -11,7 +11,8 @@ from enaml.core.enaml_compiler import EnamlCompiler
 from enaml.core.parsing import parse
 
 
-def compile_source(source, item, filename='<test>', namespace=None):
+def compile_source(source, item, filename='<test>', namespace=None,
+                   encoding='utf-8'):
     """ Compile Enaml source code and return the target item.
 
     Parameters
@@ -35,7 +36,7 @@ def compile_source(source, item, filename='<test>', namespace=None):
         The named object from the resulting namespace.
 
     """
-    ast = parse(source, filename)
+    ast = parse(source, filename, encoding)
     code = EnamlCompiler.compile(ast, filename)
     namespace = namespace or {}
     exec_(code, namespace)

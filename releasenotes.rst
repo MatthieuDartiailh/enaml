@@ -1,10 +1,17 @@
 Enaml Release Notes
 ===================
 
+0.10.1.dev - unreleased
+-------------------
+- Fix handling of b-strings under Python 3
+- Fix handling of source file encoding
+- Fix handling of generic unicode
+
+
 0.10.0.dev - 01/03/2017
 -----------------------
 - Add support for python 3 (>= 3.4). f-strings are not supported on 3.6
-- Add support for PyQt5. This relies on qtpy and update the qt packages import 
+- Add support for PyQt5. This relies on qtpy and update the qt packages import
   to use qt5 module organization and may hence break some code.
 
 0.9.8 - 08/04/2014

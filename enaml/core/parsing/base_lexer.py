@@ -8,7 +8,10 @@
 import os
 import tokenize
 
+from future.builtins import str
 import ply.lex as lex
+
+from ...compat import IS_PY3
 
 
 #------------------------------------------------------------------------------
@@ -103,13 +106,15 @@ def indentation_error(message, token):
     _parsing_error(IndentationError, message, token)
 
 
+# Matches all string prefixes even potentially non-valid ones as those are
+# filtered later on.
+STRING_PREFIX = r"(([fF]?[uU]?[bB]?[rR]?)|([rR]?[fF]?[uU]?[bB]?))"
+
 #------------------------------------------------------------------------------
 # Enaml Lexer
 #------------------------------------------------------------------------------
 class BaseEnamlLexer(object):
     """Base lexer for enaml file.
-
-    Compatible with Python 3.3 and 3.4
 
     """
 
@@ -235,13 +240,18 @@ class BaseEnamlLexer(object):
     # Default Rules
     #--------------------------------------------------------------------------
     t_COMMA = r','
-    t_NUMBER = tokenize.Number
     t_PRAGMA = r'\$pragma'
 
     # Generate the token matching rules for the operators
     for tok_pattern, tok_name in operators:
         tok_name = 't_' + tok_name
         locals()[tok_name] = tok_pattern
+
+    # Define NUMBER as a function so that it as the proper precedence over NAME
+    def t_NUMBER(self, t):
+        return t
+
+    t_NUMBER.__doc__ = tokenize.Number
 
     def t_comment(self, t):
         r'[ ]*\#[^\r\n]*'
@@ -335,13 +345,14 @@ class BaseEnamlLexer(object):
     # TRIPLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q1_string(self, t):
-        r"[uU]?[rR]?[bB]?'''"
         t.lexer.push_state("TRIPLEQ1")
         t.type = "STRING_START_TRIPLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split("'", 1)[0]
         return t
+
+    t_start_triple_quoted_q1_string.__doc__ = STRING_PREFIX + r"'''"
 
     def t_TRIPLEQ1_simple(self, t):
         r"[^'\\]+"
@@ -371,13 +382,14 @@ class BaseEnamlLexer(object):
     # TRIPLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_triple_quoted_q2_string(self, t):
-        r'[uU]?[rR]?[bB]?"""'
         t.lexer.push_state("TRIPLEQ2")
         t.type = "STRING_START_TRIPLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split('"', 1)[0]
         return t
+
+    t_start_triple_quoted_q2_string.__doc__ = STRING_PREFIX + r'"""'
 
     def t_TRIPLEQ2_simple(self, t):
         r'[^"\\]+'
@@ -407,13 +419,14 @@ class BaseEnamlLexer(object):
     # SINGLEQ1 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q1_string(self, t):
-        r"[uU]?[rR]?[bB]?'"
         t.lexer.push_state("SINGLEQ1")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split("'", 1)[0]
         return t
+
+    t_start_single_quoted_q1_string.__doc__ = STRING_PREFIX + r"'"
 
     def t_SINGLEQ1_simple(self, t):
         r"[^'\\\n]+"
@@ -437,13 +450,14 @@ class BaseEnamlLexer(object):
     # SINGLEQ2 strings
     #--------------------------------------------------------------------------
     def t_start_single_quoted_q2_string(self, t):
-        r'[uU]?[rR]?[bB]?"'
         t.lexer.push_state("SINGLEQ2")
         t.type = "STRING_START_SINGLE"
         if "r" in t.value or "R" in t.value:
             self.is_raw = True
         t.value = t.value.split('"', 1)[0]
         return t
+
+    t_start_single_quoted_q2_string.__doc__ = STRING_PREFIX + r'"'
 
     def t_SINGLEQ2_simple(self, t):
         r'[^"\\\n]+'
@@ -468,9 +482,13 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     # This is placed after the string rules so r"" is not matched as a name.
     def t_NAME(self, t):
-        r'[a-zA-Z_][a-zA-Z0-9_]*'
         t.type = self.reserved.get(t.value, "NAME")
+        if IS_PY3 and not str.isidentifier(t.value):
+            msg = '{} is not a valid Python identifier (found in {}, line {}'
+            raise ValueError(msg.format(t.value, self.filename, t.lineno))
         return t
+
+    t_NAME.__doc__ = tokenize.Name
 
     def t_error(self, t):
         syntax_error('invalid syntax', t)
@@ -478,7 +496,7 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     # Normal Class Items
     #--------------------------------------------------------------------------
-    def __init__(self, filename='Enaml'):
+    def __init__(self, filename='Enaml', encoding='utf-8'):
 
         _lex_dir, _lex_module = self._tables_location()
 
@@ -492,6 +510,7 @@ class BaseEnamlLexer(object):
         )
         self.token_stream = None
         self.filename = filename
+        self.encoding = encoding
 
         # Ply has a bit of an inconsistency when using a class as a
         # lexer instead of a module. The .lexer attribute of tokens
@@ -601,15 +620,17 @@ class BaseEnamlLexer(object):
 
             s = "".join(tok.value for tok in string_toks)
             quote_type = start_tok.value.lower()
-            s = self.format_string(s, quote_type)
-
-            start_tok.type = "STRING"
+            s, t = self.format_string(s, quote_type)
+            start_tok.type = t
             start_tok.value = s
 
             yield start_tok
 
     def format_string(self, string, quote_type):
         """Format a string according to the leading quote_type (u, r, b).
+
+        Also determine the type of the token that should be associated with the
+        string.
 
         """
         raise NotImplementedError()

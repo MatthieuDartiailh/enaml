@@ -6,6 +6,7 @@
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
 from .base_lexer import BaseEnamlLexer
+from ...compat import decode_escapes
 
 
 class Python2EnamlLexer(BaseEnamlLexer):
@@ -22,17 +23,17 @@ class Python2EnamlLexer(BaseEnamlLexer):
                     )
 
     def format_string(self, string, quote_type):
-        """Python 2 support only u and r as quote type.
+        """Python 2 support only u, b and r as quote type.
 
         """
-        if quote_type == "":
-            return string.decode("string_escape")
+        if quote_type == "" or quote_type == "b":
+            return string.decode("string_escape"), 'STRING'
         elif quote_type == "u":
-            return string.decode("unicode_escape")
+            return decode_escapes(string.decode(self.encoding)), 'STRING'
         elif quote_type == "ur":
-            return string.decode("raw_unicode_escape")
-        elif quote_type == "r" or quote_type == "b":
-            return string
+            return string.decode("raw_unicode_escape"), 'STRING'
+        elif quote_type in ("r", "br"):
+            return string, 'STRING'
         else:
             msg = 'Unknown string quote type: %r' % quote_type
             raise AssertionError(msg)
