@@ -108,6 +108,6 @@ if __name__ == '__main__':
     test_raw_unicode_literal()
     test_bytes_literal()
     test_raw_bytes_literal1()
-    test_unicode_identifier()
     if IS_PY3:
         test_raw_bytes_literal2()
+        test_unicode_identifier()
