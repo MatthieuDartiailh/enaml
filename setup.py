@@ -118,7 +118,7 @@ class Develop(develop):
 
 setup(
     name='enaml',
-    version='0.10.0.dev',
+    version='0.10.1.dev',
     author='The Nucleic Development Team',
     author_email='sccolbert@gmail.com',
     url='https://github.com/nucleic/enaml',
