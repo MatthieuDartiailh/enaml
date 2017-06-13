@@ -1,12 +1,19 @@
 Enaml Release Notes
 ===================
 
-0.10.1.dev - unreleased
--------------------
-- Fix handling of b-strings under Python 3
-- Fix handling of source file encoding
-- Fix handling of generic unicode
+0.10.2.dev - unreleased
+-----------------------
 
+
+0.10.1.dev - 13/06/2017
+-----------------------
+- Fix handling of b-strings under Python 3 #18
+- Fix handling of source file encoding #18
+- Fix handling of generic unicode string #18
+- Fix handling of unicode identifiers #18
+- Add a hotspot attribute to base widget used for dragging #17
+- Generate lex/parse tabs in setup.py so that they are always up to date and
+  correctly removed during unistall #23
 
 0.10.0.dev - 01/03/2017
 -----------------------
