@@ -6,14 +6,16 @@
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
+from future.utils import raise_from
 
 from enaml.widgets.ipython_console import ProxyIPythonConsole
 
 try:
     from qtconsole.rich_jupyter_widget import RichJupyterWidget
     from qtconsole.inprocess import QtInProcessKernelManager
-except ImportError:
-    raise ImportError('qtconsole is required to use the IPythonConsole')
+except ImportError as e:
+    msg = 'qtconsole is required to use the IPythonConsole'
+    raise raise_from(ImportError(msg), e)
 
 from .QtWidgets import QFrame, QVBoxLayout
 
