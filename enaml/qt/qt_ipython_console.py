@@ -9,8 +9,11 @@ from atom.api import Typed
 
 from enaml.widgets.ipython_console import ProxyIPythonConsole
 
-from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
-from IPython.qt.inprocess import QtInProcessKernelManager
+try:
+    from qtconsole.rich_jupyter_widget import RichJupyterWidget
+    from qtconsole.inprocess import QtInProcessKernelManager
+except ImportError:
+    raise ImportError('qtconsole is required to use the IPythonConsole')
 
 from .QtWidgets import QFrame, QVBoxLayout
 
@@ -29,7 +32,7 @@ class QtIPythonConsole(QtControl, ProxyIPythonConsole):
     widget = Typed(QFrame)
 
     #: The internal IPython console widget.
-    ipy_widget = Typed(RichIPythonWidget)
+    ipy_widget = Typed(RichJupyterWidget)
 
     #--------------------------------------------------------------------------
     # Lifecycle API
@@ -39,7 +42,7 @@ class QtIPythonConsole(QtControl, ProxyIPythonConsole):
 
         """
         self.widget = QFrame(self.parent_widget())
-        self.ipy_widget = RichIPythonWidget()
+        self.ipy_widget = RichJupyterWidget()
         assert self.page_control is not None  # always use paging
 
     def init_widget(self):
@@ -81,9 +84,14 @@ class QtIPythonConsole(QtControl, ProxyIPythonConsole):
 
         """
         kernel_manager = QtInProcessKernelManager()
-        kernel_manager.start_kernel()
+        kernel_manager.start_kernel(show_banner=False)
+
+        kernel = kernel_manager.kernel
+        kernel.gui = 'qt'
+
         kernel_client = kernel_manager.client()
         kernel_client.start_channels()
+
         ipy_widget = self.ipy_widget
         ipy_widget.kernel_manager = kernel_manager
         ipy_widget.kernel_client = kernel_client
