@@ -11,11 +11,19 @@ from future.utils import raise_from
 from enaml.widgets.ipython_console import ProxyIPythonConsole
 
 try:
+    #: IPython >= 4.0
     from qtconsole.rich_jupyter_widget import RichJupyterWidget
     from qtconsole.inprocess import QtInProcessKernelManager
 except ImportError as e:
-    msg = 'qtconsole is required to use the IPythonConsole'
-    raise raise_from(ImportError(msg), e)
+    try:
+        from IPython.qt.console.rich_ipython_widget\
+            import RichIPythonWidget as RichJupyterWidget
+        from IPython.qt.inprocess import QtInProcessKernelManager
+    except ImportError as e2:
+        msg = ('qtconsole is required to use the IPythonConsole with '
+               'IPython>=4.0.\nLoading qtconsole failed with: {}\nLoading '
+               'from IPython < 4.0 failed with: {}')
+        raise ImportError(msg.format(e, e2))
 
 from .QtWidgets import QFrame, QVBoxLayout
 
