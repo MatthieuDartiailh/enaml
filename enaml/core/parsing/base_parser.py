@@ -3225,7 +3225,7 @@ class BaseEnamlParser(object):
         ''' varargslist : fpdef COMMA STAR fpdef COMMA DOUBLESTAR fpdef '''
         # def f(a, *args, **kwargs): pass
         # def f((a, b), *args, **kwargs): pass
-        p[0] = self._make_args([p[1]], vararg=p[4], kwargs=p[7])
+        p[0] = self._make_args([p[1]], vararg=p[4], kwarg=p[7])
 
     def p_varargslist3(self, p):
         ''' varargslist : fpdef COMMA DOUBLESTAR fpdef '''

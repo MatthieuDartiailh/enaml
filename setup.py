@@ -1,16 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2017, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
 # The full license is in the file COPYING.txt, distributed with this software.
 #------------------------------------------------------------------------------
+import os
 import sys
-from setuptools import setup, find_packages, Extension
+from setuptools import find_packages, Extension, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 
+sys.path.insert(0, os.path.abspath('.'))
+from enaml.build_tools import EnamlBuildPy, EnamlInstallLib
 
 ext_modules = [
     Extension(
@@ -129,10 +132,6 @@ setup(
                       'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy'],
     packages=find_packages(),
     package_data={
-        'enaml.applib': ['*.enaml'],
-        'enaml.stdlib': ['*.enaml'],
-        'enaml.workbench.core': ['*.enaml'],
-        'enaml.workbench.ui': ['*.enaml'],
         'enaml.qt.docking': [
             'dock_images/*.png',
             'dock_images/*.py',
@@ -142,6 +141,8 @@ setup(
     entry_points={'console_scripts': ['enaml-run = enaml.runner:main']},
     ext_modules=ext_modules,
     cmdclass={'build_ext': BuildExt,
+              'build_py': EnamlBuildPy,
               'install': Install,
-              'develop': Develop},
+              'develop': Develop,
+              'install_lib': EnamlInstallLib},
 )

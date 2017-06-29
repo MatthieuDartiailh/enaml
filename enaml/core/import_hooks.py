@@ -333,6 +333,28 @@ class EnamlImporter(AbstractEnamlImporter):
             timestamp = struct.unpack('i', cache_file.read(4))[0]
         return (magic, timestamp)
 
+    def compile_code(self):
+        """ Compile the code object for the Enaml module and
+        the full path to the module for use as the __file__ attribute
+        of the module.
+
+        Returns
+        -------
+        result : (code, path)
+            The Python code object for the .enaml module, and the full
+            path to the module as a string.
+
+        """
+        file_info = self.file_info
+        src_mod_time = int(os.path.getmtime(file_info.src_path))
+        encoding = detect_encoding(file_info.src_path)
+        with open_source(file_info.src_path) as src_file:
+            src = src_file.read()
+        ast = parse(src, encoding)
+        code = EnamlCompiler.compile(ast, file_info.src_path)
+        self._write_cache(code, src_mod_time, file_info)
+        return (code, file_info.src_path)
+
     def get_code(self):
         """ Loads and returns the code object for the Enaml module and
         the full path to the module for use as the __file__ attribute
@@ -364,13 +386,7 @@ class EnamlImporter(AbstractEnamlImporter):
                 return (code, file_info.src_path)
 
         # Otherwise, compile from source and attempt to cache
-        encoding = detect_encoding(file_info.src_path)
-        with open_source(file_info.src_path) as src_file:
-            src = src_file.read()
-        ast = parse(src, encoding)
-        code = EnamlCompiler.compile(ast, file_info.src_path)
-        self._write_cache(code, src_mod_time, file_info)
-        return (code, file_info.src_path)
+        return self.compile_code()
 
 
 #------------------------------------------------------------------------------
