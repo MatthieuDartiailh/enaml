@@ -12,6 +12,8 @@ from ...compat import decode_escapes
 class Python2EnamlLexer(BaseEnamlLexer):
     """Lexer specialized for Python 2.
 
+    Under Python 2 the lexer is always passed utf-8 encoded byte string
+
     """
 
     lex_id = '2'
@@ -29,7 +31,7 @@ class Python2EnamlLexer(BaseEnamlLexer):
         if quote_type == "" or quote_type == "b":
             return string.decode("string_escape"), 'STRING'
         elif quote_type == "u":
-            return decode_escapes(string.decode(self.encoding)), 'STRING'
+            return decode_escapes(string.decode('utf-8')), 'STRING'
         elif quote_type == "ur":
             return string.decode("raw_unicode_escape"), 'STRING'
         elif quote_type in ("r", "br"):

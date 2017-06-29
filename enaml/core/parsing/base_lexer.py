@@ -496,7 +496,7 @@ class BaseEnamlLexer(object):
     #--------------------------------------------------------------------------
     # Normal Class Items
     #--------------------------------------------------------------------------
-    def __init__(self, filename='Enaml', encoding='utf-8'):
+    def __init__(self, filename='Enaml'):
 
         _lex_dir, _lex_module = self._tables_location()
 
@@ -510,7 +510,6 @@ class BaseEnamlLexer(object):
         )
         self.token_stream = None
         self.filename = filename
-        self.encoding = encoding
 
         # Ply has a bit of an inconsistency when using a class as a
         # lexer instead of a module. The .lexer attribute of tokens

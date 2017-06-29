@@ -20,7 +20,7 @@ from future.utils import exec_
 from enaml import imports
 from enaml.core.parsing import parse
 from enaml.core.enaml_compiler import EnamlCompiler
-from enaml.compat import open_source
+from enaml.compat import read_source
 
 
 def main():
@@ -40,8 +40,7 @@ def main():
         enaml_file = args[0]
         script_argv = args[1:]
 
-    with open_source(enaml_file) as f:
-        enaml_code = f.read()
+    enaml_code = read_source(enaml_file)
 
     # Parse and compile the Enaml source into a code object
     ast = parse(enaml_code, filename=enaml_file)
