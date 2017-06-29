@@ -46,7 +46,10 @@ def encode_escapes(s):
 
 if IS_PY3:
     import tokenize
-    open_source = tokenize.open
+
+    def read_source(filename):
+        with tokenize.open(filename) as f:
+            return f.read()
 
     def detect_encoding(filename):
         with open(filename, 'rb') as fileobj:
@@ -120,9 +123,13 @@ else:
             return default
         return find_cookie(second) or default
 
-    @contextmanager
-    def open_source(filename):
+    # As per PEP 263:
+    #  - read the file
+    #  - decode it assuming a fixed per file encoding
+    #  - convert to a utf-8 byte string (ie encode)
+    #  - tokenize utf-8 content
+    def read_source(filename):
         enc = detect_encoding(filename)
-        f = open(filename, 'rU', encoding=enc)
-        yield f
-        f.close()
+        with open(filename, 'rU') as f:
+            src = f.read()
+        return src.decode(enc).encode('utf-8')
