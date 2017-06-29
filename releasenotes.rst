@@ -1,9 +1,17 @@
 Enaml Release Notes
 ===================
 
-0.10.2.dev - unreleased
+0.10.3.dev - unreleased
 -----------------------
 
+
+0.10.2.dev - 29/06/2017
+-----------------------
+- Fix loading of source files under Python 2 #32
+- Fix imports for Matplotlib widget #14 provided by tacaswell
+- Fix imports for IPython qtconsole to be compatible with IPython > 4.0 #29 #30
+- Automatically install and byte compile enaml files. Setuptools command can
+  be used in other projects see doc of build_tools module #28
 
 0.10.1.dev - 13/06/2017
 -----------------------

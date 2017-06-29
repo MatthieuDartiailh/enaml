@@ -13,6 +13,7 @@ from setuptools.command.install import install
 from setuptools.command.develop import develop
 
 sys.path.insert(0, os.path.abspath('.'))
+from enaml.version import __version__
 from enaml.build_tools import EnamlBuildPy, EnamlInstallLib
 
 ext_modules = [
@@ -121,7 +122,7 @@ class Develop(develop):
 
 setup(
     name='enaml',
-    version='0.10.1.dev',
+    version=__version__,
     author='The Nucleic Development Team',
     author_email='sccolbert@gmail.com',
     url='https://github.com/nucleic/enaml',
