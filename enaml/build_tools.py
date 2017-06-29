@@ -27,14 +27,8 @@ setup(name='myproject',
       cmdclass={'build_py': enaml_build_py,
                 'install_lib': enaml_install_lib})
                 
-When building conda package be sure to declare that .enamlc files enter the
-category has_prefix_files under build as otherwise the path replacement 
-procedure of conda will break the file as they are seen as binary.
-For example for a project named my project with a usual structure, add under 
-build :
-
-has_prefix_files:
-  - myproject/*.enamlc
+When building conda package pass the argument --no-compile to setuptools to 
+avoid generating the .enamlc files as conda does handle them well.
 
 """
 import os
