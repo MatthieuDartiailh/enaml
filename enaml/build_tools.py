@@ -69,7 +69,7 @@ class EnamlBuildPy(build_py):
         return build_py.__getattr__(self, attr)
 
     def _get_data_files(self):
-        data_files = super(EnamlBuildPy, self)._get_data_files()
+        data_files = build_py._get_data_files(self)
         return data_files + self.enaml_files
 
     def _get_enaml_files(self):
@@ -117,7 +117,7 @@ class EnamlBuildPy(build_py):
         """Byte compile enaml files and write the cache files.
 
         """
-        super(EnamlBuildPy, self).byte_compile(files)
+        build_py.byte_compile(self, files)
         if sys.dont_write_bytecode:
             self.warn('byte-compiling is disabled, skipping.')
             return
@@ -138,7 +138,7 @@ class EnamlInstallLib(install_lib):
         """Byte compile enaml files and write the cache files.
 
         """
-        super(EnamlInstallLib, self).byte_compile(files)
+        install_lib.byte_compile(self, files)
         if sys.dont_write_bytecode:
             self.warn('byte-compiling is disabled, skipping.')
             return
