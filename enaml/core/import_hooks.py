@@ -18,7 +18,7 @@ from future.utils import with_metaclass, exec_
 
 from .enaml_compiler import EnamlCompiler, COMPILER_VERSION
 from .parsing import parse
-from ..compat import read_source
+from ..compat import read_source, update_code_co_filename
 
 
 # The magic number as symbols for the current Python interpreter. These
@@ -268,13 +268,15 @@ class EnamlImporter(AbstractEnamlImporter):
         """
         self.file_info = file_info
 
-    def _load_cache(self, file_info):
+    def _load_cache(self, file_info, set_src=False):
         """ Loads and returns the code object for the given file info.
 
         Parameters
         ----------
         file_info : EnamlFileInfo
             The file info object for the file.
+        set_src : bool
+            Should the source path of the code object be updated
 
         Returns
         -------
@@ -285,6 +287,8 @@ class EnamlImporter(AbstractEnamlImporter):
         with open(file_info.cache_path, 'rb') as cache_file:
             cache_file.read(8)
             code = marshal.load(cache_file)
+        if set_src:
+            code = update_code_co_filename(code, file_info.src_path)
         return code
 
     def _write_cache(self, code, ts, file_info):
@@ -379,7 +383,7 @@ class EnamlImporter(AbstractEnamlImporter):
         if os.path.exists(file_info.cache_path):
             magic, ts = self._get_magic_info(file_info)
             if magic == MAGIC and src_mod_time <= ts:
-                code = self._load_cache(file_info)
+                code = self._load_cache(file_info, set_src=True)
                 return (code, file_info.src_path)
 
         # Otherwise, compile from source and attempt to cache

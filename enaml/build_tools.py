@@ -26,8 +26,8 @@ setup(name='myproject',
       setup_requires=['enaml'],
       cmdclass={'build_py': enaml_build_py,
                 'install_lib': enaml_install_lib})
-                
-When building conda package pass the argument --no-compile to setuptools to 
+
+When building conda package pass the argument --no-compile to setuptools to
 avoid generating the .enamlc files as conda does handle them well.
 
 """
@@ -40,13 +40,12 @@ from distutils import log
 from setuptools.command.install_lib import install_lib
 from setuptools.command.build_py import build_py
 
-from .core.import_hooks import make_file_info, EnamlImporter
-
 
 def enaml_byte_compile(files):
     """Byte compile enaml files in a list of files.
 
     """
+    from .core.import_hooks import make_file_info, EnamlImporter
     for file in files:
         if not file.endswith('.enaml'):
             continue
