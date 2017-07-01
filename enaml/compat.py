@@ -45,10 +45,10 @@ def encode_escapes(s):
 
 # Functions used to update the co_filename slot of a code object
 try:
-    from .c_compat import _fix_co_filename
+    from _imp import _fix_co_filename
 except ImportError:
     try:
-        from _imp import _fix_co_filename
+        from .c_compat import _fix_co_filename
     except ImportError:
         _fix_co_filename = None
 
