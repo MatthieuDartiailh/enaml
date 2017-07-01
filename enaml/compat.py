@@ -46,7 +46,6 @@ def encode_escapes(s):
 
 if IS_PY3:
     import tokenize
-    from _imp import _fix_co_filename
 
     def read_source(filename):
         with tokenize.open(filename) as f:
@@ -56,32 +55,11 @@ if IS_PY3:
         with open(filename, 'rb') as fileobj:
             return tokenize.detect_encoding(fileobj.readline)
 
-    def update_code_path(code, src_path):
-        """Update the co_filename attribute of the code.
-
-        Parameters
-        ----------
-        code : types.CodeType
-            Code object from which the co_filename should be updated.
-
-        src_path : string
-            Path to the source file for the code object
-
-        Returns
-        -------
-        updated_code : types.CodeType
-            Code object whose co_filename field is set to src_path.
-
-        """
-        _fix_co_filename(code, src_path)
-        return code
-
 else:
     # Adapted from https://stackoverflow.com/questions/38374489/
     # get-encoding-specified-in-magic-line-shebang-from-within-module
     import re
     from codecs import lookup, BOM_UTF8
-    from types import CodeType
 
     cookie_re = re.compile(r'^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)')
     blank_re = re.compile(br'^[ \t\f]*(?:[#\r\n]|$)')
@@ -154,39 +132,3 @@ else:
         with open(filename, 'rU') as f:
             src = f.read()
         return src.decode(enc).encode('utf-8')
-
-    def update_code_path(code, src_path):
-        """Update the co_filename attribute of the code.
-
-        Parameters
-        ----------
-        code : types.CodeType
-            Code object from which the co_filename should be updated.
-
-        src_path : string
-            Path to the source file for the code object
-
-        Returns
-        -------
-        updated_code : types.CodeType
-            Code object whose co_filename field is set to src_path.
-
-        """
-        new_consts = tuple(c if not isinstance(c, CodeType)
-                           else update_code_path(c, src_path)
-                           for c in code.co_consts)
-        updated_code = CodeType(code.co_argcount,
-                                code.co_nlocals,
-                                code.co_stacksize,
-                                code.co_flags,
-                                code.co_code,
-                                new_consts,
-                                code.co_names,
-                                code.co_varnames,
-                                src_path,
-                                code.co_name,
-                                code.co_firstlineno,
-                                code.co_lnotab,
-                                code.co_freevars,
-                                code.co_cellvars)
-        return updated_code
