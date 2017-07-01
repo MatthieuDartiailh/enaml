@@ -37,8 +37,10 @@ update_code_filenames(PyCodeObject *co, PyObject *oldname, PyObject *newname)
         return;
     #endif
 
-    Py_INCREF(newname);
-    Py_XSETREF(co->co_filename, newname);
+    tmp = co->co_filename;
+    co->co_filename = newname;
+    Py_INCREF(co->co_filename);
+    Py_DECREF(tmp);
 
     constants = co->co_consts;
     n = PyTuple_GET_SIZE(constants);
