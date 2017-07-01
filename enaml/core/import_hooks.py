@@ -18,7 +18,7 @@ from future.utils import with_metaclass, exec_
 
 from .enaml_compiler import EnamlCompiler, COMPILER_VERSION
 from .parsing import parse
-from ..compat import read_source, update_code_path
+from ..compat import read_source, update_code_co_filename
 
 
 # The magic number as symbols for the current Python interpreter. These
@@ -288,7 +288,7 @@ class EnamlImporter(AbstractEnamlImporter):
             cache_file.read(8)
             code = marshal.load(cache_file)
         if set_src:
-            code = update_code_path(code, file_info.src_path)
+            code = update_code_co_filename(code, file_info.src_path)
         return code
 
     def _write_cache(self, code, ts, file_info):
