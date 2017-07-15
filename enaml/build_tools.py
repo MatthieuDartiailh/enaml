@@ -27,8 +27,15 @@ setup(name='myproject',
       cmdclass={'build_py': enaml_build_py,
                 'install_lib': enaml_install_lib})
 
-When building conda package pass the argument --no-compile to setuptools to
-avoid generating the .enamlc files as conda does handle them well.
+When building conda package you need to specify that enamlc files needs to be
+ignored during binary relocation. To do so add the following to the build
+section of your package:
+
+build:
+  ignore_prefix_files:
+    - "**/myproject/**/__enamlcache__/*.*.enamlc"
+
+This requires conda-build >= 3.0
 
 """
 import os
