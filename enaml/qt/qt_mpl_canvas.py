@@ -9,7 +9,7 @@ from atom.api import Typed
 
 from enaml.widgets.mpl_canvas import ProxyMPLCanvas
 
-from .QtCore import Qt, QT_VERSION
+from .QtCore import Qt, __version__ as QT_VERSION
 from .QtWidgets import QFrame, QVBoxLayout
 
 from .qt_control import QtControl
