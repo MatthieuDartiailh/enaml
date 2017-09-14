@@ -14,7 +14,6 @@ from setuptools.command.develop import develop
 
 sys.path.insert(0, os.path.abspath('.'))
 from enaml.version import __version__
-from enaml.build_tools import EnamlBuildPy, EnamlInstallLib
 
 ext_modules = [
     Extension(
@@ -108,8 +107,11 @@ class Install(install):
     """
 
     def run(self):
-        from enaml.core.parsing import write_tables
-        write_tables()
+        try:
+            from enaml.core.parsing import write_tables
+            write_tables()
+        except ImportError:
+            pass
         install.run(self)
 
 
@@ -120,8 +122,11 @@ class Develop(develop):
     """
 
     def run(self):
-        from enaml.core.parsing import write_tables
-        write_tables()
+        try:
+            from enaml.core.parsing import write_tables
+            write_tables()
+        except ImportError:
+            pass
         develop.run(self)
 
 
@@ -133,11 +138,15 @@ setup(
     url='https://github.com/nucleic/enaml',
     description='Declarative DSL for building rich user interfaces in Python',
     long_description=open('README.rst').read(),
-    requires=['atom', 'PyQt', 'ply', 'kiwisolver', 'qtpy'],
+    requires=['future', 'atom', 'PyQt', 'ply', 'kiwisolver', 'qtpy'],
     install_requires=['setuptools', 'future', 'atom >= 0.4.0.dev',
                       'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy'],
     packages=find_packages(),
     package_data={
+        'enaml.applib': ['*.enaml'],
+        'enaml.stdlib': ['*.enaml'],
+        'enaml.workbench.core': ['*.enaml'],
+        'enaml.workbench.ui': ['*.enaml'],
         'enaml.qt.docking': [
             'dock_images/*.png',
             'dock_images/*.py',
@@ -147,8 +156,6 @@ setup(
     entry_points={'console_scripts': ['enaml-run = enaml.runner:main']},
     ext_modules=ext_modules,
     cmdclass={'build_ext': BuildExt,
-              'build_py': EnamlBuildPy,
               'install': Install,
-              'develop': Develop,
-              'install_lib': EnamlInstallLib},
+              'develop': Develop},
 )
