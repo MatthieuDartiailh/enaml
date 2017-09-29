@@ -7,6 +7,7 @@
 #------------------------------------------------------------------------------
 import os
 import sys
+import inspect
 from setuptools import find_packages, Extension, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
@@ -112,7 +113,17 @@ class Install(install):
             write_tables()
         except ImportError:
             pass
-        install.run(self)
+        # Follow logic used in setuptools
+        # cf https://github.com/pypa/setuptools/blob/master/setuptools/command/install.py#L58
+        if self.old_and_unmanageable or self.single_version_externally_managed:
+            install.run(self)
+
+        if not self._called_from_setup(inspect.currentframe()):
+            # Run in backward-compatibility mode to support bdist_* commands.
+            install.run(self)
+        else:
+            self.do_egg_install()
+
 
 
 class Develop(develop):
@@ -139,8 +150,8 @@ setup(
     description='Declarative DSL for building rich user interfaces in Python',
     long_description=open('README.rst').read(),
     requires=['future', 'atom', 'PyQt', 'ply', 'kiwisolver', 'qtpy'],
-    install_requires=['setuptools', 'future', 'atom >= 0.4.0.dev',
-                      'kiwisolver >= 0.2.0.dev', 'ply >= 3.4', 'qtpy'],
+    install_requires=['setuptools', 'future', 'atom>=0.4.0.dev',
+                      'kiwisolver>=1.0.0', 'ply>=3.4', 'qtpy'],
     packages=find_packages(),
     package_data={
         'enaml.applib': ['*.enaml'],
