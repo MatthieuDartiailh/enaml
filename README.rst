@@ -1,3 +1,5 @@
+THIS IS A FORK: the original project is at https://github.com/nucleic/enaml and is more up to date
+
 Welcome to Enaml
 ================
 
