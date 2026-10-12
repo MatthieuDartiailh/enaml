@@ -99,6 +99,7 @@ __version__ = "{version}"
 """
 
 [tool.maturin]
+manifest-path = "crates/enaml-python/Cargo.toml"
 module-name = "enaml._rust"
 python-packages = ["enaml"]
 
