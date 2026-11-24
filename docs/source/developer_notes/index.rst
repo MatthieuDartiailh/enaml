@@ -10,6 +10,8 @@ details of the implementation and coding style of the project.
    :hidden:
 
    lsp_parser_architecture
+   lsp_parser_rowan_nodes
+   lsp_parser_ast_lowering
    lsp_parser_grammar_maintenance
    lsp_parser_python_315
    lsp_parser_development_plan
@@ -22,6 +24,10 @@ parser:
 
 * :doc:`lsp_parser_architecture` covers reuse of the Logos lexer, PEG-to-Pratt
   translation, recursive-descent boundaries, and Rowan construction.
+* :doc:`lsp_parser_rowan_nodes` specifies every concrete Rowan node and its
+  structural children.
+* :doc:`lsp_parser_ast_lowering` specifies the PyO3-only conversion of internal
+  typed red syntax to the existing Python and Enaml AST objects.
 * :doc:`lsp_parser_grammar_maintenance` provides the human-readable decision tree
   for translating future PEG changes.
 * :doc:`lsp_parser_python_315` applies the rules to lazy imports and unpacking

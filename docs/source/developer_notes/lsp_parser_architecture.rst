@@ -27,7 +27,7 @@ parser uses:
 * recursive-descent entry points for statements, declarations, blocks,
   patterns, parameters, comprehensions, imports, and other structural syntax;
 * Rowan events as the syntax-tree construction mechanism;
-* lowering and semantic validation passes after syntax parsing.
+* a Python-only PyO3 conversion path after syntax parsing.
 
 The existing PEG implementation remains the initial oracle for accepted syntax,
 diagnostics, and language-version behavior.  It is not intended to be generated
@@ -191,7 +191,7 @@ The proposed crate layering is:
    enaml-syntax        TokenKind, SyntaxKind, Rowan aliases
    enaml-parser        token adapter, event sink, Pratt and recursive descent
    enaml-syntax-bridge lossless token-to-Rowan adapter
-   enaml-lower         optional semantic Python/Enaml AST lowering
+   enaml-pyo3          Rowan-to-Python AST conversion for Python callers
    enaml-diagnostics   syntax and feature-version diagnostics
    enaml-lsp           LSP document state and feature providers
 
@@ -200,12 +200,15 @@ boundaries.  The important dependency direction is:
 
 .. code-block:: text
 
-   lexer -> syntax kinds -> parser -> Rowan
-                               |
-                               +-> lowering -> diagnostics
+   lexer -> syntax kinds -> parser -> Rowan -> diagnostics
+                                        |
+                                        +-> enaml-pyo3 -> Python AST objects
 
-The lexer must not depend on parser state, and semantic lowering must not happen
-inside Pratt or recursive-descent routines.
+``enaml-pyo3`` is compiled for the Python extension entry point, not used by the
+LSP.  The lexer must not depend on parser state, and AST construction must not
+happen inside Pratt or recursive-descent routines.  Python never receives a
+green-tree or red-tree proxy: PyO3 converts the internal tree and exposes only
+the existing ``ast`` and ``enaml_ast`` object families.
 
 PEG information categories
 ==========================

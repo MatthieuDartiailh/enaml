@@ -29,6 +29,8 @@ Deliverables:
 * lexer reconstruction tests;
 * a test helper that renders the entire Rowan tree, ranges, tokens, and text;
 * the rule mapping manifest skeleton.
+* the normative node inventory in :ref:`lsp_parser_rowan_nodes`;
+* the lowering contract in :ref:`lsp_parser_ast_lowering`.
 
 Exit criteria:
 
@@ -99,6 +101,9 @@ Exit criteria:
 * generated source examples reconstruct exactly;
 * binding edge cases such as unary/power, comparisons, lambdas, ternaries,
   calls, comprehensions, and assignment expressions are explicit snapshots.
+* every expression node required by :ref:`lsp_parser_rowan_nodes` has a typed
+  wrapper and a concrete tree test; PyO3 AST conversion tests are added in
+  Phase 7.
 
 Phase 3: Python statements and blocks
 ------------------------------------
@@ -214,18 +219,22 @@ Deliverables:
 Exit criteria:
 
 * changing the target version never changes Rowan recognition;
-* only diagnostic and lowering results change;
+* syntax remains unchanged; only diagnostics and Python-conversion capability
+  change;
 * the Python 3.15 additions match the worked examples in this document.
 
-Phase 7: semantic lowering
---------------------------
+Phase 7: PyO3 AST conversion
+----------------------------
 
-Build lowering only after syntax behavior is stable.
+Build conversion only after syntax behavior is stable.  Implement the strict,
+Python-only conversion described in :ref:`lsp_parser_ast_lowering`; no AST
+object should be constructed from unparsed source text, and the LSP must never
+invoke this path.
 
 Deliverables:
 
-* optional Python AST-compatible lowering where needed;
-* Enaml semantic AST lowering;
+* a PyO3 conversion entry point for the existing Python parser API;
+* direct construction of current Python ``ast`` and Enaml ``enaml_ast`` objects;
 * operator block synthetic-function construction;
 * template and enamldef validation;
 * target-context validation;
@@ -234,10 +243,12 @@ Deliverables:
 
 Exit criteria:
 
-* semantic lowering does not alter Rowan text or range;
+* conversion does not expose or mutate Rowan;
+* Python receives no intermediate syntax or neutral AST objects;
 * valid runtime-AST comparison tests continue to pass where a corresponding
   AST is part of the project's requirements;
-* semantic errors can be reported without discarding syntax nodes.
+* the LSP continues to use Rowan alone and never calls the PyO3 conversion
+  entry point.
 
 Phase 8: LSP integration
 -----------------------
@@ -283,7 +294,7 @@ The reusable lexer and parser are complete enough to support the LSP when:
 * Python target versions create diagnostics without changing syntax shape;
 * the Python 3.15 lazy-import and comprehension cases satisfy their worked
   examples;
-* semantic lowering and diagnostics consume Rowan rather than mutating parser
-  events;
+* the Python-only PyO3 converter consumes Rowan internally, while the LSP uses
+  Rowan diagnostics directly and never constructs Python objects;
 * the grammar-diff CI protocol identifies required parser updates for a future
   PEG change.

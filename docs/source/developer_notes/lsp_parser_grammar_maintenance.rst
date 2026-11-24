@@ -185,7 +185,7 @@ Use four distinct layers:
 1. Lexer reconstruction tests.
 2. Rowan snapshot and round-trip tests.
 3. Parser-versus-PEG differential tests.
-4. Semantic lowering and LSP behavior tests.
+4. PyO3 AST conversion and LSP behavior tests.
 
 Do not combine them into one broad assertion.  A syntax failure should not be
 indistinguishable from a lexer or AST-lowering failure.
