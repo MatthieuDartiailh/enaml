@@ -6,6 +6,29 @@ Developer notes
 These notes are meant to help developers and contributors with regards to some
 details of the implementation and coding style of the project.
 
+.. toctree::
+   :hidden:
+
+   lsp_parser_architecture
+   lsp_parser_grammar_maintenance
+   lsp_parser_python_315
+   lsp_parser_development_plan
+
+LSP parser design
+-----------------
+
+The LSP parser notes specify the design and execution plan for a lossless Rust
+parser:
+
+* :doc:`lsp_parser_architecture` covers reuse of the Logos lexer, PEG-to-Pratt
+  translation, recursive-descent boundaries, and Rowan construction.
+* :doc:`lsp_parser_grammar_maintenance` provides the human-readable decision tree
+  for translating future PEG changes.
+* :doc:`lsp_parser_python_315` applies the rules to lazy imports and unpacking
+  in comprehensions.
+* :doc:`lsp_parser_development_plan` defines the phased implementation and
+  acceptance criteria.
+
 Python codebase
 ---------------
 
