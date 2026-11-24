@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Enum, Bool, Typed, ForwardTyped, Unicode, observe, set_default
+    Enum, Bool, Typed, ForwardTyped, Str, set_default
 )
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .constraints_widget import ConstraintsWidget, ProxyConstraintsWidget
 from .page import Page
@@ -21,6 +21,9 @@ class ProxyNotebook(ProxyConstraintsWidget):
     """
     #: A reference to the Notebook declaration.
     declaration = ForwardTyped(lambda: Notebook)
+
+    def page_moved(self, page):
+        raise NotImplementedError
 
     def set_tab_style(self, style):
         raise NotImplementedError
@@ -61,7 +64,7 @@ class Notebook(ConstraintsWidget):
     tabs_movable = d_(Bool(True))
 
     #: The object name for the selected tab in the notebook.
-    selected_tab = d_(Unicode())
+    selected_tab = d_(Str())
 
     #: The size hint mode for the stack. The default is 'union' and
     #: means that the size hint of the notebook is the union of all
@@ -81,6 +84,10 @@ class Notebook(ConstraintsWidget):
 
         """
         return [c for c in self.children if isinstance(c, Page)]
+
+    def child_moved(self, child):
+        if self.proxy_is_active and isinstance(child, Page) and child.proxy_is_active:
+            self.proxy.page_moved(child.proxy)
 
     #--------------------------------------------------------------------------
     # Observers

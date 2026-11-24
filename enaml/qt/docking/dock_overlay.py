@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Atom, Bool, Int, Float, Typed
 
-from enaml.qt import QT_API
 from enaml.qt.QtCore import Qt, QPoint, QRect, QTimer, QPropertyAnimation
-from enaml.qt.QtGui import QWidget, QStyle, QStyleOption, QPainter
+from enaml.qt.QtGui import QPainter
+from enaml.qt.QtWidgets import QWidget, QStyle, QStyleOption
 
 from .q_guide_rose import QGuideRose
 from .q_dock_bar import QDockBar
@@ -47,7 +47,9 @@ class QDockRubberBand(QWidget):
         self.style().drawPrimitive(QStyle.PE_Widget, opt, painter, self)
 
 
-class DockOverlay(Atom):
+# PySide requires weakrefs for using bound methods as slots.
+# PyQt doesn't, but executes unsafe code if not using weakrefs.
+class DockOverlay(Atom, enable_weakrefs=True):
     """ An object which manages the overlays for dock widgets.
 
     This manager handles the state transitions for the overlays. The
@@ -55,10 +57,6 @@ class DockOverlay(Atom):
     a more fluid user interaction experience.
 
     """
-    # PySide requires weakrefs for using bound methods as slots
-    if QT_API == 'pyside':
-        __slots__ = '__weakref__'
-
     #: The size of the rubber band when docking on the border, in px.
     border_size = Int(60)
 
@@ -148,7 +146,7 @@ class DockOverlay(Atom):
         """ Create the default property animator for the rubber band.
 
         """
-        p = QPropertyAnimation(self._band, 'geometry')
+        p = QPropertyAnimation(self._band, b'geometry')
         p.setDuration(self.band_geo_duration)
         return p
 
@@ -156,7 +154,7 @@ class DockOverlay(Atom):
         """ Create the default property animator for the rubber band.
 
         """
-        p = QPropertyAnimation(self._band, 'windowOpacity')
+        p = QPropertyAnimation(self._band, b'windowOpacity')
         p.setDuration(self.band_vis_duration)
         p.finished.connect(self._on_vis_finished)
         return p
@@ -237,7 +235,7 @@ class DockOverlay(Atom):
 
         """
         animator = self._vis_animator
-        if animator.state() == animator.Running:
+        if animator.state() == animator.State.Running:
             animator.stop()
         target = animator.targetObject()
         if target.isHidden() and opacity != 0.0:
@@ -257,7 +255,7 @@ class DockOverlay(Atom):
 
         """
         animator = self._geo_animator
-        if animator.state() == animator.Running:
+        if animator.state() == animator.State.Running:
             animator.stop()
         target = animator.targetObject()
         animator.setStartValue(target.geometry())
@@ -298,35 +296,35 @@ class DockOverlay(Atom):
             if bar_rect.isValid():
                 rect = bar_rect
             else:
-                rect.setHeight(border_size / 2)
+                rect.setHeight(border_size // 2)
         elif guide == Guide.BorderExEast:
             bar_rect = widget.dockBarGeometry(QDockBar.East)
             if bar_rect.isValid():
                 rect = bar_rect
             else:
-                rect.setLeft(rect.right() + 1 - border_size / 2)
+                rect.setLeft(rect.right() + 1 - border_size // 2)
         elif guide == Guide.BorderExSouth:
             bar_rect = widget.dockBarGeometry(QDockBar.South)
             if bar_rect.isValid():
                 rect = bar_rect
             else:
-                rect.setTop(rect.bottom() + 1 - border_size / 2)
+                rect.setTop(rect.bottom() + 1 - border_size // 2)
         elif guide == Guide.BorderExWest:
             bar_rect = widget.dockBarGeometry(QDockBar.West)
             if bar_rect.isValid():
                 rect = bar_rect
             else:
-                rect.setWidth(border_size / 2)
+                rect.setWidth(border_size // 2)
 
         # compass hits
         elif guide == Guide.CompassNorth:
-            rect.setHeight(rect.height() / 3)
+            rect.setHeight(rect.height() // 3)
         elif guide == Guide.CompassEast:
-            rect.setLeft(2 * rect.width() / 3)
+            rect.setLeft(2 * rect.width() // 3)
         elif guide == Guide.CompassSouth:
-            rect.setTop(2 * rect.height() / 3)
+            rect.setTop(2 * rect.height() // 3)
         elif guide == Guide.CompassWest:
-            rect.setWidth(rect.width() / 3)
+            rect.setWidth(rect.width() // 3)
         elif guide == Guide.CompassCenter:
             pass  # nothing to do
         elif guide == Guide.CompassExNorth:
@@ -435,7 +433,7 @@ class DockOverlay(Atom):
             self._last_guide = guide
             self._target_band_geo = self._band_geometry(widget, guide)
             self._band_timer.start(self.band_delay)
-        rose.setCenterPoint(QPoint(geo.width() / 2, geo.height() / 2))
+        rose.setCenterPoint(QPoint(geo.width() // 2, geo.height() // 2))
         rose.mouseOver(pos)
         rose.show()
 
@@ -482,7 +480,7 @@ class DockOverlay(Atom):
 
         # Get the local area coordinates for the center of the widget.
         center = widget.mapTo(pane, QPoint(0, 0))
-        center += QPoint(widget.width() / 2, widget.height() / 2)
+        center += QPoint(widget.width() // 2, widget.height() // 2)
 
         # Update the state of the rose. If it is to be hidden, it is
         # done so immediately. If the target mode is different from

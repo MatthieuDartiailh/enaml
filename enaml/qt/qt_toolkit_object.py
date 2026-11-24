@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
@@ -12,14 +12,12 @@ from enaml.widgets.toolkit_object import ProxyToolkitObject
 from .QtCore import QObject
 
 
-class QtToolkitObject(ProxyToolkitObject):
+# PySide requires weakrefs for using bound methods as slots.
+# PyQt doesn't, but executes unsafe code if not using weakrefs.
+class QtToolkitObject(ProxyToolkitObject, enable_weakrefs=True):
     """ A Qt implementation of an Enaml ProxyToolkitObject.
 
     """
-    # PySide requires weakrefs for using bound methods as slots.
-    # PyQt doesn't, but executes unsafe code if not using weakrefs.
-    __slots__ = '__weakref__'
-
     #: A reference to the toolkit widget created by the proxy.
     widget = Typed(QObject)
 
@@ -52,7 +50,7 @@ class QtToolkitObject(ProxyToolkitObject):
             # engine applies the cascade itself). Names provided by the
             # widget author are assumed to be unique.
             d = self.declaration
-            name = d.name or u'obj-%d' % id(d)
+            name = d.name or 'obj-%d' % id(d)
             widget.setObjectName(name)
 
     def init_layout(self):
@@ -91,6 +89,7 @@ class QtToolkitObject(ProxyToolkitObject):
         widget = self.widget
         if widget is not None:
             widget.setParent(None)
+            widget.deleteLater()
             del self.widget
         super(QtToolkitObject, self).destroy()
 

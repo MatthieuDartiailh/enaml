@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of using Conditional to generate the views.
 
@@ -19,36 +19,42 @@ from enaml.widgets.api import (
     Window, Container, Field, PushButton, CheckBox, Separator, ScrollArea
 )
 
+class Foo(object):
+    text = 'foo'
 
-class Foo(object): pass
-class Bar(object): pass
-class Baz(object): pass
+
+class Bar(object):
+    text = 'bar'
+
+
+class Baz(object):
+    text = 'baz'
 
 
 enamldef FooView(Container):
     attr model: Foo
-    PushButton: text = str(model)
-    PushButton: text = str(model)
-    PushButton: text = str(model)
+    PushButton: text = model.text
+    PushButton: text = model.text
+    PushButton: text = model.text
 
 
 enamldef BarView(Container):
     attr model: Bar
-    Field: text = str(model)
-    Field: text = str(model)
-    Field: text = str(model)
+    Field: text = model.text
+    Field: text = model.text
+    Field: text = model.text
 
 
 enamldef BazView(Container):
     attr model: Baz
-    CheckBox: text = str(model)
-    CheckBox: text = str(model)
-    CheckBox: text = str(model)
+    CheckBox: text = model.text
+    CheckBox: text = model.text
+    CheckBox: text = model.text
 
 
 CLASSES = [Foo, Bar, Baz]
 def generate(n):
-    return [random.choice(CLASSES)() for _ in xrange(n)]
+    return [random.choice(CLASSES)() for _ in range(n)]
 
 
 enamldef Main(Window): main:
@@ -65,21 +71,21 @@ enamldef Main(Window): main:
                 Looper:
                     iterable << models
                     Conditional:
-                        condition = isinstance(loop_item, Foo)
+                        condition = isinstance(loop.item, Foo)
                         FooView:
-                            model = loop_item
+                            model = loop.item
                     Conditional:
-                        condition << isinstance(loop_item, Bar) and show_bar.checked
+                        condition << isinstance(loop.item, Bar) and show_bar.checked
                         BarView:
-                            model = loop_item
+                            model = loop.item
                     Conditional:
-                        condition = isinstance(loop_item, Baz)
+                        condition = isinstance(loop.item, Baz)
                         BazView:
-                            model = loop_item
+                            model = loop.item
                     Conditional:
                         condition << (
-                            (loop_index != len(main.models) - 1) and
-                            (show_bar.checked if isinstance(loop_item, Bar) else True)
+                            (loop.index != len(main.models) - 1) and
+                            (show_bar.checked if isinstance(loop.item, Bar) else True)
                         )
                         Separator:
                             orientation = 'horizontal'

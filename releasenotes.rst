@@ -1,6 +1,234 @@
 Enaml Release Notes
 ===================
 
+Dates are written as DD/MM/YYYY
+
+0.20.0 - 23/11/2026
+-------------------
+- add support for Python 3.15 PR #630
+- drop support for Python 3.10 PR #610
+- fix f-string parsing bug #628 PR #630
+- improve C++ extension lifetime management PR #606 #609 #611 #612 #615
+- update DynamicScope C++ binding PR #614
+- update declarative functions C++ binding PR #613
+- fix annotated functions not executing in DynamicScope PR #619
+- fix lambda defaults on Python 3.13 and later PR #620
+- fix patching declarative members added to a class PR #622
+
+0.19.0 - 06/10/2025
+-------------------
+- support for Python 3.14 PR #580
+- use cache_tag in import hooks PR #574
+- make dynamicscope iterable PR #571 #572
+- use vectorcall protocol in call_func helper PR #567
+- move standard_tracer's subscription observer to cpp to improve performance PR #562
+- add non-blocking open support to FileDialog PR #552
+- fix re-ordering of notebook tabs PR #583
+- remove version_info attribute from version.py
+
+0.18.0 - 28/10/2024
+-------------------
+- support for Python 3.13 PR #556
+- fix possible error in rewrite fast locals when using templates on 3.12 PR #550
+
+0.17.0 - 20/11/2023
+-------------------
+- support for Python 3.12 PR #535
+  Python 3.12 is only tested with Qt6
+  All syntactic features of Python 3.12 are supported and catching error groups
+  is now supported.
+- fix a bug in Enaml parser that was not showing proper location of syntax and
+  indentation errors in tracebacks when the error was in an Enaml file. PR #530
+
+0.16.1 - 05/05/2023
+-------------------
+- fix typo causing a crash in dock area PR #523
+- fix a multi-inheritance issue with pyside6 which affected the dock area PR #525
+
+0.16.0 - 21/02/2023
+-------------------
+- add support for Python 3.11+ PR #514
+  Python 3.11 is only tested with Qt6 backend and does not include support for
+  catching exception groups.
+- fix several issues related to PySide6 PR #513
+- switch to use pegen to generate the parser PR #474
+  This results in a much easier to maintain parser (in particular when it comes
+  to supporting new Python features). It provides with more detailed location
+  information which are needed on 3.11+ and add support for the match statement
+  in enaml files.
+  It however comes with a speed penalty (x4 slowdown). There will be efforts to
+  mitigate this but since parsing should occurs only once for deployed application
+  the gains are expected to out weight the cost here.
+- implement hash and eq for decl functions PR #517
+
+0.15.2 - 19/08/2022
+-------------------
+- fix position of popup view when multiple displays are used PR #500
+- reimplement DockArea.initialize instead of shadowing the initialized member.
+  PR #502
+- require qtpy>=2.1 far Qt backends version PR #501
+- qt: use QEvent.Type to coerce new registered event type with all bindings. PR #497
+  This requires PyQt 6.3.1 to work and allow to eliminate a deprecation warning.
+- fix loading of dock area guide images. PR #503
+
+0.15.1 - 13/06/2022
+-------------------
+- bump qtpy minimal required version for Qt6 PR #490
+- fix drag and drop support under Qt6 PR #491
+- fix date and time conversion under Qt6 PR #486
+- fix handling of mouse press event by popup views PR #486
+- fix flow widget size computation to only use integer (fixes Qt6) PR #492
+- add new extra requirements to ease use of widgets with extra dependencies PR #495
+
+0.15.0 - 31/03/2022
+-------------------
+- make install PEP 517 compliant and use a PEP 621 compliant pyproject.toml PR #485
+- add support for PyQt6 and Pyside6 PR #475
+- fix last occurrences of passing float instead of int to PyQt PR #481
+- add new declarative @observe which ignores 'create' and 'container' events by default PR #479
+- use atom builtin filtering mechanism to avoid refreshing the declarative engine on
+  'create' and 'container' event PR # 479
+
+0.14.1 - 09/02/2022
+-------------------
+- fixes a bug in code generation for Python 3.10 PR #476
+- fixes several bugs in corner cases of the Qt dock area PR #469
+- add python fstring scintilla tokens PR #470
+- address PyQt deprecation of accepting float values for pixel dimensions PR #471
+
+0.14.0 - 21/11/2021
+-------------------
+- use enum.IntEnum/IntFlag instead of atom.IntEnum PR #453
+- fix operator bindings in template instances PR #445
+- fix FlowLayout error with FlowItems that have non-zero stretch or ortho_stretch PR #448
+- add support for styling notebook tabs PR #452
+- drop official support for Python 3.6 and add minimal support for Python 3.10
+  As with earlier Python version, support for 3.10 is currently limited to running on
+  Python 3.10 excluding any features that were added in Python 3.10
+
+0.13.0 - 19/04/2021
+-------------------
+- fix Python 3.9 only syntax issue PR #443
+- make app editor more resilient to errors PR #440
+- fixes to vim syntax highlighting PR #439
+- fix documentation of ScrollArea example PR #438
+- add extra_requires to provide an easy way to install qt bindings
+  when relevant PR # 434
+- add support for explicit Qt app name PR #430
+  Allows setting the WM_CLASS property for X11 (Linux) apps.
+
+0.12.0 - 04/11/2020
+-------------------
+- add support for Python 3.9 PR #424
+- add support for PySide2 and fix Qt deprecation PR #423
+- add support for subscription block PR #348
+  Subscription blocks allow to write right to left synchronization logic over
+  multiple lines and using statements. The assigned value is the value returned
+  from the block.
+- add support for Python 3.8 only syntax PR #422
+  This covers: the walrus operator (:=), and the use of * in return and yields
+
+
+0.11.2 - 03/06/2020
+-------------------
+- fix reference counting in declarative function PR #417
+
+
+0.11.1 - 01/05/2020
+-------------------
+- fix signaling/weakmethod/callableref that were broken since 0.10.0 PR #416
+- coerce iterator iterables of loopers to tuple so refresh works properly PR #414
+
+
+0.11.0 - 05/04/2020
+-------------------
+- add support for Python 3.8 (not Python 3.8 only syntax) PR #391
+- enforce conversion of float to int at the Qt boudary PR #391
+- replace byteplay by bytecode PR #391
+- add get method to DynamicScope PR #394
+- properly set the attributes of imported module PR #398
+- qt: fix alerts on tabbed DockItem PR #396
+- qt: avoid going higher than the dock area when looking for a DockTabWidget
+  among the parents of a QDockContainer PR #386
+- properly report SyntaxError in f strings PR #378
+- add support for using attributes (. access) when specifying attr types PR #359
+- limit support to Python 3.6+ PR #349
+- use cppy for the Python/C interface PR #349
+- qt: add missing brackets to widget.focusPolicy within
+  qt_widget.py/QtWidget.tab_focus_request() PR #403
+- qt: fix return value of QtWidget.tab_focus_request() PR #404
+
+
+0.10.4 - 18/09/2019
+-------------------
+- fix a bug in the parser preventing the use of `raise from` under Python 3 PR #364
+- add a ButtonGroup widget and a group attribute on all buttons to allow to
+  group buttons belonging to different containers. PR #346
+- fix an issue in ImageView when the image is None PR #361
+- add a sync_time attribute to Field to control the refresh rate when using the
+  'auto_sync' trigger mode. PR #353
+- multiple improvement of the documentation PR #341 #345 #350
+- add a new example about layout PR #343
+- fix issue where fields with a validator would lose their original stylesheet when
+  the error state of the validator is cleared. PR #365
+- fix Looper's ``loop_index`` becoming invalid when items are reordered #357 via PR #358
+
+.. note::
+
+    Looper's ``loop_index`` and ``loop_item`` scope variables are now deprecated.
+    When upgrading to 0.10.4 or newer all usage of ``loop_index`` and ``loop_item``
+    within a Looper should be replaced with ``loop.index`` and ``loop.item``
+    respectively. See #357 for details.
+
+
+0.10.3 - 28/01/2019
+-------------------
+- implement import hooks using Python 3 interface #331
+- make enaml-run exit immediately when pressing ^c #328
+- add support for f-strings in enaml files on supported Python versions PR #288
+- add support for declarative async function PR #285
+- add a enaml-compileallcommand to generate pyc and enamlc files PR #262
+- fix the tp_name value of all C extensions #318
+- add pickle support for enaml's Color - #316
+- add support for tiling and cascading to MdiArea PR # 259
+- fix issue # 174 (MdiWindow not automatically shown when added) PR # 259
+- add minimal workbench documentation PR # 258
+- add support for font-stretch PR # 258
+- remove dependency on future to reduce import time PR #255
+- add constraints to enforce image aspect ratio in ImageView PR #254
+- improvements to the scintilla widget and live editor PR #243
+
+Multiple improvements to the documentation, special thanks to Julian-O for
+this.
+
+
+0.10.2 - 28/01/2018
+-------------------
+- fix import of QScintilla under PyQt5 PR #230
+- add support for importing enaml files from zip archives #232
+- fix menu item ordering under Python 3 #233
+- fix repr of declarative function objects #235
+- properly reset layout_container member in qt backend after a widget has been
+  reparented #240
+- fix calls to explicit_warn which could lead to global vars corruption #247
+- add a text align member to Field to control text alignment #249
+- fix the parsing rules for function definitions #252
+- several improvements to the handling of comprehensions and lambdas #242 #245
+
+0.10.1 - 13/11/2017
+-------------------
+- fix mistake in setup.py file preventing conda package building
+
+0.10.0 - 12/11/2017
+-------------------
+- add support for Qt5 (based on QtPy) PR #228
+- add support for Python 3 (3.3, 3.4, 3.5, 3.6) (f-strings are not supported) PR #227
+- refactor the parser to be based on classes PR #227
+- move every parser/lexer related module in the parser package PR #227
+- support for dict and set comprehensions in enaml files PR #227
+
+Below dates are in MM/DD/YYYY
+
 0.9.8 - 08/04/2014
 ------------------
 - Add drag and drop support. 56a2127e714c_

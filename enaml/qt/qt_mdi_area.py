@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.mdi_area import ProxyMdiArea
 
-from .QtGui import QMdiArea
+from .QtWidgets import QMdiArea
 
 from .qt_constraints_widget import QtConstraintsWidget
 from .qt_mdi_window import QtMdiWindow
@@ -52,6 +52,30 @@ class QtMdiArea(QtConstraintsWidget, ProxyMdiArea):
             widget = window.proxy.widget
             if widget:
                 yield widget
+
+    def tile_mdi_windows(self):
+        """ Tile the subwindows.
+
+        Notes
+        -----
+        For the time being the ordering is the insertion order (Qt default). In
+        the future, a way to modify the order may be added.
+
+        """
+        if self.widget:
+            self.widget.tileSubWindows()
+
+    def cascade_mdi_windows(self):
+        """ Cascade the subwindows.
+
+        Notes
+        -----
+        For the time being the ordering is the insertion order (Qt default). In
+        the future, a way to modify the order may be added.
+
+        """
+        if self.widget:
+            self.widget.cascadeSubWindows()
 
     #--------------------------------------------------------------------------
     # Signal Handlers

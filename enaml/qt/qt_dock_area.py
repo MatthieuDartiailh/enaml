@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
@@ -12,7 +12,7 @@ from enaml.widgets.dock_area import ProxyDockArea
 from enaml.widgets.dock_events import DockItemEvent
 
 from .QtCore import QObject, QEvent, QSize, QTimer
-from .QtGui import QTabWidget
+from .QtWidgets import QTabWidget
 
 from .docking.dock_manager import DockManager
 from .docking.event_types import (
@@ -178,16 +178,16 @@ class QtDockArea(QtConstraintsWidget, ProxyDockArea):
 
         """
         # workaround win-7 sizing bug
-        parts = [u'QDockTabWidget::pane {}']
+        parts = ['QDockTabWidget::pane {}']
         name = self.widget.objectName()
         for style in StyleCache.styles(self.declaration):
             t = translate_dock_area_style(name, style)
             if t:
                 parts.append(t)
         if len(parts) > 1:
-            stylesheet = u'\n\n'.join(parts)
+            stylesheet = '\n\n'.join(parts)
         else:
-            stylesheet = u''
+            stylesheet = ''
         self.widget.setStyleSheet(stylesheet)
 
     #--------------------------------------------------------------------------
@@ -229,7 +229,7 @@ class QtDockArea(QtConstraintsWidget, ProxyDockArea):
     # ProxyDockArea API
     #--------------------------------------------------------------------------
     def set_tab_position(self, position):
-        """ Set the default tab position on the underyling widget.
+        """ Set the default tab position on the underlying widget.
 
         """
         self.widget.setTabPosition(TAB_POSITIONS[position])

@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Bool, Event, Typed, ForwardTyped, set_default
 
@@ -20,6 +20,9 @@ class ProxyDialog(ProxyWindow):
     declaration = ForwardTyped(lambda: Dialog)
 
     def exec_(self):
+        raise NotImplementedError
+
+    def open(self):
         raise NotImplementedError
 
     def done(self, result):
@@ -67,6 +70,18 @@ class Dialog(Window):
         if not self.proxy_is_active:
             self.activate_proxy()
         return self.proxy.exec_()
+
+    def open(self):
+        """ Launch the dialog as a modal window.
+
+        Note that this is nonblocking and you will recieve
+        the result via the `finished` and `accepted` or `rejected` events.
+        """
+        if not self.is_initialized:
+            self.initialize()
+        if not self.proxy_is_active:
+            self.activate_proxy()
+        return self.proxy.open()
 
     def done(self, result):
         """ Close the dialog and set the result value.

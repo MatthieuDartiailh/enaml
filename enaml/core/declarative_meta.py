@@ -1,11 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Atom, AtomMeta, DefaultValue, Member, Typed
+from atom.api import Atom, AtomMeta, ChangeType, DefaultValue, Member, Typed
+
+# The declarative engine only updates for these types of changes
+D_CHANGE_TYPES = (
+    ChangeType.UPDATE | ChangeType.PROPERTY | ChangeType.EVENT | ChangeType.DELETE
+)
 
 
 class DeclarativeDefaultHandler(Atom):
@@ -60,12 +65,11 @@ def declarative_change_handler(change):
 
     """
     # TODO think about whether this is the right place to filter on change_t
-    change_t = change['type']
-    if change_t == 'update' or change_t == 'event' or change_t == 'property':
-        owner = change['object']
-        engine = owner._d_engine
-        if engine is not None:
-            engine.write(owner, change['name'], change)
+    # NOTE: Filtering on change['type'] is done by atom
+    owner = change['object']
+    engine = owner._d_engine
+    if engine is not None:
+        engine.write(owner, change['name'], change)
 
 
 def patch_d_member(member):
@@ -82,13 +86,12 @@ def patch_d_member(member):
     """
     metadata = member.metadata
     if metadata['d_writable']:
-        mode, ctxt = member.default_value_mode
         handler = DeclarativeDefaultHandler()
         handler.delegate = member.clone()
         new_mode = DefaultValue.CallObject_ObjectName
         member.set_default_value_mode(new_mode, handler)
     if metadata['d_readable']:
-        member.add_static_observer(declarative_change_handler)
+        member.add_static_observer(declarative_change_handler, D_CHANGE_TYPES)
 
 
 class DeclarativeMeta(AtomMeta):
@@ -117,7 +120,7 @@ class DeclarativeMeta(AtomMeta):
         # the d_ members. This must done *after* the main metaclass
         # runs, or the declarative default values can get clobbered.
         cls = AtomMeta.__new__(meta, name, bases, dct)
-        for key, value in cls.__dict__.iteritems():
+        for key, value in cls.__dict__.items():
             if isinstance(value, Member):
                 metadata = value.metadata
                 if metadata is not None and metadata.get('d_member'):

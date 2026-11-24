@@ -1,16 +1,14 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    Bool, Unicode, Typed, ForwardTyped, Event, Callable, observe
-)
+from atom.api import Bool, Str, Typed, ForwardTyped, Event, Callable
 
 from enaml.application import deferred_call
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .toolkit_object import ToolkitObject, ProxyToolkitObject
 
@@ -51,7 +49,7 @@ class ToolkitDialog(ToolkitObject):
 
     """
     #: The title of the dialog window.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: An optional callback which will be invoked when the dialog is
     #: closed. This is a convenience to make it easier to handle a

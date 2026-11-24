@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from .code_tracing import CodeInverter
 
@@ -47,16 +47,15 @@ class StandardInverter(CodeInverter):
         setattr(obj, attr, value)
 
     def call_function(self, func, argtuple, argspec, value):
-        """ Called before the CALL_FUNCTION opcode is executed.
+        """ Called before the CALL opcode is executed.
 
         This method inverts a call to the builtin `getattr` into a call
         to the builtin `setattr`. All other calls will raise.
         See also: `CodeInverter.call_function`.
 
         """
-        nargs = argspec & 0xFF
-        nkwargs = (argspec >> 8) & 0xFF
-        if (func is getattr and (nargs == 2 or nargs == 3) and nkwargs == 0):
+        nargs = argspec
+        if (func is getattr and (nargs == 2 or nargs == 3)):
             obj, attr = argtuple[0], argtuple[1]
             setattr(obj, attr, value)
         else:

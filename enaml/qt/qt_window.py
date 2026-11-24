@@ -1,23 +1,24 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import sys
 
 from atom.api import Typed, atomref
 
 from enaml.layout.geometry import Pos, Rect, Size
-from enaml.widgets.window import ProxyWindow, CloseEvent
+from enaml.widgets.window import ProxyWindow
 
 from .QtCore import Qt, QPoint, QRect, QSize
-from .QtGui import QApplication, QIcon
+from .QtGui import QIcon
+from .QtWidgets import QApplication, QWidget, QLayout
 
 from .q_deferred_caller import deferredCall
 from .q_resource_helpers import get_cached_qicon
-from .q_window_base import QWindowBase
+from .q_window_base import add_base_window_methods, QWindowLayout
 from .qt_container import QtContainer
 from .qt_widget import QtWidget
 
@@ -42,7 +43,8 @@ def finalize_close(d):
         d.destroy()
 
 
-class QWindow(QWindowBase):
+@add_base_window_methods
+class QWindow(QWidget):
     """ A window base subclass which handles the close event.
 
     The window layout computes the min/max size of the window based
@@ -54,35 +56,30 @@ class QWindow(QWindowBase):
 
         Parameters
         ----------
-        proxy : QtWindow
-            The proxy object which owns this window. Only an atomref
+        proxy : QtDialog
+            The proxy object which owns this dialog. Only an atomref
             will be maintained to this object.
 
         parent : QWidget, optional
-            The parent of the window.
+            The parent of the dialog.
 
         flags : Qt.WindowFlags, optional
             The window flags to pass to the parent constructor.
 
         """
-        super(QWindow, self).__init__(parent, Qt.Window | flags)
+        super().__init__(parent, flags | Qt.Window)
+        self._expl_min_size = QSize()
+        self._expl_max_size = QSize()
+        layout = QWindowLayout()
+        layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.setLayout(layout)
         self._proxy_ref = atomref(proxy)
 
-    def closeEvent(self, event):
-        """ Handle the close event for the window.
+    def accept_closing(self, event, declaration):
+        """ Use a deferred call to let the window properly close.
 
         """
-        event.accept()
-        if not self._proxy_ref:
-            return
-        proxy = self._proxy_ref()
-        d = proxy.declaration
-        d_event = CloseEvent()
-        d.closing(d_event)
-        if d_event.is_accepted():
-            deferredCall(finalize_close, d)
-        else:
-            event.ignore()
+        deferredCall(finalize_close, declaration)
 
 
 class QtWindow(QtWidget, ProxyWindow):
@@ -235,7 +232,7 @@ class QtWindow(QtWidget, ProxyWindow):
         """ Set the geometry of the window.
 
         """
-        rect = QRect(*rect)
+        rect = QRect(*(int(round(x)) for x in rect))
         if rect.isValid():
             self.widget.setGeometry(rect)
 

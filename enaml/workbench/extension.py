@@ -1,11 +1,12 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Callable, Int, Unicode
+from __future__ import unicode_literals
+from atom.api import Callable, Int, Str
 
 from enaml.core.declarative import Declarative, d_
 
@@ -17,10 +18,10 @@ class Extension(Declarative):
 
     """
     #: The globally unique identifier for the extension.
-    id = d_(Unicode())
+    id = d_(Str())
 
     #: The fully qualified id of the target extension point.
-    point = d_(Unicode())
+    point = d_(Str())
 
     #: An optional rank to use for order the extension among others.
     rank = d_(Int())
@@ -31,7 +32,7 @@ class Extension(Declarative):
     factory = d_(Callable())
 
     #: An optional description of the extension.
-    description = d_(Unicode())
+    description = d_(Str())
 
     @property
     def plugin_id(self):
@@ -46,9 +47,9 @@ class Extension(Declarative):
 
         """
         this_id = self.id
-        if u'.' in this_id:
+        if '.' in this_id:
             return this_id
-        return u'%s.%s' % (self.plugin_id, this_id)
+        return '%s.%s' % (self.plugin_id, this_id)
 
     def get_child(self, kind, reverse=False):
         """ Find a child by the given type.

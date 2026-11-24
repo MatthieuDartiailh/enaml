@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Typed, Unicode
+from atom.api import Typed, Str
 
 from enaml.core.declarative import Declarative, d_
 from enaml.widgets.container import Container
@@ -17,7 +17,7 @@ class Workspace(Declarative):
 
     """
     #: Extra information to display in the window title bar.
-    window_title = d_(Unicode())
+    window_title = d_(Str())
 
     #: The primary window content for the workspace. This will be
     #: destroyed automatically when the workspace is disposed.

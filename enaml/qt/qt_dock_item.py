@@ -1,13 +1,14 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Int, Typed
+from atom.api import Int, Typed, atomref
 
 from enaml.styling import StyleCache
+from enaml.widgets.close_event import CloseEvent
 from enaml.widgets.dock_item import ProxyDockItem
 
 from .QtCore import Qt, QSize, Signal
@@ -15,6 +16,7 @@ from .QtGui import QIcon
 
 from .docking.q_dock_item import QDockItem
 
+from .q_deferred_caller import deferredCall
 from .q_resource_helpers import get_cached_qicon
 from .qt_widget import QtWidget
 from .styleutil import translate_dock_item_style
@@ -28,10 +30,33 @@ class QCustomDockItem(QDockItem):
     #: before the close event handler returns.
     closed = Signal()
 
+    def __init__(self, proxy, parent=None):
+        """ Initialize a QCustomDockItem.
+
+        Parameters
+        ----------
+        proxy : QtDockItem
+            The proxy object which owns this dock item. Only an atomref
+            will be maintained to this object.
+
+        parent : QWidget, optional
+            The parent of the window.
+        """
+        super(QCustomDockItem, self).__init__(parent)
+        self._proxy_ref = atomref(proxy)
+
     def closeEvent(self, event):
         """ Handle the close event for the dock item.
-
         """
+        if self._proxy_ref:
+            proxy = self._proxy_ref()
+            d = proxy.declaration
+            d_event = CloseEvent()
+            d.closing(d_event)
+            if not d_event.is_accepted():
+                event.ignore()
+                return
+
         super(QCustomDockItem, self).closeEvent(event)
         if event.isAccepted():
             self.closed.emit()
@@ -58,7 +83,7 @@ class QtDockItem(QtWidget, ProxyDockItem):
         """ Create the underlying QDockItem widget.
 
         """
-        self.widget = QCustomDockItem(self.parent_widget())
+        self.widget = QCustomDockItem(self, self.parent_widget())
 
     def init_widget(self):
         """ Initialize the state of the underlying widget.
@@ -78,7 +103,7 @@ class QtDockItem(QtWidget, ProxyDockItem):
         self.set_closable(d.closable)
 
     def init_layout(self):
-        """ Initialize the layout for the underyling widget.
+        """ Initialize the layout for the underlying widget.
 
         """
         super(QtDockItem, self).init_layout()
@@ -117,9 +142,9 @@ class QtDockItem(QtWidget, ProxyDockItem):
             if t:
                 parts.append(t)
         if len(parts) > 0:
-            stylesheet = u'\n\n'.join(parts)
+            stylesheet = '\n\n'.join(parts)
         else:
-            stylesheet = u''
+            stylesheet = ''
         self.widget.setStyleSheet(stylesheet)
 
     #--------------------------------------------------------------------------
@@ -151,7 +176,7 @@ class QtDockItem(QtWidget, ProxyDockItem):
         """
         d = self.declaration
         if d is not None:
-            d._item_closed()
+            deferredCall(d._item_closed)
 
     #--------------------------------------------------------------------------
     # Child Events

@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Bool, Enum, List, Unicode, Typed, ForwardTyped, observe
+from atom.api import Bool, Enum, List, Str, Typed, ForwardTyped
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .toolkit_dialog import ToolkitDialog, ProxyToolkitDialog
 
@@ -60,17 +60,17 @@ class FileDialogEx(ToolkitDialog):
     show_dirs_only = d_(Bool(False))
 
     #: The currently selected path in the dialog.
-    current_path = d_(Unicode())
+    current_path = d_(Str())
 
     #: The paths selected by the user when the dialog is accepted.
     #: This value is output only.
-    selected_paths = List(Unicode())
+    selected_paths = List(Str())
 
     #: The name filters used to restrict the available files.
-    name_filters = d_(List(Unicode()))
+    name_filters = d_(List(Str()))
 
     #: The selected name filter from the list of name filters.
-    selected_name_filter = d_(Unicode())
+    selected_name_filter = d_(Str())
 
     #: A reference to the ProxyFileDialog object.
     proxy = Typed(ProxyFileDialogEx)
@@ -101,7 +101,7 @@ class FileDialogEx(ToolkitDialog):
         if dialog.exec_native():
             if dialog.selected_paths:
                 return dialog.selected_paths[0]
-        return u''
+        return ''
 
     @staticmethod
     def get_open_file_name(parent=None, **kwargs):
@@ -128,7 +128,7 @@ class FileDialogEx(ToolkitDialog):
         if dialog.exec_native():
             if dialog.selected_paths:
                 return dialog.selected_paths[0]
-        return u''
+        return ''
 
     @staticmethod
     def get_open_file_names(parent=None, **kwargs):
@@ -181,7 +181,7 @@ class FileDialogEx(ToolkitDialog):
         if dialog.exec_native():
             if dialog.selected_paths:
                 return dialog.selected_paths[0]
-        return u''
+        return ''
 
     def exec_native(self):
         """ Open the dialog using a native OS dialog if available.
@@ -223,4 +223,4 @@ class FileDialogEx(ToolkitDialog):
         """
         super(FileDialogEx, self)._prepare()
         self.selected_paths = []
-        self.selected_name_filter = u''
+        self.selected_name_filter = ''

@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from contextlib import contextmanager
 
@@ -249,6 +249,9 @@ class EnamlDefNode(DeclarativeNode):
     """ A declarative node which represents an 'enamldef' block.
 
     """
+    #: The const values available in the block scope.
+    scope = Typed(sortedmap, ())
+
     def __call__(self, instance):
         """ Instantiate the declarative hierarchy for the node.
 
@@ -262,8 +265,14 @@ class EnamlDefNode(DeclarativeNode):
             The enamldef instance which should be populated.
 
         """
-        with new_scope(self.scope_key):
+        with new_scope(self.scope_key, self.scope):
             self.populate(instance)
+
+    def copy(self):
+        """ Create a copy of the compiler node. """
+        node = super().copy()
+        node.scope = self.scope.copy()
+        return node
 
     def update_id_nodes(self):
         """ Update the id nodes for this node.
@@ -396,7 +405,7 @@ class TemplateInstanceNode(CompilerNode):
         if self.names:
             nodeiter = self.iternodes()
             for name in self.names:
-                mapping[name] = nodeiter.next()
+                mapping[name] = next(nodeiter)
         super(TemplateInstanceNode, self).update_id_nodes(mapping)
 
     def size(self):

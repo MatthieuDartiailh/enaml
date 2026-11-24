@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Bool, Typed, ForwardTyped, Unicode, observe, set_default
+from atom.api import Bool, Typed, ForwardTyped, Str, set_default
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .control import Control, ProxyControl
 
@@ -40,7 +40,7 @@ class MultilineField(Control):
 
     """
     #: The unicode text to display in the field.
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: Whether or not the field is read only.
     read_only = d_(Bool(False))
@@ -93,4 +93,4 @@ class MultilineField(Control):
         """
         if self.proxy_is_active:
             return self.proxy.field_text()
-        return u''
+        return ''

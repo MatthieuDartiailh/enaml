@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Typed, ForwardTyped, Unicode
+from atom.api import Typed, ForwardTyped, Str
 
 from enaml.core.declarative import d_
 from enaml.icon import Icon
@@ -29,21 +29,14 @@ class ProxyMdiWindow(ProxyWidget):
 
 class MdiWindow(Widget):
     """ A widget which can be used as a window in an MdiArea.
-    
 
-    Returns
-    -------
-    result : QWidget or None
-        The mdi widget defined for this widget, or None if one is
-        not defined.
-        
     An MdiWindow is a widget which can be used as an independent window
     in an MdiArea. It can have at most a single child widget which is
     an instance of Widget.
 
     """
     #: The titlebar text.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: The title bar icon.
     icon = d_(Typed(Icon))

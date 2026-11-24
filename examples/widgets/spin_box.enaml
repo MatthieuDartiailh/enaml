@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of the `SpinBox` widget.
 
@@ -25,5 +25,5 @@ enamldef Main(Window):
             maximum = 100
             minimum = 0
         Field: fld:
-            text << u'Age: {}'.format(sbox.value)
+            text << 'Age: {}'.format(sbox.value)
             read_only = True

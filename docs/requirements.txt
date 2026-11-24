@@ -1,0 +1,7 @@
+sphinx<9
+sphinx-rtd-theme
+packaging
+git+https://github.com/nucleic/cppy@main
+git+https://github.com/nucleic/atom@main
+git+https://github.com/nucleic/kiwi@main
+tools/pygments

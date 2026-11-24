@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import defaultdict
 
@@ -76,13 +76,7 @@ def solve_ordering(nodes):
         solver.addConstraint(cn)
     solver.updateVariables()
 
-    flat = []
-    for node in nodes:
-        node_var = variables[node.id]
-        flat.append((node_var.value(), node))
-    flat.sort()
-
-    return [pair[1] for pair in flat]
+    return sorted(nodes, key=lambda node: (variables[node.id].value(), id(node)))
 
 
 class PathNode(Atom):
@@ -100,11 +94,11 @@ class PathNode(Atom):
         """ Get the sanitized path for the node.
 
         """
-        path = self.item.path.rstrip(u'/')
+        path = self.item.path.rstrip('/')
         if not path:
-            return u'/'
-        if path[0] != u'/':
-            return u'/' + path
+            return '/'
+        if path[0] != '/':
+            return '/' + path
         return path
 
     @property
@@ -112,15 +106,15 @@ class PathNode(Atom):
         """ Get the sanitized path of the parent node.
 
         """
-        path = self.path.rsplit(u'/', 1)[0]
-        return path or u'/'
+        path = self.path.rsplit('/', 1)[0]
+        return path or '/'
 
     @property
     def id(self):
         """ Get the id portion of the path.
 
         """
-        return self.path.rsplit(u'/', 1)[1]
+        return self.path.rsplit('/', 1)[1]
 
     def assemble(self):
         """ Assemble the menu or action object for the node.
@@ -175,9 +169,9 @@ class MenuNode(PathNode):
                 raise ValueError(msg % (self.path, group.id))
             group_map[group.id] = group
 
-        if u'' not in group_map:
+        if '' not in group_map:
             group = ItemGroup()
-            group_map[u''] = group
+            group_map[''] = group
             item_groups.append(group)
 
         return group_map, item_groups
@@ -263,7 +257,7 @@ class RootMenuNode(MenuNode):
 
         """
         group = ItemGroup()
-        return {u'': group}, [group]
+        return {'': group}, [group]
 
     def assemble(self):
         """ Assemble and return the list of root menu bar menus.
@@ -306,7 +300,7 @@ def create_menus(workbench, menu_items, action_items):
     # assemble the menu nodes into a tree structure in two passes
     # in order to maintain the relative item definition order
     root = RootMenuNode()
-    node_map = {u'/': root}
+    node_map = {'/': root}
     for node in menu_nodes:
         path = node.path
         if path in node_map:

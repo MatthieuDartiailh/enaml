@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Bool, Unicode, Enum, Typed, ForwardTyped, observe
+from atom.api import Bool, Str, Enum, Typed, ForwardTyped
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .container import Container, ProxyContainer
 
@@ -35,7 +35,7 @@ class GroupBox(Container):
 
     """
     #: The title displayed at the top of the box.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: The flat parameter determines if the GroupBox is displayed with
     #: just the title and a header line (True) or with a full border

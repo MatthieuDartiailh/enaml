@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Unicode, Bool, Event, Typed, ForwardTyped, observe
+from atom.api import Str, Bool, Event, Typed, ForwardTyped
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.icon import Icon
 
 from .container import Container
@@ -40,7 +40,7 @@ class Page(Widget):
 
     """
     #: The title to use for the page in the notebook.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: The icon to use for the page tab.
     icon = d_(Typed(Icon))

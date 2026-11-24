@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from abc import ABCMeta
 
@@ -12,7 +12,7 @@ from atom.api import Atom, Constant, DefaultValue, Enum
 import kiwisolver as kiwi
 
 
-class Constrainable(object):
+class Constrainable(object, metaclass=ABCMeta):
     """ An abstract base class for defining constrainable objects.
 
     Implementations must provide `top`, `bottom`, `left`, `right`,
@@ -24,7 +24,6 @@ class Constrainable(object):
     which are valid PolicyEnum values.
 
     """
-    __metaclass__ = ABCMeta
 
 
 class ContentsConstrainable(Constrainable):
@@ -89,32 +88,38 @@ class ConstrainableMixin(Atom):
     v_center = Constant()
 
     #: How strongly a widget hugs it's width hint. This is equivalent
-    #: to the constraint:
+    #: to the constraint::
+    #:
     #:      (width == hint) | hug_width
     hug_width = PolicyEnum('strong')
 
     #: How strongly a widget hugs it's height hint. This is equivalent
-    #: to the constraint:
+    #: to the constraint::
+    #:
     #:      (height == hint) | hug_height
     hug_height = PolicyEnum('strong')
 
     #: How strongly a widget resists clipping its width hint. This is
     #: equivalent to the constraint:
+    #:
     #:      (width >= hint) | resist_width
     resist_width = PolicyEnum('strong')
 
     #: How strongly a widget resists clipping its height hint. This is
-    #: iequivalent to the constraint:
+    #: equivalent to the constraint::
+    #:
     #:      (height >= hint) | resist_height
     resist_height = PolicyEnum('strong')
 
     #: How strongly a widget resists expanding its width hint. This is
-    #: equivalent to the constraint:
+    #: equivalent to the constraint::
+    #:
     #:      (width <= hint) | limit_width
     limit_width = PolicyEnum('ignore')
 
     #: How strongly a widget resists expanding its height hint. This is
-    #: equivalent to the constraint:
+    #: equivalent to the constraint::
+    #:
     #:      (height <= hint) | limit_height
     limit_height = PolicyEnum('ignore')
 

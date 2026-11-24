@@ -1,27 +1,30 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed, atomref
 
 from enaml.widgets.dialog import ProxyDialog
-from enaml.widgets.window import CloseEvent
+from enaml.widgets.close_event import CloseEvent
 
-from .QtCore import Qt
-from .QtGui import QDialog
+from .QtCore import Qt, QSize
+from .QtWidgets import QDialog, QLayout
 
+from .q_single_widget_layout import QSingleWidgetLayout
 from .q_deferred_caller import deferredCall
-from .q_window_base import QWindowBase
+from .q_window_base import add_base_window_methods, QWindowLayout
 from .qt_window import QtWindow, finalize_close
 
 
-class QWindowDialog(QDialog, QWindowBase):
+@add_base_window_methods
+class QWindowDialog(QDialog):
     """ A window base subclass which implements dialog behavior.
 
     """
+
     def __init__(self, proxy, parent=None, flags=Qt.Widget):
         """ Initialize a QWindowDialog.
 
@@ -38,24 +41,19 @@ class QWindowDialog(QDialog, QWindowBase):
             The window flags to pass to the parent constructor.
 
         """
-        super(QWindowDialog, self).__init__(parent, flags)
+        super().__init__(parent, flags)
+        self._expl_min_size = QSize()
+        self._expl_max_size = QSize()
+        layout = QWindowLayout()
+        layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.setLayout(layout)
         self._proxy_ref = atomref(proxy)
 
-    def closeEvent(self, event):
-        """ Handle the close event for the dialog.
+    def accept_closing(self, event, declaration):
+        """ Call the super class close method.
 
         """
-        event.accept()
-        if not self._proxy_ref:
-            return
-        proxy = self._proxy_ref()
-        d = proxy.declaration
-        d_event = CloseEvent()
-        d.closing(d_event)
-        if d_event.is_accepted():
-            super(QWindowDialog, self).closeEvent(event)
-        else:
-            event.ignore()
+        super(QWindowDialog, self).closeEvent(event)
 
 
 class QtDialog(QtWindow, ProxyDialog):
@@ -103,6 +101,12 @@ class QtDialog(QtWindow, ProxyDialog):
 
         """
         return bool(self.widget.exec_())
+
+    def open(self):
+        """ Launch the dialog as a modal window.
+
+        """
+        self.widget.open()
 
     def done(self, result):
         """ Close the dialog and set the result code.

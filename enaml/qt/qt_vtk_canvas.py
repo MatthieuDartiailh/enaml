@@ -1,17 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.vtk_canvas import ProxyVTKCanvas
 
-from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-from .QtGui import QFrame, QVBoxLayout
+from .QtWidgets import QFrame, QVBoxLayout
 
 from .qt_control import QtControl
 
@@ -86,7 +86,7 @@ class QtVTKCanvas(QtControl, ProxyVTKCanvas):
         """
         d = self.declaration
         old = self._current_renderers
-        new = set(filter(None, [d.renderer] + d.renderers))
+        new = set([_f for _f in [d.renderer] + d.renderers if _f])
         to_remove = old.difference(new)
         to_add = new.difference(old)
         window = self.vtk_widget.GetRenderWindow()

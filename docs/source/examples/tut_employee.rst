@@ -1,6 +1,8 @@
 .. _tut_employee:
 
 
+.. highlight:: enaml
+
 Employee tutorial
 ==============================================================================
 
@@ -13,13 +15,19 @@ Here is the Enaml file (:download:`download here
 <../../../examples/tutorial/employee/employee_view.enaml>`):
 
 .. literalinclude:: ../../../examples/tutorial/employee/employee_view.enaml
-    :language: python
+    :language: enaml
 
 
 Here is the Python code (:download:`download here
 <../../../examples/tutorial/employee/employee.py>`):
 
 .. literalinclude:: ../../../examples/tutorial/employee/employee.py
+    :language: python
+
+Here is the Python code for the phone number validator (:download:`download here
+<../../../examples/tutorial/employee/phone_validator.py>`):
+
+.. literalinclude:: ../../../examples/tutorial/employee/phone_validator.py
     :language: python
 
 
@@ -240,6 +248,6 @@ following set of changes:
             text = "Allow Editing:"
         CheckBox: en_cb:
             checked = True
-            
+
 .. image:: images/tut_employee_layout_nested_container.png
 

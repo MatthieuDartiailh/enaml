@@ -1,18 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from contextlib import contextmanager
 
 from atom.api import (
-    Bool, Coerced, Enum, Typed, ForwardTyped, Unicode, Event, observe,
-    set_default
+    Bool, Coerced, Enum, Typed, ForwardTyped, Str, Event, set_default
 )
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.layout.dock_layout import DockLayout, DockLayoutOp
 from enaml.styling import StyleSheet
 
@@ -92,7 +91,7 @@ class DockArea(ConstraintsWidget):
     #:
     #: Only one mode of styling should be used for the dock area at a
     #: time. Using both modes simultaneously is undefined.
-    style = d_(Unicode('vs-2010'))
+    style = d_(Str('vs-2024'))
 
     #: Whether or not dock events are enabled for the area.
     dock_events_enabled = d_(Bool(False))
@@ -111,13 +110,13 @@ class DockArea(ConstraintsWidget):
     #: The style sheet created from the 'style' attribute.
     _internal_style = Typed(StyleSheet)
 
-    def initialized(self):
+    def initialize(self):
         """ A reimplemented initializer method.
 
         This method ensures the internal style sheet is created.
 
         """
-        super(DockArea, self).initialized()
+        super(DockArea, self).initialize()
         self._refresh_internal_style()
 
     def dock_items(self):

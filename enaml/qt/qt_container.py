@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import deque
 from contextlib import contextmanager
@@ -15,7 +15,7 @@ from enaml.widgets.constraints_widget import ConstraintsWidget
 from enaml.widgets.container import ProxyContainer
 
 from .QtCore import QRect, QSize, QTimer, Signal
-from .QtGui import QFrame, QWidgetItem, QSizePolicy
+from .QtWidgets import QFrame, QWidgetItem, QSizePolicy
 
 from .qt_constraints_widget import QtConstraintsWidget
 from .qt_frame import QtFrame
@@ -162,7 +162,10 @@ class QtLayoutItem(LayoutItem):
         offset = self.offset
         x -= offset.x
         y -= offset.y
-        self.widget_item.setGeometry(QRect(x, y, width, height))
+        self.widget_item.setGeometry(
+            QRect(int(round(x)), int(round(y)),
+                  int(round(width)), int(round(height)))
+        )
 
 
 class QtContainerItem(QtLayoutItem):
@@ -349,6 +352,16 @@ class QtContainer(QtFrame, ProxyContainer):
         cw = child.widget
         if cw is not None and cw.parent() != self.widget:
             cw.setParent(self.widget)
+
+    def child_removed(self, child):
+        """ Handle the child removed event.
+
+        This handler will clear the layout_parent member is applicable.
+
+        """
+        super(QtContainer, self).child_removed(child)
+        if isinstance(child, QtConstraintsWidget):
+            del child.layout_container
 
     #--------------------------------------------------------------------------
     # Layout API
@@ -553,9 +566,9 @@ class QtContainer(QtFrame, ProxyContainer):
             min_size = DEFAULT_MIN_SIZE
             max_size = DEFAULT_MAX_SIZE
         else:
-            best_size = QSize(*manager.best_size())
-            min_size = QSize(*manager.min_size())
-            max_size = QSize(*manager.max_size())
+            best_size = QSize(*(int(round(s)) for s in manager.best_size()))
+            min_size = QSize(*(int(round(s)) for s in manager.min_size()))
+            max_size = QSize(*(int(round(s)) for s in manager.max_size()))
 
         # Store the computed min and max size, which is used by the
         # QtChildContainerItem to provide min and max size constraints.

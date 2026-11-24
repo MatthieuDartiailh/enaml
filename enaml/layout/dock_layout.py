@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import deque
 import sys
 import warnings
 
-from atom.api import Atom, Int, Bool, Coerced, Enum, List, Unicode
+from atom.api import Atom, Int, Bool, Coerced, Enum, List, Str
 
 from enaml.nodevisitor import NodeVisitor
 
@@ -121,7 +121,7 @@ class ItemLayout(LayoutNode):
 
     """
     #: The name of the DockItem to which this layout item applies.
-    name = Unicode()
+    name = Str()
 
     #: Whether or not the item is floating. An ItemLayout defined as
     #: a toplevel item in a DockLayout should be marked as floating.
@@ -153,6 +153,9 @@ class TabLayout(LayoutNode):
     #: The index of the currently selected tab.
     index = Int(0)
 
+    #: Whether or not the tab layout is maximized.
+    maximized = Bool(False)
+
     #: The list of item layouts to include in the tab layout.
     items = List(Coerced(ItemLayout))
 
@@ -166,20 +169,22 @@ class TabLayout(LayoutNode):
         return self.items[:]
 
 
-class _SplitLayoutItem(object):
+class _SplitLayoutItemMeta(type):
+
+    def __instancecheck__(cls, instance):
+        return isinstance(instance, (ItemLayout, TabLayout, SplitLayout))
+
+    def __call__(cls, item):
+        if isinstance(item, str):
+            return ItemLayout(item)
+        msg = "cannot coerce '%s' to a 'SplitLayout' item"
+        raise TypeError(msg % type(item).__name__)
+
+
+class _SplitLayoutItem(object, metaclass=_SplitLayoutItemMeta):
     """ A private class which performs type checking for split layouts.
 
     """
-    class __metaclass__(type):
-
-        def __instancecheck__(cls, instance):
-            return isinstance(instance, (ItemLayout, TabLayout, SplitLayout))
-
-        def __call__(cls, item):
-            if isinstance(item, basestring):
-                return ItemLayout(item)
-            msg = "cannot coerce '%s' to a 'SplitLayout' item"
-            raise TypeError(msg % type(item).__name__)
 
 
 class SplitLayout(LayoutNode):
@@ -245,21 +250,22 @@ class DockBarLayout(LayoutNode):
         return self.items[:]
 
 
-class _AreaLayoutItem(object):
+class _AreaLayoutItemMeta(type):
+    def __instancecheck__(cls, instance):
+        allowed = (type(None), ItemLayout, TabLayout, SplitLayout)
+        return isinstance(instance, allowed)
+
+    def __call__(cls, item):
+        if isinstance(item, str):
+            return ItemLayout(item)
+        msg = "cannot coerce '%s' to an 'AreaLayout' item"
+        raise TypeError(msg % type(item).__name__)
+
+
+class _AreaLayoutItem(object, metaclass=_AreaLayoutItemMeta):
     """ A private class which performs type checking for area layouts.
 
     """
-    class __metaclass__(type):
-
-        def __instancecheck__(cls, instance):
-            allowed = (type(None), ItemLayout, TabLayout, SplitLayout)
-            return isinstance(instance, allowed)
-
-        def __call__(cls, item):
-            if isinstance(item, basestring):
-                return ItemLayout(item)
-            msg = "cannot coerce '%s' to an 'AreaLayout' item"
-            raise TypeError(msg % type(item).__name__)
 
 
 class AreaLayout(LayoutNode):
@@ -300,22 +306,24 @@ class AreaLayout(LayoutNode):
         return base + self.dock_bars
 
 
-class _DockLayoutItem(object):
+class _DockLayoutItemMeta(type):
+
+    def __instancecheck__(cls, instance):
+        return isinstance(instance, (ItemLayout, AreaLayout))
+
+    def __call__(cls, item):
+        if isinstance(item, str):
+            return ItemLayout(item)
+        if isinstance(item, (SplitLayout, TabLayout)):
+            return AreaLayout(item)
+        msg = "cannot coerce '%s' to a 'DockLayout' item"
+        raise TypeError(msg % type(item).__name__)
+
+
+class _DockLayoutItem(object, metaclass=_DockLayoutItemMeta):
     """ A private class which performs type checking for dock layouts.
 
     """
-    class __metaclass__(type):
-
-        def __instancecheck__(cls, instance):
-            return isinstance(instance, (ItemLayout, AreaLayout))
-
-        def __call__(cls, item):
-            if isinstance(item, basestring):
-                return ItemLayout(item)
-            if isinstance(item, (SplitLayout, TabLayout)):
-                return AreaLayout(item)
-            msg = "cannot coerce '%s' to a 'DockLayout' item"
-            raise TypeError(msg % type(item).__name__)
 
 
 class DockLayout(LayoutNode):
@@ -380,7 +388,8 @@ class DockLayoutValidator(NodeVisitor):
             if not f_name:
                 f_name = f_mod
         warnings.warn_explicit(
-            message, DockLayoutWarning, f_name, f_lineno, f_mod, f_globals
+            message, DockLayoutWarning, f_name, f_lineno, f_mod, None,
+            f_globals
         )
 
     def setup(self, node):
@@ -526,10 +535,10 @@ class InsertItem(DockLayoutOp):
 
     """
     #: The name of the dock item to insert into the layout.
-    item = Unicode()
+    item = Str()
 
     #: The name of the dock item to use as the target location.
-    target = Unicode()
+    target = Str()
 
     #: The position relative to the target at which to insert the item.
     position = Enum('left', 'top', 'right', 'bottom')
@@ -565,10 +574,10 @@ class InsertBorderItem(DockLayoutOp):
 
     """
     #: The name of the dock item to insert into the layout.
-    item = Unicode()
+    item = Str()
 
     #: The name of the dock item to use as the target location.
-    target = Unicode()
+    target = Str()
 
     #: The border position at which to insert the item.
     position = Enum('left', 'top', 'right', 'bottom')
@@ -605,10 +614,10 @@ class InsertDockBarItem(DockLayoutOp):
 
     """
     #: The name of the dock item to insert into the layout.
-    item = Unicode()
+    item = Str()
 
     #: The name of the dock item to use as the target location.
-    target = Unicode()
+    target = Str()
 
     #: The dock bar position at which to insert the item.
     position = Enum('right', 'left', 'bottom', 'top')
@@ -646,10 +655,10 @@ class InsertTab(DockLayoutOp):
 
     """
     #: The name of the dock item to insert into the tab group.
-    item = Unicode()
+    item = Str()
 
     #: The name of an existing dock item in the tab group of interest.
-    target = Unicode()
+    target = Str()
 
     #: The index at which to insert the dock item.
     index = Int(-1)
@@ -690,7 +699,7 @@ class RemoveItem(DockLayoutOp):
 
     """
     #: The name of the dock item to remove from the layout.
-    item = Unicode()
+    item = Str()
 
 
 class ExtendItem(DockLayoutOp):
@@ -702,7 +711,7 @@ class ExtendItem(DockLayoutOp):
 
     """
     #: The name of the dock item to extend from its dock bar.
-    item = Unicode()
+    item = Str()
 
 
 class RetractItem(DockLayoutOp):
@@ -714,4 +723,4 @@ class RetractItem(DockLayoutOp):
 
     """
     #: The name of the dock item to retract into its dock bar.
-    item = Unicode()
+    item = Str()

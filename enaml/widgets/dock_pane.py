@@ -1,15 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    List, Enum, Unicode, Bool, Event, Typed, ForwardTyped, observe
-)
+from atom.api import List, Enum, Str, Bool, Event, Typed, ForwardTyped
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .container import Container
 from .widget import Widget, ProxyWidget
@@ -59,7 +57,7 @@ class DockPane(Widget):
 
     """
     #: The title to use in the title bar.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: Whether or not the title bar is visible.
     title_bar_visible = d_(Bool(True))

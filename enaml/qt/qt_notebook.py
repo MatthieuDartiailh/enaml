@@ -1,24 +1,28 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import sys
+from enum import IntEnum
 from weakref import WeakKeyDictionary
 
-from atom.api import Int, IntEnum, Typed
+from atom.api import Int, Typed
 
+from enaml.styling import StyleCache
 from enaml.widgets.notebook import ProxyNotebook
 
 from .QtCore import Qt, QEvent, QSize, Signal
-from .QtGui import (
-    QTabWidget, QTabBar, QResizeEvent, QApplication, QStackedWidget
+from .QtGui import QResizeEvent
+from .QtWidgets import (
+    QTabWidget, QTabBar, QApplication, QStackedWidget
 )
 
 from .qt_constraints_widget import QtConstraintsWidget
 from .qt_page import QtPage
+from .styleutil import translate_notebook_style
 
 
 TAB_POSITIONS = {
@@ -267,6 +271,19 @@ class QNotebook(QTabWidget):
             page.hide()
             self._hidden_pages[page] = index
 
+    def movePage(self, page, index: int):
+        """ Move a QPage instance within the notebook.
+
+        Parameters
+        ----------
+        page : QPage
+            The QPage instance to add to the notebook.
+        index : int
+            The index to which to move the page.
+
+        """
+        self.tabBar().moveTab(self.indexOf(page), index)
+
     def removePage(self, page):
         """ Remove a QPage instance from the notebook.
 
@@ -346,7 +363,7 @@ class QNotebook(QTabWidget):
         # the state of the buttons when the flag is set to True.
         if closable:
             setVisible = self.setTabCloseButtonVisible
-            for index in xrange(self.count()):
+            for index in range(self.count()):
                 page = self.widget(index)
                 setVisible(index, page.isClosable(), refresh=False)
         self._refreshTabBar()
@@ -389,7 +406,7 @@ class QtNotebook(QtConstraintsWidget, ProxyNotebook):
         self.widget = widget
 
     def init_widget(self):
-        """ Initialize the underyling widget.
+        """ Initialize the underlying widget.
 
         """
         super(QtNotebook, self).init_widget()
@@ -412,6 +429,35 @@ class QtNotebook(QtConstraintsWidget, ProxyNotebook):
         self.init_selected_tab()
         widget.layoutRequested.connect(self.on_layout_requested)
         widget.currentChanged.connect(self.on_current_changed)
+
+    #--------------------------------------------------------------------------
+    # Overrides
+    #--------------------------------------------------------------------------
+    def refresh_style_sheet(self):
+        """ A reimplemented styling method.
+
+        The notebook has an embedded tab bar and tabs that needs stylesheet
+        processing.
+
+        """
+        super().refresh_style_sheet()
+        self.refresh_tab_bar_style_sheet()
+
+    def refresh_tab_bar_style_sheet(self):
+        """ Refresh the notebook pseudo element styles.
+
+        """
+        parts = []
+        name = self.widget.objectName()
+        for style in StyleCache.styles(self.declaration):
+            t = translate_notebook_style(name, style)
+            if t:
+                parts.append(t)
+        if len(parts) > 0:
+            stylesheet = '\n\n'.join(parts)
+        else:
+            stylesheet = ''
+        self.widget.tabBar().setStyleSheet(stylesheet)
 
     #--------------------------------------------------------------------------
     # Utility Methods
@@ -454,7 +500,7 @@ class QtNotebook(QtConstraintsWidget, ProxyNotebook):
             self.set_selected_tab(d.selected_tab)
         else:
             current = self.widget.currentWidget()
-            name = current.objectName() if current is not None else u''
+            name = current.objectName() if current is not None else ''
             self._guard |= CHANGE_GUARD
             try:
                 d.selected_tab = name
@@ -499,7 +545,7 @@ class QtNotebook(QtConstraintsWidget, ProxyNotebook):
             self._guard |= CHANGE_GUARD
             try:
                 page = self.widget.currentWidget()
-                name = page.objectName() if page is not None else u''
+                name = page.objectName() if page is not None else ''
                 self.declaration.selected_tab = name
             finally:
                 self._guard &= ~CHANGE_GUARD
@@ -507,6 +553,12 @@ class QtNotebook(QtConstraintsWidget, ProxyNotebook):
     #--------------------------------------------------------------------------
     # ProxyNotebook API
     #--------------------------------------------------------------------------
+    def page_moved(self, child: QtPage):
+        """Handle a page being moved QtNotebook."""
+        for index, dchild in enumerate(self.children()):
+            if child is dchild:
+                self.widget.movePage(child.widget, index)
+
     def set_tab_style(self, style):
         """ Set the tab style for the tab bar in the widget.
 

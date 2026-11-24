@@ -1,19 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ Declarative classes which implement style sheet styling.
 
 """
 from collections import defaultdict
 
-from atom.api import Atom, Unicode, Typed, observe
+from atom.api import Atom, Str, Typed
 
 from enaml.application import Application, deferred_call
-from enaml.core.declarative import Declarative, d_
+from enaml.core.declarative import Declarative, d_, observe
 
 
 class Setter(Declarative):
@@ -29,10 +29,10 @@ class Setter(Declarative):
     # aligned in an Enaml source definition.
     #
     #: The style field to which this setter applies.
-    field = d_(Unicode())
+    field = d_(Str())
 
     #: The value to apply to the style field.
-    value = d_(Unicode())
+    value = d_(Str())
 
     def destroy(self):
         """ A reimplemented destructor.
@@ -61,7 +61,7 @@ def _comma_split(text):
         return cache[text]
     if len(cache) >= _MAX_CACHE:
         cache.clear()
-    result = tuple(s.strip() for s in text.split(u',') if s)
+    result = tuple(s.strip() for s in text.split(',') if s)
     cache[text] = result
     return result
 
@@ -81,32 +81,32 @@ class Style(Declarative):
     #: empty string will match all elements. Multiple elements can
     #: be separated by a comma and will match using logical OR
     #: semantics.
-    element = d_(Unicode())
+    element = d_(Str())
 
     #: The name of the widget style class which will match the style.
     #: An empty string will match all style classes. Multiple classes
     #: can be separated by a comma and will match using logical OR
     #: semantics.
-    style_class = d_(Unicode())
+    style_class = d_(Str())
 
     #: The object name of the widget which will match the style. An
     #: empty string will match all object names. Multiple object names
     #: can be separated by a comma and will match using logical OR
     #: semantics.
-    object_name = d_(Unicode())
+    object_name = d_(Str())
 
     #: The pseudo-class which must be active for the style to apply. An
     #: empty string will apply the syle for all pseudo-classes. Multiple
     #: classes can be separated by a colon will match using logical AND
     #: semantics. Commas can be used to separate multiple classes which
     #: will match using logical OR semantics.
-    pseudo_class = d_(Unicode())
+    pseudo_class = d_(Str())
 
     #: The pseudo-element to which the style applies. An empty string
     #: indicates the style applies to the primary element. Multiple
     #: pseudo elements can be separated comma and match using logical
     #: OR semantics.
-    pseudo_element = d_(Unicode())
+    pseudo_element = d_(Str())
 
     def setters(self):
         """ Get the :class:`Setter` objects declared for the style.
@@ -286,7 +286,7 @@ class Stylable(Declarative):
     #: The style class to which this item belongs. Multiple classes
     #: can be separated with whitespace. An empty string indicates
     #: the widget does not belong to any style class.
-    style_class = d_(Unicode())
+    style_class = d_(Str())
 
     def destroy(self):
         """ A reimplemented destructor.
@@ -325,7 +325,7 @@ class Stylable(Declarative):
     def parent_changed(self, old, new):
         """ A reimplemented parent changed event handler.
 
-        This will notifiy the :class:`StyleCache` if the parent of
+        This will notify the :class:`StyleCache` if the parent of
         the item has changed.
 
         """

@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from .QtCore import QPoint, QPointF, QRect, QVariantAnimation, Signal
 from .QtGui import QPainter, QPixmap, QPainterPath
@@ -349,8 +349,8 @@ class QIrisTransition(QPixmapTransition):
         width = size.width()
         height = size.height()
         radius = int((width**2 + height**2) ** 0.5) / 2
-        start_rect = QRect(width / 2, height / 2, 0, 0)
-        end_rect = QRect(width / 2, height / 2, radius, radius)
+        start_rect = QRect(width // 2, height // 2, 0, 0)
+        end_rect = QRect(width // 2, height // 2, radius, radius)
         return start_rect, end_rect
 
     def updatePixmap(self, rect):

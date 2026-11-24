@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Typed, ForwardTyped, Unicode, Bool, Event, observe
+from atom.api import Typed, ForwardTyped, Str, Bool, Event
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.icon import Icon
 
 from .toolkit_object import ToolkitObject, ProxyToolkitObject
@@ -58,15 +58,15 @@ class Action(ToolkitObject):
 
     """
     #: The text label associate with the action.
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: The tool tip text to use for this action. Typically displayed
     #: as a small label when the user hovers over the action.
-    tool_tip = d_(Unicode())
+    tool_tip = d_(Str())
 
     #: The text that is displayed in the status bar when the user
     #: hovers over the action.
-    status_tip = d_(Unicode())
+    status_tip = d_(Str())
 
     #: The icon to use for the Action.
     icon = d_(Typed(Icon))

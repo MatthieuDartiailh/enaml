@@ -13,6 +13,7 @@ enaml.widgets
     bounded_date <bounded_date>
     bounded_datetime <bounded_datetime>
     bounded_time <bounded_time>
+    button_group <button_group>
     calendar <calendar>
     check_box <check_box>
     color_dialog <color_dialog>
@@ -38,6 +39,7 @@ enaml.widgets
     group_box <group_box>
     html <html>
     image_view <image_view>
+    ipython_console <ipython_console>
     label <label>
     main_window <main_window>
     mdi_area <mdi_area>
@@ -85,6 +87,7 @@ enaml.widgets
     bounded_date
     bounded_datetime
     bounded_time
+    button_group
     calendar
     check_box
     color_dialog
@@ -110,6 +113,7 @@ enaml.widgets
     group_box
     html
     image_view
+    ipython_console
     label
     main_window
     mdi_area

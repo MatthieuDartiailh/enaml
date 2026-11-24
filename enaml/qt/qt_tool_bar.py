@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import sys
 
@@ -12,7 +12,7 @@ from atom.api import Int, Typed
 from enaml.widgets.tool_bar import ProxyToolBar
 
 from .QtCore import Qt, Signal
-from .QtGui import QToolBar, QMainWindow
+from .QtWidgets import QToolBar, QMainWindow
 
 from .qt_action import QtAction
 from .qt_action_group import QtActionGroup
@@ -339,7 +339,7 @@ class QtToolBar(QtConstraintsWidget, ProxyToolBar):
                 self._guard &= ~FLOATED_GUARD
 
     def set_dock_area(self, dock_area):
-        """ Set the dock area on the underyling widget.
+        """ Set the dock area on the underlying widget.
 
         """
         self.widget.setToolBarArea(DOCK_AREAS[dock_area])

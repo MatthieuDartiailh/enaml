@@ -1,16 +1,34 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Event, Typed, Unicode
+from atom.api import ChangeType, Event, Typed, Str, observe as default_observe
 from atom.datastructures.api import sortedmap
 
 from .declarative_meta import DeclarativeMeta
 from .expression_engine import ExpressionEngine
 from .object import Object, flag_generator, flag_property
+
+#: Declarative observe ignores create events
+OBSERVE_CHANGE_TYPES = ChangeType.ANY & ~ChangeType.CREATE
+
+
+def observe(*names, change_types=OBSERVE_CHANGE_TYPES):
+    """ An observe decorator which ignores the created event by default.
+
+    Parameters
+    ----------
+    *names
+        The str names of the attributes to observe on the object.
+        These must be of the form 'foo' or 'foo.bar'.
+    change_types
+        The flag specifying the type of changes to observe.
+
+    """
+    return default_observe(*names, change_types=change_types)
 
 
 def d_(member, readable=True, writable=True, final=True):
@@ -66,10 +84,10 @@ def d_func(func):
 
 
 #: The flag indicating that the Declarative object has been initialized.
-INITIALIZED_FLAG = flag_generator.next()
+INITIALIZED_FLAG = next(flag_generator)
 
 
-class Declarative(Object):
+class Declarative(Object, metaclass=DeclarativeMeta):
     """ The most base class of the Enaml declarative objects.
 
     This class provides the core functionality required of declarative
@@ -78,10 +96,9 @@ class Declarative(Object):
     visual representation; that functionality is added by subclasses.
 
     """
-    __metaclass__ = DeclarativeMeta
 
     #: Export the 'name' attribute as a declarative member.
-    name = d_(Unicode())
+    name = d_(Str())
 
     #: An event fired when an object is initialized. It is triggered
     #: once during the object lifetime, at the end of the initialize

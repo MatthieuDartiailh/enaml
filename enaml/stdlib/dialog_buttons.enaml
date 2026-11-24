@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Atom, Bool, Enum, Unicode
+from atom.api import Atom, Bool, Enum, Str
 from enaml.core.looper import Looper
 from enaml.layout.layout_helpers import hbox
 from enaml.widgets.container import Container
@@ -20,7 +20,7 @@ class DialogButton(Atom):
 
     """
     #: The text for the button.
-    text = Unicode()
+    text = Str()
 
     #: The dialog action to perform when the button is clicked.
     action = Enum('accept', 'reject')
@@ -78,16 +78,16 @@ enamldef DialogButtonBox(Container): box:
     """
     attr buttons: list = []
     event clicked: DialogButton
-    padding = 0
+    padding = 1  # Fix a small clipping issue observed on MacOSX
     constraints = [hbox(*sum(looper.items, []), spacing=6)]
     Looper: looper:
         iterable = buttons
         PushButton:
             style_class = 'dialog-box-button'
-            text = loop_item.text
-            default = loop_item.default
-            enabled << loop_item.enabled
+            text = loop.item.text
+            default = loop.item.default
+            enabled << loop.item.enabled
             clicked ::
-                loop_item.was_clicked = True
-                box.clicked(loop_item)
-                nonlocals[loop_item.action]()
+                loop.item.was_clicked = True
+                box.clicked(loop.item)
+                nonlocals[loop.item.action]()

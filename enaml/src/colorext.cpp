@@ -1,27 +1,48 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2013, Nucleic Development Team.
+| Copyright (c) 2013-2025, Nucleic Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |
-| The full license is in the file COPYING.txt, distributed with this software.
+| The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
-#include "inttypes.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include "pythonhelpers.h"
+#include <cppy/cppy.h>
+#include "platstdint.h"
 
-using namespace PythonHelpers;
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#endif
 
 
-typedef struct {
-    PyObject_HEAD
+namespace enaml
+{
+
+// POD struct - all member fields are considered private
+struct Color
+{
+	PyObject_HEAD
     PyObject* tkdata;   // Toolkit specific color representation.
     uint32_t argb;      // Stored using Qt's #AARRGGBB byte order.
-} Color;
+
+	static PyType_Spec TypeObject_Spec;
+
+    static PyTypeObject* TypeObject;
+
+	static bool Ready();
+
+};
 
 
-static PyObject*
+namespace
+{
+
+PyObject*
 Color_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
 {
     int32_t r = -1;
@@ -31,7 +52,7 @@ Color_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
     static char* kwlist[] = { "red", "green", "blue", "alpha", 0 };
     if( !PyArg_ParseTupleAndKeywords( args, kwargs, "|iiii", kwlist, &r, &g, &b, &a ) )
         return 0;
-    PyObjectPtr colorptr( PyType_GenericNew( type, args, kwargs ) );
+    cppy::ptr colorptr( PyType_GenericNew( type, args, kwargs ) );
     if( !colorptr )
         return 0;
     Color* color = reinterpret_cast<Color*>( colorptr.get() );
@@ -49,15 +70,17 @@ Color_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
 }
 
 
-static void
+void
 Color_dealloc( Color* self )
 {
+    PyTypeObject *tp = Py_TYPE(self);
     Py_CLEAR( self->tkdata );
-    self->ob_type->tp_free( reinterpret_cast<PyObject*>( self ) );
+    tp->tp_free( reinterpret_cast<PyObject*>( self ) );
+    Py_DECREF(tp);
 }
 
 
-static PyObject*
+PyObject*
 Color_repr( Color* self )
 {
     uint32_t a = ( self->argb >> 24 ) & 255;
@@ -66,50 +89,50 @@ Color_repr( Color* self )
     uint32_t b = self->argb & 255;
     std::ostringstream ostr;
     ostr << "Color(red=" << r << ", green=" << g << ", blue=" << b << ", alpha=" << a << ")";
-    return PyString_FromString(ostr.str().c_str());
+    return PyUnicode_FromString(ostr.str().c_str());
 }
 
 
-static PyObject*
+PyObject*
 Color_get_alpha( Color* self, void* context )
 {
     uint32_t a = ( self->argb >> 24 ) & 255;
-    return PyInt_FromLong( a );
+    return PyLong_FromLong( a );
 }
 
 
-static PyObject*
+PyObject*
 Color_get_red( Color* self, void* context )
 {
     uint32_t r = ( self->argb >> 16 ) & 255;
-    return PyInt_FromLong( r );
+    return PyLong_FromLong( r );
 }
 
 
-static PyObject*
+PyObject*
 Color_get_green( Color* self, void* context )
 {
     uint32_t g = ( self->argb >> 8 ) & 255;
-    return PyInt_FromLong( g );
+    return PyLong_FromLong( g );
 }
 
 
-static PyObject*
+PyObject*
 Color_get_blue( Color* self, void* context )
 {
     uint32_t b = self->argb & 255;
-    return PyInt_FromLong( b );
+    return PyLong_FromLong( b );
 }
 
 
-static PyObject*
+PyObject*
 Color_get_argb( Color* self, void* context )
 {
     return PyLong_FromUnsignedLong( self->argb );
 }
 
 
-static PyObject*
+PyObject*
 Color_get_tkdata( Color* self, void* context )
 {
     if( !self->tkdata )
@@ -119,7 +142,7 @@ Color_get_tkdata( Color* self, void* context )
 }
 
 
-static int
+int
 Color_set_tkdata( Color* self, PyObject* value, void* context )
 {
     // don't let users do something silly which would require GC
@@ -151,73 +174,120 @@ Color_getset[] = {
 };
 
 
-PyTypeObject Color_Type = {
-    PyObject_HEAD_INIT( 0 )
-    0,                                      /* ob_size */
-    "colorext.Color",                       /* tp_name */
-    sizeof( Color ),                        /* tp_basicsize */
-    0,                                      /* tp_itemsize */
-    (destructor)Color_dealloc,              /* tp_dealloc */
-    (printfunc)0,                           /* tp_print */
-    (getattrfunc)0,                         /* tp_getattr */
-    (setattrfunc)0,                         /* tp_setattr */
-    (cmpfunc)0,                             /* tp_compare */
-    (reprfunc)Color_repr,                   /* tp_repr */
-    (PyNumberMethods*)0,                    /* tp_as_number */
-    (PySequenceMethods*)0,                  /* tp_as_sequence */
-    (PyMappingMethods*)0,                   /* tp_as_mapping */
-    (hashfunc)0,                            /* tp_hash */
-    (ternaryfunc)0,                         /* tp_call */
-    (reprfunc)0,                            /* tp_str */
-    (getattrofunc)0,                        /* tp_getattro */
-    (setattrofunc)0,                        /* tp_setattro */
-    (PyBufferProcs*)0,                      /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,                     /* tp_flags */
-    0,                                      /* Documentation string */
-    (traverseproc)0,                        /* tp_traverse */
-    (inquiry)0,                             /* tp_clear */
-    (richcmpfunc)0,                         /* tp_richcompare */
-    0,                                      /* tp_weaklistoffset */
-    (getiterfunc)0,                         /* tp_iter */
-    (iternextfunc)0,                        /* tp_iternext */
-    (struct PyMethodDef*)0,                 /* tp_methods */
-    (struct PyMemberDef*)0,                 /* tp_members */
-    Color_getset,                           /* tp_getset */
-    0,                                      /* tp_base */
-    0,                                      /* tp_dict */
-    (descrgetfunc)0,                        /* tp_descr_get */
-    (descrsetfunc)0,                        /* tp_descr_set */
-    0,                                      /* tp_dictoffset */
-    (initproc)0,                            /* tp_init */
-    (allocfunc)PyType_GenericAlloc,         /* tp_alloc */
-    (newfunc)Color_new,                     /* tp_new */
-    (freefunc)0,                            /* tp_free */
-    (inquiry)0,                             /* tp_is_gc */
-    0,                                      /* tp_bases */
-    0,                                      /* tp_mro */
-    0,                                      /* tp_cache */
-    0,                                      /* tp_subclasses */
-    0,                                      /* tp_weaklist */
-    (destructor)0                           /* tp_del */
-};
+PyObject*
+Color__reduce__( Color* self, void* context )
+{
+    PyObject* obj = reinterpret_cast<PyObject*>( self );
+    uint32_t a = ( self->argb >> 24 ) & 0xFF;
+    uint32_t r = ( self->argb >> 16 ) & 0xFF;
+    uint32_t g = ( self->argb >> 8 ) & 0xFF;
+    uint32_t b = self->argb & 0xFF;
+    return Py_BuildValue( "O (iiii)", Py_TYPE( obj ), r, g, b, a );
+}
 
 
 static PyMethodDef
+Color_methods[] = {
+    { "__reduce__", ( PyCFunction )Color__reduce__, METH_NOARGS, "" },
+    { 0 } // Sentinel
+};
+
+static PyType_Slot Color_Type_slots[] = {
+    { Py_tp_dealloc, void_cast( Color_dealloc ) },          /* tp_dealloc */
+    { Py_tp_repr, void_cast( Color_repr ) },                /* tp_repr */
+    { Py_tp_getset, void_cast( Color_getset ) },            /* tp_getset */
+    { Py_tp_methods, void_cast( Color_methods ) },          /* tp_methods */
+    { Py_tp_new, void_cast( Color_new ) },                  /* tp_new */
+    { Py_tp_alloc, void_cast( PyType_GenericAlloc ) },      /* tp_alloc */
+    { 0, 0 },
+};
+
+
+}  // namespace
+
+
+// Initialize static variables (otherwise the compiler eliminates them)
+PyTypeObject* Color::TypeObject = NULL;
+
+
+PyType_Spec Color::TypeObject_Spec = {
+	"enaml.colorext.Color",              /* tp_name */
+	sizeof( Color ),                     /* tp_basicsize */
+	0,                                   /* tp_itemsize */
+	Py_TPFLAGS_DEFAULT,                  /* tp_flags */
+    Color_Type_slots               /* slots */
+};
+
+
+bool Color::Ready()
+{
+    // The reference will be handled by the module to which we will add the type
+	TypeObject = pytype_cast( PyType_FromSpec( &TypeObject_Spec ) );
+    if( !TypeObject )
+    {
+        return false;  // LCOV_EXCL_LINE (failed type creation)
+    }
+    return true;
+}
+
+
+// Module definition
+namespace
+{
+
+
+int
+colorext_modexec( PyObject *mod )
+{
+    if( !Color::Ready() )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed type creation)
+    }
+
+    // callableref
+    cppy::ptr color( pyobject_cast( Color::TypeObject ) );
+	if( PyModule_AddObject( mod, "Color", color.get() ) < 0 )
+	{
+		return -1;  // LCOV_EXCL_LINE (failed type addition to module)
+	}
+    color.release();
+
+    return 0;
+}
+
+
+PyMethodDef
 colorext_methods[] = {
     { 0 } // Sentinel
 };
 
 
-PyMODINIT_FUNC
-initcolorext( void )
+PyModuleDef_Slot colorext_slots[] = {
+    {Py_mod_exec, reinterpret_cast<void*>( colorext_modexec ) },
+    {0, NULL}
+};
+
+
+struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "colorext",
+        "colorext extension module",
+        0,
+        colorext_methods,
+        colorext_slots,
+        NULL,
+        NULL,
+        NULL
+};
+
+
+}  // namespace
+
+
+}  // namespace enaml
+
+
+PyMODINIT_FUNC PyInit_colorext( void )
 {
-    PyObject* mod = Py_InitModule( "colorext", colorext_methods );
-    if( !mod )
-        return;
-
-    if( PyType_Ready( &Color_Type ) )
-        return;
-
-    Py_INCREF( ( PyObject* )( &Color_Type ) );
-    PyModule_AddObject( mod, "Color", ( PyObject* )( &Color_Type ) );
+    return PyModuleDef_Init( &enaml::moduledef );
 }

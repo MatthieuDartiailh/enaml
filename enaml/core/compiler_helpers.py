@@ -1,11 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Event, Instance, Member
+from functools import update_wrapper
+
+from atom.api import Event, Instance, Member, add_member
 from atom.datastructures.api import sortedmap
 
 from .alias import Alias
@@ -19,6 +21,7 @@ from .enamldef_meta import EnamlDefMeta
 from .expression_engine import ExpressionEngine
 from .operators import __get_operators
 from .template import Template
+from .funchelper import call_func
 
 
 def resolve_alias(node, alias):
@@ -151,16 +154,8 @@ def add_storage(node, name, store_type, kind):
     else:
         raise RuntimeError("invalid kind '%s'" % kind)
 
-    if member is not None:
-        new.set_index(member.index)
-        new.copy_static_observers(member)
-    else:
-        new.set_index(len(members))
-
-    new.set_name(name)
+    add_member(klass, name, new)
     patch_d_member(new)
-    members[name] = new
-    setattr(klass, name, new)
 
 
 def declarative_node(klass, identifier, scope_key, store_locals):
@@ -735,6 +730,26 @@ def add_decl_function(node, func, is_override):
     setattr(klass, name, d_func)
 
 
+def wrap_function(func, scope):
+    """Wrap a function to call it with the dynamicscope in which it was defined
+
+    Parameters
+    ----------
+    func : FunctionType
+        Function for which a new scope need to be built
+
+    scope : DynamicScope
+        Scope in which the function was defined.
+
+    """
+    def wrapper(*args, **kwargs):
+        return call_func(func, args, kwargs, scope)
+
+    update_wrapper(wrapper, func)
+
+    return wrapper
+
+
 __compiler_helpers = {
     'add_alias': add_alias,
     'add_decl_function': add_decl_function,
@@ -754,4 +769,5 @@ __compiler_helpers = {
     'validate_spec': validate_spec,
     'validate_template': validate_template,
     'validate_unpack_size': validate_unpack_size,
+    'wrap_func': wrap_function,
 }

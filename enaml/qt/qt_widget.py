@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024,, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed, Coerced
 
@@ -11,8 +11,10 @@ from enaml.drag_drop import DropAction
 from enaml.styling import StyleCache
 from enaml.widgets.widget import Feature, ProxyWidget
 
-from .QtCore import Qt, QSize, QPoint
-from .QtGui import QFont, QWidget, QWidgetAction, QApplication, QDrag, QPixmap
+from .compat import mouse_event_pos
+from .QtCore import Qt, QSize, QPoint,  __version_info__
+from .QtGui import QFont, QDrag, QPixmap, QCursor
+from .QtWidgets import QWidget, QWidgetAction, QApplication
 
 from . import focus_registry
 from .q_resource_helpers import (
@@ -33,7 +35,7 @@ class QtWidget(QtToolkitObject, ProxyWidget):
     #: A private copy of the declaration features. This ensures that
     #: feature cleanup will proceed correctly in the event that user
     #: code modifies the declaration features value at runtime.
-    _features = Coerced(Feature.Flags)
+    _features = Coerced(Feature, (0,))
 
     #: Internal storage for the shared widget action.
     _widget_action = Typed(QWidgetAction)
@@ -148,9 +150,9 @@ class QtWidget(QtToolkitObject, ProxyWidget):
             if t:
                 parts.append(t)
         if len(parts) > 0:
-            stylesheet = u'\n\n'.join(parts)
+            stylesheet = '\n\n'.join(parts)
         else:
-            stylesheet = u''
+            stylesheet = ''
         self.widget.setStyleSheet(stylesheet)
 
     def tab_focus_request(self, reason):
@@ -172,14 +174,14 @@ class QtWidget(QtToolkitObject, ProxyWidget):
 
         """
         widget = self.focus_target()
-        if not widget.focusPolicy & Qt.TabFocus:
+        if not widget.focusPolicy() & Qt.TabFocus:
             return False
         if not widget.isEnabled():
             return False
         if not widget.isVisibleTo(widget.window()):
             return False
         widget.setFocus(reason)
-        return False
+        return widget.hasFocus()
 
     def focus_target(self):
         """ Return the current focus target for a focus request.
@@ -281,7 +283,7 @@ class QtWidget(QtToolkitObject, ProxyWidget):
 
         """
         if event.button() == Qt.LeftButton:
-            self._drag_origin = event.pos()
+            self._drag_origin = mouse_event_pos(event)
         widget = self.widget
         type(widget).mousePressEvent(widget, event)
 
@@ -290,7 +292,7 @@ class QtWidget(QtToolkitObject, ProxyWidget):
 
         """
         if event.buttons() & Qt.LeftButton and self._drag_origin is not None:
-            dist = (event.pos() - self._drag_origin).manhattanLength()
+            dist = (mouse_event_pos(event) - self._drag_origin).manhattanLength()
             if dist >= QApplication.startDragDistance():
                 self.do_drag()
                 self._drag_origin = None
@@ -343,11 +345,18 @@ class QtWidget(QtToolkitObject, ProxyWidget):
             qimg = get_cached_qimage(drag_data.image)
             qdrag.setPixmap(QPixmap.fromImage(qimg))
         else:
-            qdrag.setPixmap(QPixmap.grabWidget(widget))
+            qdrag.setPixmap(widget.grab())
+        if drag_data.hotspot:
+            qdrag.setHotSpot(QPoint(*drag_data.hotspot))
+        else:
+            cursor_position = widget.mapFromGlobal(QCursor.pos())
+            qdrag.setHotSpot(cursor_position)
         default = Qt.DropAction(drag_data.default_drop_action)
-        supported = Qt.DropActions(drag_data.supported_actions)
+        supported = Qt.DropAction(drag_data.supported_actions)
         qresult = qdrag.exec_(supported, default)
-        self.declaration.drag_end(drag_data, DropAction(int(qresult)))
+        self.declaration.drag_end(
+            drag_data, DropAction(getattr(qresult, "value", qresult))
+        )
 
     def dragEnterEvent(self, event):
         """ Handle the drag enter event for the widget.

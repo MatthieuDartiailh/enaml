@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ A utility module for dealing with CSS3 color strings.
 
@@ -11,10 +11,10 @@
 from colorsys import hls_to_rgb
 import re
 
+
 from atom.api import Coerced
 
 from .colorext import Color
-
 
 #: Regex sub-expressions used for building more complex expression.
 _int = r'\s*((?:\+|\-)?[0-9]+)\s*'
@@ -346,7 +346,7 @@ def coerce_color(color):
     """ The coercing function for the ColorMember.
 
     """
-    if isinstance(color, basestring):
+    if isinstance(color, str):
         return parse_color(color)
 
 

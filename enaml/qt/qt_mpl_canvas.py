@@ -1,25 +1,21 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.mpl_canvas import ProxyMPLCanvas
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
-try:
-    from matplotlib.backends.backend_qt4agg import (NavigationToolbar2QTAgg
-                                                    as NavigationToolbar2QT)
-except ImportError:
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
-
 from .QtCore import Qt
-from .QtGui import QFrame, QVBoxLayout
+from .QtWidgets import QFrame, QVBoxLayout
 
 from .qt_control import QtControl
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 
 
 class QtMPLCanvas(QtControl, ProxyMPLCanvas):

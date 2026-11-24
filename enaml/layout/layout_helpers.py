@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from .constraint_helper import ConstraintHelper
 from .factory_helper import FactoryHelper
@@ -21,10 +21,10 @@ def horizontal(*items, **config):
 
     Parameters
     ----------
-    *items
+    items
         The constraint items to pass to the helper.
 
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """
@@ -36,10 +36,10 @@ def vertical(*items, **config):
 
     Parameters
     ----------
-    *items
+    items
         The constraint items to pass to the helper.
 
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """
@@ -51,10 +51,10 @@ def hbox(*items, **config):
 
     Parameters
     ----------
-    *items
+    items
         The constraint items to pass to the helper.
 
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """
@@ -66,10 +66,10 @@ def vbox(*items, **config):
 
     Parameters
     ----------
-    *items
+    items
         The constraint items to pass to the helper.
 
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """
@@ -84,10 +84,10 @@ def align(anchor, *items, **config):
     anchor : str
         The name of the target anchor on the constrainable object.
 
-    *items
+    items
         The constraint items to pass to the helper.
 
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """
@@ -104,10 +104,10 @@ def factory(func, *args, **kwargs):
         The callable which will generate the list of constraints.
         The owner widget will be passed as the first argument.
 
-    *args
+    args
         Additional positional arguments to pass to the factory.
 
-    **kwargs
+    kwargs
         Additional keyword arguments to pass to the factory.
 
     """
@@ -119,10 +119,10 @@ def grid(*rows, **config):
 
     Parameters
     ----------
-    *rows
+    rows
+        Rows of identifier to use to build a grid.
 
-
-    **config
+    config
         Additional keyword arguments to pass to the helper.
 
     """

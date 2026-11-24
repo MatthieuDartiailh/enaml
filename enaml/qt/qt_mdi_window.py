@@ -1,15 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.mdi_window import ProxyMdiWindow
 
-from .QtGui import QMdiSubWindow, QLayout, QIcon
+from .QtGui import QIcon
+from .QtWidgets import QMdiSubWindow, QLayout
 
 from .q_resource_helpers import get_cached_qicon
 from .qt_widget import QtWidget

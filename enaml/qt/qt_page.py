@@ -1,16 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.page import ProxyPage
 
 from .QtCore import Signal
-from .QtGui import QFrame, QIcon
+from .QtGui import QIcon
+from .QtWidgets import QFrame
 
 from .q_resource_helpers import get_cached_qicon
 from .q_single_widget_layout import QSingleWidgetLayout
@@ -36,8 +37,8 @@ class QPage(QFrame):
 
         """
         super(QPage, self).__init__(*args, **kwargs)
-        self._title = u''
-        self._tool_tip = u''
+        self._title = ''
+        self._tool_tip = ''
         self._icon = QIcon()
         self._closable = True
         self._is_enabled = True
@@ -311,7 +312,7 @@ class QtPage(QtWidget, ProxyPage):
         self.widget.pageClosed.connect(self.on_page_closed)
 
     def init_layout(self):
-        """ Initialize the layout for the underyling widget.
+        """ Initialize the layout for the underlying widget.
 
         """
         super(QtPage, self).init_layout()

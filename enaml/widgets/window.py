@@ -1,19 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Atom, Unicode, Enum, Bool, Event, Coerced, Typed, ForwardTyped, observe,
-    set_default
+    Atom, Str, Enum, Bool, Event, Coerced, Typed, ForwardTyped, set_default
 )
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.icon import Icon
 from enaml.layout.geometry import Pos, Rect, Size
 
+from .close_event import CloseEvent
 from .container import Container
 from .widget import Widget, ProxyWidget
 
@@ -89,40 +89,6 @@ class ProxyWindow(ProxyWidget):
         raise NotImplementedError
 
 
-class CloseEvent(Atom):
-    """ An payload object carried by a window 'closing' event.
-
-    User code can manipulate this object to veto a close event.
-
-    """
-    #: The internal accepted state.
-    _accepted = Bool(True)
-
-    def is_accepted(self):
-        """ Get whether or not the event is accepted.
-
-        Returns
-        -------
-        result : bool
-            True if the event is accepted, False otherwise. The
-            default is True.
-
-        """
-        return self._accepted
-
-    def accept(self):
-        """ Accept the close event and allow the window to be closed.
-
-        """
-        self._accepted = True
-
-    def ignore(self):
-        """ Reject the close event and prevent the window from closing.
-
-        """
-        self._accepted = False
-
-
 class Window(Widget):
     """ A top-level Window component.
 
@@ -142,7 +108,7 @@ class Window(Widget):
     windows = set()
 
     #: The titlebar text.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: The initial position of the window frame. A value of (-1, -1)
     #: indicates that the toolkit should choose the initial position.
@@ -416,7 +382,7 @@ class Window(Widget):
             self.activate_proxy()
         super(Window, self).show()
 
-    #--------------------------------------------------------------------------
+    #-------------------------------------------------------------------------
     # Observers
     #--------------------------------------------------------------------------
     @observe('title', 'modality', 'icon')

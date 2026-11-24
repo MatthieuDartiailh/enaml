@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Atom, Int, Typed, List, atomref
 
 from enaml.layout.dock_layout import DockLayout, DockLayoutValidator
 
 from enaml.qt.QtCore import Qt, QPoint, QRect, QObject
-from enaml.qt.QtGui import QApplication
+from enaml.qt.QtWidgets import QApplication
 
 from .dock_overlay import DockOverlay
 from .layout_handling import layout_hit_test, plug_frame, iter_containers
@@ -242,8 +242,7 @@ class DockManager(Atom):
             manager.
 
         """
-        f = lambda w: isinstance(w, QDockContainer)
-        return filter(f, self._dock_frames)
+        return [f for f in self._dock_frames if isinstance(f, QDockContainer)]
 
     def dock_windows(self):
         """ Get an iterable of QDockWindow instances.
@@ -257,8 +256,7 @@ class DockManager(Atom):
             A list of QDockWindow instances owned by this dock manager.
 
         """
-        f = lambda w: isinstance(w, QDockWindow)
-        return filter(f, self._dock_frames)
+        return [f for f in self._dock_frames if isinstance(f, QDockWindow)]
 
     def floating_frames(self):
         """ Get an iterable of floating dock frames.
@@ -272,8 +270,7 @@ class DockManager(Atom):
             A list toplevel QDockFrame instances.
 
         """
-        f = lambda w: w.isWindow()
-        return filter(f, self._dock_frames)
+        return [f for f in self._dock_frames if f.isWindow()]
 
     def add_window(self, window):
         """ Add a floating QDockWindow to the dock manager.
@@ -342,6 +339,11 @@ class DockManager(Atom):
                 size = container.sizeHint()
                 geometries[container] = QRect(window.pos(), size)
             for container in containers:
+                # Return a maximized container to normal.
+                # This ensures the container is properly removed from all the
+                # layouts it is attached to and it ca be freed once closed.
+                if container.frame_state.item_is_maximized:
+                    container.showNormal()
                 if not container.close():
                     container.unplug()
                     container.float()
@@ -448,20 +450,18 @@ class DockManager(Atom):
                     o_y = o_geo.top()
                     o_right = o_x + o_geo.width()
                     o_bottom = o_y + o_geo.height()
-                    dx = filter(filt, (
-                        o_x - f_x,
-                        o_x - (f_x + f_w),
-                        o_right - f_x,
-                        o_right - (f_x + f_w),
-                    ))
+                    dx = [c for c in (o_x - f_x,
+                                      o_x - (f_x + f_w),
+                                      o_right - f_x,
+                                      o_right - (f_x + f_w))
+                          if filt(c)]
                     if dx:
                         f_x += min(dx)
-                    dy = filter(filt, (
-                        o_y - f_y,
-                        o_y - (f_y + f_h),
-                        o_bottom - f_y,
-                        o_bottom - (f_y + f_h),
-                    ))
+                    dy = [c for c in (o_y - f_y,
+                                      o_y - (f_y + f_h),
+                                      o_bottom - f_y,
+                                      o_bottom - (f_y + f_h))
+                          if filt(c)]
                     if dy:
                         f_y += min(dy)
             frame.move(f_x, f_y)

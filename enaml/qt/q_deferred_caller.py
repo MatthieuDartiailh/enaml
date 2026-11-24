@@ -1,12 +1,12 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from .QtCore import QObject, QTimer, QEvent, QThread
-from .QtGui import QApplication
+from .QtWidgets import QApplication
 
 
 class DeferredCallEvent(QEvent):
@@ -70,4 +70,4 @@ def timedCall(ms, callback, *args, **kwargs):
     if QThread.currentThread() != QApplication.instance().thread():
         deferredCall(timedCall, ms, callback, *args, **kwargs)
     else:
-        QTimer.singleShot(ms, lambda: callback(*args, **kwargs))
+        QTimer.singleShot(int(ms), lambda: callback(*args, **kwargs))

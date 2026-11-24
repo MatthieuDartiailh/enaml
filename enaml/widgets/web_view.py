@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Unicode, Typed, ForwardTyped, observe, set_default
+from atom.api import Str, Typed, ForwardTyped, set_default
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .control import Control, ProxyControl
 
@@ -36,14 +36,14 @@ class WebView(Control):
     #: The URL to load in the web view. This can be a path to a remote
     #: resource or a path to a file on the local filesystem. This value
     #: is mutually exclusive of `html`.
-    url = d_(Unicode())
+    url = d_(Str())
 
     #: The html to load into the web view. This value is mutually
     #: exclusive of `url`.
-    html = d_(Unicode())
+    html = d_(Str())
 
     #: The base url for loading content in statically supplied 'html'.
-    base_url = d_(Unicode())
+    base_url = d_(Str())
 
     #: A web view expands freely in height and width by default.
     hug_width = set_default('ignore')

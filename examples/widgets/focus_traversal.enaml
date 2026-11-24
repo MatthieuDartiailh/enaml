@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024,, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of using the FocusTraversal advanced widget feature.
 
 The FocusTraversal is an advanced widget feature for controlling the
-order in which widgets receive focus during Tab and Shit+Tab keyboard
+order in which widgets receive focus during Tab and Shift+Tab keyboard
 events. It enables two methods which can be implemented as declarative
 Enaml functions which will compute the next/previous focus widgets on
 demand.
@@ -20,7 +20,7 @@ widgets.
 
 << autodoc-me >>
 """
-from enaml.widgets.api import Window, GroupBox, Field, Container, Feature
+from enaml.widgets.api import Window, GroupBox, Field, FocusTracker, Container, Feature
 
 
 enamldef LinkField(Field):
@@ -38,6 +38,10 @@ enamldef Main(Window):
 
         previous_focus_child => (current):  # triggered on Shift+Tab
             return getattr(current, 'prev_field', None)
+
+        FocusTracker:
+            focused_widget::
+                print(change["value"])
 
         GroupBox:
             title = 'First Group'

@@ -1,12 +1,12 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from enaml.qt.QtCore import Qt, QRect, QSize, QPoint, QTimer, Signal
-from enaml.qt.QtGui import QApplication, QFrame, QLayout
+from enaml.qt.QtWidgets import QApplication, QFrame, QLayout
 
 from .event_types import (
     QDockItemEvent, DockItemShown, DockItemHidden, DockItemClosed
@@ -264,7 +264,7 @@ class QDockItem(QFrame):
 
     #: A signal emitted when the title is edited by the user. This
     #: signal is proxied from the current dock item title bar.
-    titleEdited = Signal(unicode)
+    titleEdited = Signal(str)
 
     #: A signal emitted when the empty area is left double clicked.
     #: This signal is proxied from the current dock item title bar.
@@ -276,7 +276,7 @@ class QDockItem(QFrame):
 
     #: A signal emitted when the item is alerted. The payload is the
     #: new alert level. An empty string indicates no alert.
-    alerted = Signal(unicode)
+    alerted = Signal(str)
 
     def __init__(self, parent=None):
         """ Initialize a QDockItem.
@@ -737,7 +737,7 @@ class QDockItem(QFrame):
             self._alert_data = None
             app = QApplication.instance()
             app.focusChanged.disconnect(self._onAppFocusChanged)
-            self.alerted.emit(u'')
+            self.alerted.emit('')
 
     #--------------------------------------------------------------------------
     # Private API
@@ -760,7 +760,7 @@ class QDockItem(QFrame):
                 data.remaining -= 1
                 if data.remaining > 0:
                     data.timer.start(data.off)
-                    self.alerted.emit(u'')
+                    self.alerted.emit('')
                 elif data.persist:
                     data.timer.stop()
                     self.alerted.emit(data.level)
@@ -778,9 +778,9 @@ class QDockItem(QFrame):
         level = level or None
         title_bar = self.titleBarWidget()
         label = title_bar.label()
-        self.setProperty(u'alert', level)
-        title_bar.setProperty(u'alert', level)
-        label.setProperty(u'alert', level)
+        self.setProperty('alert', level)
+        title_bar.setProperty('alert', level)
+        label.setProperty('alert', level)
         repolish(label)
         repolish(title_bar)
         repolish(self)

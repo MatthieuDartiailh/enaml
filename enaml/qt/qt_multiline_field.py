@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Int, Typed
 
 from enaml.widgets.multiline_field import ProxyMultilineField
 
 from .QtCore import QTimer, Signal
-from .QtGui import QTextEdit
+from .QtWidgets import QTextEdit
 
 from .qt_control import QtControl
 

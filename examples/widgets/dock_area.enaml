@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-#  Copyright (c) 2013, Nucleic Development Team
+#  Copyright (c) 2013-2025, Nucleic Development Team
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ This example demonstrates the use of the advanced DockArea widget.
 
@@ -13,14 +13,15 @@ and restored using a layout object which can be easily pickled.
 
 << autodoc-me >>
 """
-import cPickle
+import pickle
 
-from atom.api import Atom, ContainerList, Unicode
+from atom.api import Atom, ContainerList, Str
 
 from enaml.layout.api import (
     HSplitLayout, VSplitLayout, TabLayout, InsertItem, hbox, vbox, spacer
 )
 from enaml.stdlib.dock_area_styles import available_styles
+from enaml.stdlib.message_box import question
 from enaml.widgets.api import (
     Window, Container, DockArea, DockItem, PushButton, Field, Html, Slider,
     ObjectCombo, CheckBox, MultilineField
@@ -31,19 +32,29 @@ def cap_case(name):
     return ' '.join(s.capitalize() for s in name.split('-'))
 
 
+def confirm_close(window, event):
+    button = question(
+        window, 'Dock item closing', 'Are you sure you want to close this dock item?'
+    )
+    if button and button.action == 'accept':
+        event.accept()
+    else:
+        event.ignore()
+
+
 class LineCollector(Atom):
     """ A simple class used to generate event logging text.
 
     """
     #: The header to use as the first lines of the text.
-    HEADER = u'#   Item     Event Type            \n'\
-             u'-----------------------------------'
+    HEADER = '#   Item     Event Type            \n'\
+             '-----------------------------------'
 
     #: The output text of the collector; updated when data changes.
-    text = Unicode(HEADER)
+    text = Str(HEADER)
 
     #: The data for the collector. This is a list of 2-tuples of
-    #: the form (unicode, DockItemEvent.Type).
+    #: the form (str, DockItemEvent.Type).
     data = ContainerList()
 
     def _observe_data(self, change):
@@ -60,9 +71,9 @@ class LineCollector(Atom):
         lines = [self.HEADER]
         for item in parts:
             num, name, enum = item
-            line = u'{0!s: <4}{1: <9}{2: <19}'.format(num, name, enum.name)
+            line = '{0!s: <4}{1: <9}{2: <19}'.format(num, name, enum.name)
             lines.append(line)
-        self.text = u'\n'.join(lines)
+        self.text = '\n'.join(lines)
 
 
 enamldef MyDockArea(DockArea):
@@ -87,6 +98,8 @@ enamldef MyDockArea(DockArea):
             Field: pass
             Field: pass
             Field: pass
+        closing ::
+            confirm_close(self, change['value'])
     DockItem:
         name = 'item_2'
         title = 'Item 2'
@@ -115,7 +128,7 @@ enamldef MyDockArea(DockArea):
         name = 'item_6'
         title = 'Item 6'
         Container:
-            Html: source = u'<h1><center>Guten Tag!</center></h1>'
+            Html: source = '<h1><center>Guten Tag!</center></h1>'
     DockItem:
         name = 'item_7'
         title = 'Item 7'
@@ -140,6 +153,7 @@ enamldef MyDockArea(DockArea):
     DockItem:
         name = 'logger'
         title = 'Logger'
+        closable = False
         Container:
             MultilineField:
                 attr collector = LineCollector()
@@ -171,18 +185,18 @@ enamldef Main(Window):
             text = 'Save Layout'
             clicked ::
                 layout = area.save_layout()
-                parent.stored = cPickle.dumps(layout, -1)
+                parent.stored = pickle.dumps(layout, -1)
         PushButton: restore_b:
             text = 'Restore Layout'
             enabled << stored is not None
             clicked ::
-                layout = cPickle.loads(stored)
+                layout = pickle.loads(stored)
                 with area.suppress_dock_events():
                     area.apply_layout(layout)
         PushButton: add_b:
             text = 'Add Items'
             clicked ::
-                for _ in xrange(3):
+                for _ in range(3):
                     n = (len(area.children) + 1)
                     name = 'item_%d' % n
                     title = 'Item %d' % n
@@ -192,7 +206,7 @@ enamldef Main(Window):
         ObjectCombo: style_c:
             items = available_styles()
             to_string = cap_case
-            selected = 'vs-2010'
+            selected = 'vs-2024'
         CheckBox: c_box:
             text = 'Enable Dock Events'
             checked := area.dock_events_enabled

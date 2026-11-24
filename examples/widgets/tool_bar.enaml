@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of the `ToolBar` widget.
 
@@ -26,6 +26,7 @@ Implementation Notes:
 
 << autodoc-me >>
 """
+from __future__ import print_function
 from enaml.layout.api import vbox
 from enaml.widgets.api import (
     MainWindow, ToolBar, Action, ActionGroup, Container, Html
@@ -42,8 +43,8 @@ enamldef MyToolBar(ToolBar):
         Action:
             checkable = True
             text = 'Exclusive'
-            triggered :: print 'triggered'
-            toggled :: print 'toggled'
+            triggered :: print('triggered')
+            toggled :: print('toggled')
         Action:
             checkable = True
             text = 'ToolBar'

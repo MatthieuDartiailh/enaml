@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from contextlib import contextmanager
 import warnings
@@ -11,9 +11,9 @@ import warnings
 from enaml.nodevisitor import NodeVisitor
 
 from enaml.qt.QtCore import Qt, QRect
-from enaml.qt.QtGui import QApplication
+from enaml.qt.QtWidgets import QApplication
 
-from enaml.layout.dock_layout import ItemLayout, AreaLayout
+from enaml.layout.dock_layout import ItemLayout, AreaLayout, TabLayout
 
 from .event_types import QDockItemEvent, DockItemDocked
 from .layout_handling import plug_frame
@@ -43,9 +43,11 @@ def ensure_on_screen(rect):
         The potentially adjusted QRect which fits on the screen.
 
     """
-    d = QApplication.desktop()
     pos = rect.topLeft()
-    drect = d.screenGeometry(pos)
+    screen = QApplication.screenAt(pos)
+    if screen is None:
+        screen = QApplication.primaryScreen()
+    drect = screen.availableGeometry()
     if not drect.contains(pos):
         x = pos.x()
         if x < drect.x() or x > drect.right():
@@ -180,12 +182,31 @@ class LayoutBuilder(NodeVisitor):
                 container = containers.get(item.name)
                 if container is not None:
                     area.addToDockBar(container, position)
+
         for item in layout.find_all(ItemLayout):
             if item.maximized:
                 container = containers.get(item.name)
                 if container is not None:
                     container.showMaximized()
                     break
+
+        if area.maximizedWidget() is None:
+            # If no dock item is maximized, see if any tab layouts are
+            for item in layout.find_all(TabLayout):
+                if not item.maximized:
+                    continue
+
+                container = None
+                for c in item.children():
+                    container = containers.get(c.name)
+                    if container is not None:
+                        break
+
+                if container is not None:
+                    tab_widget = container.parentDockTabWidget()
+                    if tab_widget is not None:
+                        tab_widget.showMaximized()
+                        break
 
     def init_floating_frame(self, frame, layout):
         """ Initialize a floating frame.
@@ -311,7 +332,7 @@ class LayoutBuilder(NodeVisitor):
         for item in node.items:
             self.visit(item)
             children.append(self.stack.pop())
-        children = filter(None, children)
+        children = [_f for _f in children if _f]
         if len(children) == 0:
             self.stack.append(None)
             return
@@ -339,7 +360,7 @@ class LayoutBuilder(NodeVisitor):
         for item in node.items:
             self.visit(item)
             children.append(self.stack.pop())
-        children = filter(None, children)
+        children = [_f for _f in children if _f]
         if len(children) == 0:
             self.stack.append(None)
             return
@@ -370,6 +391,10 @@ class LayoutBuilder(NodeVisitor):
         dock_area = manager.dock_area()
         dock_area.clearDockBars()
         dock_area.setCentralWidget(None)
+
+        if isinstance(dock_area.maximizedWidget(), QDockTabWidget):
+            # This must be cleared for tabs
+            dock_area.setMaximizedWidget(None)
 
         has_primary = False
         for item in node.items:

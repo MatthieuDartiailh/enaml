@@ -1,23 +1,27 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+from enaml.qt.compat import global_pos_from_event
 from enaml.qt.QtCore import Qt, QSize, QPoint, QMargins, Signal
-from enaml.qt.QtGui import QWidget, QFrame, QLineEdit, QHBoxLayout, QSizePolicy
+from enaml.qt.QtWidgets import (
+    QWidget, QFrame, QLineEdit, QHBoxLayout, QSizePolicy
+)
 
+from ..compat import mouse_event_pos
 from .q_bitmap_button import QBitmapButton, QCheckedBitmapButton
 from .q_icon_widget import QIconWidget
 from .q_text_label import QTextLabel
 from .xbms import (
     CLOSE_BUTTON, MAXIMIZE_BUTTON, RESTORE_BUTTON, LINKED_BUTTON,
-    UNLINKED_BUTTON, PIN_BUTTON, UNPIN_BUTTON
+    UNLINKED_BUTTON, PIN_BUTTON, UNPIN_BUTTON, TAB_BUTTON
 )
 
 
-class IDockTitleBar(QWidget):
+class IDockTitleBar:
     """ An interface class for defining a title bar.
 
     """
@@ -36,8 +40,11 @@ class IDockTitleBar(QWidget):
     #: A signal emitted when the pin button is toggled.
     pinButtonToggled = Signal(bool)
 
+    #: A signal emitted when the tabs button is clicked.
+    tabsButtonClicked = Signal(bool)
+
     #: A signal emitted when the title is edited by the user.
-    titleEdited = Signal(unicode)
+    titleEdited = Signal(str)
 
     #: A signal emitted when the title bar is left double clicked.
     leftDoubleClicked = Signal(QPoint)
@@ -62,6 +69,9 @@ class IDockTitleBar(QWidget):
 
     #: Show the pin button in the title bar.
     PinButton = 0x10
+
+    #: Show the tabs menu button in the title bar.
+    TabsButton = 0x20
 
     def buttons(self):
         """ Get the buttons to show in the title bar.
@@ -277,8 +287,11 @@ class QDockTitleBar(QFrame, IDockTitleBar):
     #: A signal emitted when the pin button is toggled.
     pinButtonToggled = Signal(bool)
 
+    #: A signal emitted when the tabs button is clicked.
+    tabsButtonClicked = Signal(bool)
+
     #: A signal emitted when the title is edited by the user.
-    titleEdited = Signal(unicode)
+    titleEdited = Signal(str)
 
     #: A signal emitted when the empty area is left double clicked.
     leftDoubleClicked = Signal(QPoint)
@@ -295,7 +308,8 @@ class QDockTitleBar(QFrame, IDockTitleBar):
             The parent of the title bar.
 
         """
-        super(QDockTitleBar, self).__init__(parent)
+        QFrame.__init__(self)
+        self.setParent(parent)
         self._buttons = self.CloseButton | self.MaximizeButton | self.PinButton
         self._is_editable = False
         self._force_hidden = False
@@ -341,8 +355,14 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         link_button.setCheckedBitmap(LINKED_BUTTON.toBitmap())
         link_button.setIconSize(btn_size)
         link_button.setVisible(self._buttons & self.LinkButton)
-        link_button.setToolTip('Link Window')
-        link_button.setCheckedToolTip('Unlink Window')
+        link_button.setToolTip(
+            'Link Window\n\n'
+            'Floating windows snapped together move together when they are linked.'
+        )
+        link_button.setCheckedToolTip(
+            'Unlink Window\n\n'
+            'Floating windows snapped together move together when they are linked.'
+        )
 
         pin_button = self._pin_button = QCheckedBitmapButton(self)
         pin_button.setObjectName('docktitlebar-pin-button')
@@ -353,6 +373,13 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         pin_button.setToolTip('Pin Window')
         pin_button.setCheckedToolTip('Unpin Window')
 
+        tabs_button = self._tabs_button = QBitmapButton(self)
+        tabs_button.setObjectName('docktitlebar-tabs-button')
+        tabs_button.setBitmap(TAB_BUTTON.toBitmap())
+        tabs_button.setIconSize(btn_size)
+        tabs_button.setVisible(self._buttons & self.TabsButton)
+        tabs_button.setToolTip('List all tabs')
+
         layout = QHBoxLayout()
         layout.setContentsMargins(QMargins(5, 2, 5, 2))
         layout.setSpacing(1)
@@ -361,6 +388,7 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         layout.addWidget(title_label)
         layout.addWidget(spacer)
         layout.addSpacing(4)
+        layout.addWidget(tabs_button)
         layout.addWidget(pin_button)
         layout.addWidget(link_button)
         layout.addWidget(max_button)
@@ -374,6 +402,7 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         close_button.clicked.connect(self.closeButtonClicked)
         link_button.toggled.connect(self.linkButtonToggled)
         pin_button.toggled.connect(self.pinButtonToggled)
+        tabs_button.clicked.connect(self.tabsButtonClicked)
 
     #--------------------------------------------------------------------------
     # Event Handlers
@@ -384,14 +413,14 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         """
         event.ignore()
         if event.button() == Qt.LeftButton:
-            pos = event.pos()
+            pos = mouse_event_pos(event)
             is_editable = self._is_editable
             if self._adjustedLabelGeometry().contains(pos) and is_editable:
                 self._showTitleLineEdit()
                 event.accept()
                 return
             if self._clickableGeometry().contains(pos):
-                self.leftDoubleClicked.emit(event.globalPos())
+                self.leftDoubleClicked.emit(global_pos_from_event(event))
                 event.accept()
                 return
 
@@ -401,8 +430,8 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         """
         event.ignore()
         if event.button() == Qt.RightButton:
-            if self._clickableGeometry().contains(event.pos()):
-                self.rightClicked.emit(event.globalPos())
+            if self._clickableGeometry().contains(mouse_event_pos(event)):
+                self.rightClicked.emit(global_pos_from_event(event))
                 event.accept()
                 return
 
@@ -524,6 +553,7 @@ class QDockTitleBar(QFrame, IDockTitleBar):
         self._close_button.setVisible(buttons & self.CloseButton)
         self._link_button.setVisible(buttons & self.LinkButton)
         self._pin_button.setVisible(buttons & self.PinButton)
+        self._tabs_button.setVisible(buttons & self.TabsButton)
 
     def title(self):
         """ Get the title string of the title bar.

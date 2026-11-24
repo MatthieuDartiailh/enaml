@@ -1,16 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Bool, Callable, List, Value, Typed, ForwardTyped, set_default, observe
+    Bool, Callable, List, Value, Typed, ForwardTyped, set_default
 )
 
-from enaml.core.declarative import d_
-
+from enaml.core.declarative import d_, observe
 from .control import Control, ProxyControl
 
 
@@ -44,9 +43,9 @@ class ObjectCombo(Control):
     #: the first item in the list of items, or None.
     selected = d_(Value())
 
-    #: The callable to use to convert the items into unicode strings
-    #: for display. The default is the builtin 'unicode'.
-    to_string = d_(Callable(unicode))
+    #: The callable to use to convert the items into strings
+    #: for display. The default is the builtin 'str'.
+    to_string = d_(Callable(str))
 
     #: The callable to use to convert the items into icons for
     #: display. The default is a lambda which returns None.

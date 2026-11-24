@@ -1,0 +1,22 @@
+#------------------------------------------------------------------------------
+# Copyright (c) 2017-2024, Nucleic Development Team.
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file LICENSE, distributed with this software.
+#------------------------------------------------------------------------------
+""" An example of the `IPythonConsole` widget.
+
+Requires qtconsole to be installed.
+
+<< autodoc-me >>
+"""
+from enaml.widgets.api import Window, Container, IPythonConsole
+
+
+enamldef Main(Window):
+    title = 'IPython console'
+    Container:
+        padding = 0
+        IPythonConsole:
+            pass

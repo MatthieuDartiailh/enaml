@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import deque
 import re
 
-from atom.api import Atom, Unicode, Value, List, Event
+from atom.api import Atom, Str, Value, List, Event
 
 
 def flag_generator():
@@ -26,7 +26,7 @@ flag_generator = flag_generator()
 
 
 #: A flag indicated that an object has been destroyed.
-DESTROYED_FLAG = flag_generator.next()
+DESTROYED_FLAG = next(flag_generator)
 
 
 def flag_property(flag):
@@ -54,7 +54,7 @@ class Object(Atom):
     #: in the tree (see . the 'find' method). There is no guarantee of
     #: uniqueness for an object `name`. It is left to the developer to
     #: choose an appropriate name.
-    name = Unicode()
+    name = Str()
 
     #: The read-only property which returns the object parent. This will
     #: be an Object or None. Use 'set_parent()' or pass the parent to

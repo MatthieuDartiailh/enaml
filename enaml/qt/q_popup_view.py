@@ -1,22 +1,28 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Atom, Bool, Typed, Float, Int, IntEnum
+from enum import IntEnum
 
+from atom.api import Atom, Bool, Typed, Float, Int
+
+from .compat import mouse_event_pos
 from .QtCore import (
-    Qt, QPoint, QPointF, QSize, QRect,QMargins, QPropertyAnimation, QTimer,
+    Qt, QPoint, QPointF, QSize, QRect, QMargins, QPropertyAnimation, QTimer,
     QEvent, Signal
 )
 from .QtGui import (
-    QApplication, QWidget, QLayout, QPainter, QPainterPath, QRegion, QPen,
-    QCursor
+    QPainter, QPainterPath, QRegion, QPen, QCursor, QTransform
 )
+from .QtWidgets import QApplication, QWidget, QLayout
 
 from .q_single_widget_layout import QSingleWidgetLayout
+
+
+IS_X11 = QApplication.platformName() == "xcb"
 
 
 class AnchorMode(IntEnum):
@@ -104,10 +110,10 @@ class PopupState(Atom):
         """
         fade_in = self.fade_in_animator
         fade_in.setTargetObject(widget)
-        fade_in.setPropertyName('windowOpacity')
+        fade_in.setPropertyName(b'windowOpacity')
         fade_out = self.fade_out_animator
         fade_out.setTargetObject(widget)
-        fade_out.setPropertyName('windowOpacity')
+        fade_out.setPropertyName(b'windowOpacity')
         fade_out.finished.connect(widget.close)
         close_timer = self.close_timer
         close_timer.setSingleShot(True)
@@ -217,11 +223,15 @@ def edge_margins(arrow_size, arrow_edge):
     return margins
 
 
-def is_fully_on_screen(rect):
+# XXX check on multiple screen setup
+def is_fully_on_screen(screen, rect):
     """ Get whether or not a rect is fully contained on the screen.
 
     Parameters
     ----------
+    screen : QScreen
+        The screen widget on which to display.
+
     rect : QRect
         The rect of interest.
 
@@ -232,128 +242,31 @@ def is_fully_on_screen(rect):
         otherwise.
 
     """
-    desktop = QApplication.desktop()
-    desk_geo = desktop.availableGeometry(rect.topLeft())
+    desk_geo = screen.availableGeometry()
     if not desk_geo.contains(rect.topLeft()):
         return False
-    desk_geo = desktop.availableGeometry(rect.topRight())
     if not desk_geo.contains(rect.topRight()):
         return False
-    desk_geo = desktop.availableGeometry(rect.bottomLeft())
     if not desk_geo.contains(rect.bottomLeft()):
         return False
-    desk_geo = desktop.availableGeometry(rect.bottomRight())
     if not desk_geo.contains(rect.bottomRight()):
         return False
     return True
 
 
-def left_screen_edge(desktop, rect):
-    """ Get the x-coordinate of the effective left screen edge.
-
-    Parameters
-    ----------
-    desktop : QDesktopWidget
-        The desktop widget for the application.
-
-    rect : QRect
-        The rect of interest.
-
-    Returns
-    -------
-    result : int
-        the x-coordinate of the effective left screen edge.
-
-    """
-    p1 = rect.topLeft()
-    p2 = rect.bottomLeft()
-    g1 = desktop.availableGeometry(p1)
-    g2 = desktop.availableGeometry(p2)
-    return max(p1.x(), g1.left(), g2.left())
-
-
-def right_screen_edge(desktop, rect):
-    """ Get the x-coordinate of the effective right screen edge.
-
-    Parameters
-    ----------
-    desktop : QDesktopWidget
-        The desktop widget for the application.
-
-    rect : QRect
-        The rect of interest.
-
-    Returns
-    -------
-    result : int
-        the x-coordinate of the effective right screen edge.
-
-    """
-    p1 = rect.topRight()
-    p2 = rect.bottomRight()
-    g1 = desktop.availableGeometry(p1)
-    g2 = desktop.availableGeometry(p2)
-    return min(p1.x(), g1.right(), g2.right())
-
-
-def top_screen_edge(desktop, rect):
-    """ Get the y-coordinate of the effective top screen edge.
-
-    Parameters
-    ----------
-    desktop : QDesktopWidget
-        The desktop widget for the application.
-
-    rect : QRect
-        The rect of interest.
-
-    Returns
-    -------
-    result : int
-        the y-coordinate of the effective top screen edge.
-
-    """
-    p1 = rect.topLeft()
-    p2 = rect.topRight()
-    g1 = desktop.availableGeometry(p1)
-    g2 = desktop.availableGeometry(p2)
-    return max(p1.y(), g1.top(), g2.top())
-
-
-def bottom_screen_edge(desktop, rect):
-    """ Get the y-coordinate of the effective bottom screen edge.
-
-    Parameters
-    ----------
-    desktop : QDesktopWidget
-        The desktop widget for the application.
-
-    rect : QRect
-        The rect of interest.
-
-    Returns
-    -------
-    result : int
-        the y-coordinate of the effective bottom screen edge.
-
-    """
-    p1 = rect.bottomLeft()
-    p2 = rect.bottomRight()
-    g1 = desktop.availableGeometry(p1)
-    g2 = desktop.availableGeometry(p2)
-    return min(p1.y(), g1.bottom(), g2.bottom())
-
-
-def ensure_on_screen(rect):
+def ensure_on_screen(screen, rect):
     """ Ensure that the given rectangle is fully on-screen.
 
-    If the given rectangle does fit on the screen its position will be
-    adjusted so that it fits on screen as close as possible to its
-    original position. Rects which are bigger than the screen size
-    will necessarily still incur clipping.
+    If the given rectangle does not fit on the screen its position will be
+    adjusted so that it fits on screen as close as possible to its original
+    position. Rects which are bigger than the screen size will necessarily
+    still incur clipping.
 
     Parameters
     ----------
+    screen : QScreen
+        The screen widget on which to display.
+
     rect : QRect
         The global geometry rectangle of interest.
 
@@ -364,30 +277,32 @@ def ensure_on_screen(rect):
 
     """
     rect = QRect(rect)
-    desktop = QApplication.desktop()
-    desk_geo = desktop.availableGeometry(rect.topLeft())
+    desk_geo = screen.availableGeometry()
     if desk_geo.contains(rect):
         return rect
-    bottom_edge = bottom_screen_edge(desktop, rect)
+    bottom_edge = desk_geo.bottom()
     if rect.bottom() > bottom_edge:
         rect.moveBottom(bottom_edge)
-    right_edge = right_screen_edge(desktop, rect)
+    right_edge = desk_geo.right()
     if rect.right() > right_edge:
         rect.moveRight(right_edge)
-    top_edge = top_screen_edge(desktop, rect)
+    top_edge = desk_geo.top()
     if rect.top() < top_edge:
         rect.moveTop(top_edge)
-    left_edge = left_screen_edge(desktop, rect)
+    left_edge = desk_geo.left()
     if rect.left() < left_edge:
         rect.moveLeft(left_edge)
     return rect
 
 
-def adjust_arrow_rect(rect, arrow_edge, target_pos, offset):
+def adjust_arrow_rect(screen, rect, arrow_edge, target_pos, offset):
     """ Adjust an arrow rectangle to fit on the screen.
 
     Parameters
     ----------
+    screen : QScreen
+        The screen widget on which to display.
+
     rect : QRect
         The rect of interest.
 
@@ -410,75 +325,75 @@ def adjust_arrow_rect(rect, arrow_edge, target_pos, offset):
     """
     ax = ay = 0
     rect = QRect(rect)
-    desktop = QApplication.desktop()
+    desk_geo = screen.availableGeometry()
 
     if arrow_edge == ArrowEdge.Left:
-        bottom_edge = bottom_screen_edge(desktop, rect)
+        bottom_edge = desk_geo.bottom()
         if rect.bottom() > bottom_edge:
             ay += rect.bottom() - bottom_edge
             rect.moveBottom(bottom_edge)
-        top_edge = top_screen_edge(desktop, rect)
+        top_edge = desk_geo.top()
         if rect.top() < top_edge:
             ay -= top_edge - rect.top()
             rect.moveTop(top_edge)
-        left_edge = left_screen_edge(desktop, rect)
+        left_edge = desk_geo.left()
         if rect.left() < left_edge:
             rect.moveLeft(left_edge)
-        right_edge = right_screen_edge(desktop, rect)
+        right_edge = desk_geo.right()
         if rect.right() > right_edge:
             arrow_edge = ArrowEdge.Right
             right = target_pos.x() - offset.x()
             rect.moveRight(min(right, right_edge))
 
     elif arrow_edge == ArrowEdge.Top:
-        right_edge = right_screen_edge(desktop, rect)
+        right_edge = desk_geo.right()
         if rect.right() > right_edge:
             ax += rect.right() - right_edge
             rect.moveRight(right_edge)
-        left_edge = left_screen_edge(desktop, rect)
+        left_edge = desk_geo.left()
         if rect.left() < left_edge:
             ax -= left_edge - rect.left()
             rect.moveLeft(left_edge)
-        top_edge = top_screen_edge(desktop, rect)
+        top_edge = desk_geo.top()
         if rect.top() < top_edge:
             rect.moveTop(top_edge)
-        bottom_edge = bottom_screen_edge(desktop, rect)
+        bottom_edge = desk_geo.bottom()
         if rect.bottom() > bottom_edge:
             arrow_edge = ArrowEdge.Bottom
             bottom = target_pos.y() - offset.y()
             rect.moveBottom(min(bottom, bottom_edge))
 
     elif arrow_edge == ArrowEdge.Right:
-        bottom_edge = bottom_screen_edge(desktop, rect)
+        bottom_edge = desk_geo.bottom()
         if rect.bottom() > bottom_edge:
             ay += rect.bottom() - bottom_edge
             rect.moveBottom(bottom_edge)
-        top_edge = top_screen_edge(desktop, rect)
+        top_edge = desk_geo.top()
         if rect.top() < top_edge:
             ay -= top_edge - rect.top()
             rect.moveTop(top_edge)
-        right_edge = right_screen_edge(desktop, rect)
+        right_edge = desk_geo.right()
         if rect.right() > right_edge:
             rect.moveRight(right_edge)
-        left_edge = left_screen_edge(desktop, rect)
+        left_edge = desk_geo.left()
         if rect.left() < left_edge:
             arrow_edge = ArrowEdge.Left
             left = target_pos.x() - offset.x()
             rect.moveLeft(max(left, left_edge))
 
     else:  # ArrowEdge.Bottom
-        right_edge = right_screen_edge(desktop, rect)
+        right_edge = desk_geo.right()
         if rect.right() > right_edge:
             ax += rect.right() - right_edge
             rect.moveRight(right_edge)
-        left_edge = left_screen_edge(desktop, rect)
+        left_edge = desk_geo.left()
         if rect.left() < left_edge:
             ax -= left_edge - rect.left()
             rect.moveLeft(left_edge)
-        bottom_edge = bottom_screen_edge(desktop, rect)
+        bottom_edge = desk_geo.bottom()
         if rect.bottom() > bottom_edge:
             rect.moveBottom(bottom_edge)
-        top_edge = top_screen_edge(desktop, rect)
+        top_edge = desk_geo.top()
         if rect.top() < top_edge:
             arrow_edge = ArrowEdge.Top
             top = target_pos.y() - offset.y()
@@ -488,7 +403,7 @@ def adjust_arrow_rect(rect, arrow_edge, target_pos, offset):
 
 
 class QPopupView(QWidget):
-    """ A custom QWidget which implements a framless popup widget.
+    """ A custom QWidget which implements a frameless popup widget.
 
     It is useful for showing transient configuration dialogs as well
     as temporary notification windows.
@@ -815,7 +730,8 @@ class QPopupView(QWidget):
         state = self._state
         if state.close_on_click:
             path = state.path
-            pos = event.pos()
+            pos = mouse_event_pos(event)
+            posf = QPointF(pos)
             rect = self.rect()
             win_type = self.windowType()
             if win_type == Qt.Popup:
@@ -823,11 +739,11 @@ class QPopupView(QWidget):
                     super(QPopupView, self).mousePressEvent(event)
                 else:
                     path = state.path
-                    if not path.isEmpty() and not path.contains(pos):
+                    if not path.isEmpty() and not path.contains(posf):
                         event.accept()
                         self.close()
             elif win_type == Qt.ToolTip or win_type == Qt.Window:
-                if path.isEmpty() or path.contains(pos):
+                if path.isEmpty() or path.contains(posf):
                     event.accept()
                     self.close()
 
@@ -914,6 +830,26 @@ class QPopupView(QWidget):
     #--------------------------------------------------------------------------
     # Private API
     #--------------------------------------------------------------------------
+    def _get_screen(self):
+        """ Access the screen on which this popup is displayed.
+
+        """
+        screen = None
+        parent = self.parent()
+        if parent:
+            if parent.isWindow():
+                screen = parent.screen()
+            else:
+                screen = parent.window().screen()
+        else:
+            window = self.windowHandle()
+            if window:
+                screen = window.screen()
+        if screen is None:
+            screen = QApplication.primaryScreen()
+
+        return screen
+
     def _refreshGeometry(self, force=False):
         """ Refresh the geometry for the popup using the current state.
 
@@ -942,7 +878,12 @@ class QPopupView(QWidget):
         offset = self._state.offset
         trial_pos = target_pos + offset - anchor_pos
         trial_geo = QRect(trial_pos, self.size())
-        geo = ensure_on_screen(trial_geo)
+        if IS_X11:
+            # X11 handles geometry as an absolute position in the desktop
+            # when there are multiple screens
+            geo = trial_geo
+        else:
+            geo = ensure_on_screen(self._get_screen(), trial_geo)
         self.setGeometry(geo)
 
     def _layoutArrowRect(self):
@@ -975,9 +916,10 @@ class QPopupView(QWidget):
         target_pos = self._targetPos()
         pos = target_pos + state.offset - QPoint(ax, ay)
         rect = QRect(pos, size)
-        if not is_fully_on_screen(rect):
+        screen = self._get_screen()
+        if not is_fully_on_screen(screen, rect) and not IS_X11:
             rect, new_edge, d_ax, d_ay = adjust_arrow_rect(
-                rect, arrow_edge, target_pos, state.offset
+                screen, rect, arrow_edge, target_pos, state.offset
             )
             ax = max(arrow_size, min(size.width() - arrow_size, ax + d_ax))
             ay = max(arrow_size, min(size.height() - arrow_size, ay + d_ay))
@@ -994,7 +936,7 @@ class QPopupView(QWidget):
 
         # Store the path for painting and update the widget mask.
         state.path = path
-        mask = QRegion(path.toFillPolygon().toPolygon())
+        mask = QRegion(path.toFillPolygon(QTransform()).toPolygon())
         self.setMask(mask)
 
         # Set the geometry of the view and update. The update is needed
@@ -1020,8 +962,8 @@ class QPopupView(QWidget):
         else:
             parent = self.parent()
             if parent is None:
-                desktop = QApplication.desktop()
-                geo = desktop.availableGeometry()
+                screen = QApplication.primaryScreen()
+                geo = screen.availableGeometry()
                 origin = geo.topLeft()
                 size = geo.size()
             else:

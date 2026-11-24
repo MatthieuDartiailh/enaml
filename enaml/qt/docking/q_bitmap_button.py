@@ -1,13 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+from enaml.qt.compat import global_pos_from_event
 from enaml.qt.QtCore import QPoint, QRect, QEvent
-from enaml.qt.QtGui import (
-    QAbstractButton, QColor, QPainter, QStyle, QStyleOption, QToolTip
+from enaml.qt.QtGui import QPainter, QColor
+from enaml.qt.QtWidgets import (
+    QAbstractButton, QStyle, QStyleOption, QToolTip
 )
 
 
@@ -116,8 +118,8 @@ class QBitmapButton(QAbstractButton):
         painter.setPen(QColor.fromRgba(0xffffffff & fg))
         size = self.size()
         im_size = bmp.size()
-        x = size.width() / 2 - im_size.width() / 2
-        y = size.height() / 2 - im_size.height() / 2
+        x = int(round(size.width() / 2 - im_size.width() / 2))
+        y = int(round(size.height() / 2 - im_size.height() / 2))
         source = QRect(QPoint(0, 0), im_size)
         dest = QRect(QPoint(x, y), im_size)
         painter.drawPixmap(dest, bmp, source)
@@ -138,8 +140,8 @@ class QCheckedBitmapButton(QBitmapButton):
     """ A bitmap button subclass which supports a checked bitmap.
 
     """
-    _tool_tip = u''
-    _checked_tool_tip = u''
+    _tool_tip = ''
+    _checked_tool_tip = ''
     _checked_bitmap = None
 
     def __init__(self, parent=None):
@@ -216,7 +218,7 @@ class QCheckedBitmapButton(QBitmapButton):
         if event.type() == QEvent.ToolTip:
             tool_tip = self._effectiveToolTip()
             if tool_tip:
-                QToolTip.showText(event.globalPos(), tool_tip, self)
+                QToolTip.showText(global_pos_from_event(event), tool_tip, self)
             return True
         return super(QCheckedBitmapButton, self).event(event)
 

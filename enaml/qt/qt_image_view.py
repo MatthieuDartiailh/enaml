@@ -1,15 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.image_view import ProxyImageView
 
-from .QtGui import QFrame, QPainter, QPixmap
+from .QtGui import QPainter, QPixmap
+from .QtWidgets import QFrame
 
 from .q_resource_helpers import get_cached_qimage
 from .qt_control import QtControl
@@ -262,3 +263,10 @@ class QtImageView(QtControl, ProxyImageView):
 
         """
         self.widget.setPreserveAspectRatio(preserve)
+
+    def get_aspect_ratio(self):
+        """Get the image aspect ratio from the pixmap.
+
+        """
+        pm_size = self.widget.sizeHint()
+        return pm_size.width()/pm_size.height()

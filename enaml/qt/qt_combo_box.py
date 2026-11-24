@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Int, Typed
 
 from enaml.widgets.combo_box import ProxyComboBox
 
-from .QtGui import QComboBox
+from .QtWidgets import QComboBox
 
 from .qt_control import QtControl
 
@@ -76,7 +76,7 @@ class QtComboBox(QtControl, ProxyComboBox):
             for item in items[count:]:
                 widget.addItem(item)
         elif nitems < count:
-            for idx in reversed(xrange(nitems, count)):
+            for idx in reversed(range(nitems, count)):
                 widget.removeItem(idx)
 
     def set_index(self, index):

@@ -1,12 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from enaml.qt.QtCore import Qt, QSize, QEvent
-from enaml.qt.QtGui import QFrame, QPainter
+from enaml.qt.QtGui import QPainter
+from enaml.qt.QtWidgets import QFrame
 
 
 class QTextLabel(QFrame):
@@ -25,7 +26,7 @@ class QTextLabel(QFrame):
         super(QTextLabel, self).__init__(parent)
         self._min_text_size = QSize()
         self._text_size = QSize()
-        self._text = u''
+        self._text = ''
 
     #--------------------------------------------------------------------------
     # Private API
@@ -91,10 +92,13 @@ class QTextLabel(QFrame):
         base = self._text_size
         if not base.isValid():
             metrics = self.fontMetrics()
-            base = QSize(metrics.width(self._text), metrics.height())
+            base = metrics.boundingRect(self._text).size()
             self._text_size = base
-        left, top, right, bottom = self.getContentsMargins()
-        return base + QSize(left + right, top + bottom)
+        margin = self.contentsMargins()
+        return (
+            base
+            + QSize(margin.left() + margin.right(), margin.top() + margin.bottom())
+        )
 
     def minimumSizeHint(self):
         """ Get the minimum size hint for the text label.
@@ -104,10 +108,13 @@ class QTextLabel(QFrame):
         if not base.isValid():
             metrics = self.fontMetrics()
             text = self._computeElidedText(self._text)
-            base = QSize(metrics.width(text), metrics.height())
+            base = metrics.boundingRect(text).size()
             self._min_text_size = base
-        left, top, right, bottom = self.getContentsMargins()
-        return base + QSize(left + right, top + bottom)
+        margin = self.contentsMargins()
+        return (
+            base
+            + QSize(margin.left() + margin.right(), margin.top() + margin.bottom())
+        )
 
     def paintEvent(self, event):
         """ Handle the paint event for the title bar.
@@ -121,4 +128,4 @@ class QTextLabel(QFrame):
         # The +1 is to fix a seeming off-by-one error in elidedText.
         # https://github.com/nucleic/enaml/issues/38
         text = metrics.elidedText(self._text, Qt.ElideRight, rect.width() + 1)
-        QPainter(self).drawText(rect, Qt.AlignLeft | Qt.AlignVCenter, text)
+        QPainter(self).drawText(rect, int(Qt.AlignLeft | Qt.AlignVCenter), text)

@@ -1,15 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed, Bool
 
+from enaml.qt.compat import global_pos_from_event
 from enaml.qt.QtCore import Qt, QMargins, QPoint, QRect, QEvent, Signal
-from enaml.qt.QtGui import QApplication, QLayout, QIcon, QCursor
+from enaml.qt.QtGui import QIcon, QCursor
+from enaml.qt.QtWidgets import QApplication, QLayout
+from enaml.qt.docking.q_dock_window import QDockWindow
 
+from ..compat import mouse_event_pos
 from .event_types import QDockItemEvent, DockItemUndocked
 from .q_dock_area import QDockArea
 from .q_dock_bar import QDockBar
@@ -53,7 +57,7 @@ def _computePressPos(container, coeff):
     test_x = int(coeff * container.width())
     new_x = max(margins.left() + 5, min(test_x, max_x))
     title_bar = container.dockItem().titleBarWidget()
-    title_height = title_bar.height() / 2
+    title_height = title_bar.height() // 2
     mid_title = title_bar.mapTo(container, QPoint(0, title_height))
     return QPoint(new_x, mid_title.y())
 
@@ -108,7 +112,7 @@ class QDockContainer(QDockFrame):
     topLevelChanged = Signal(bool)
 
     #: A signal emitted when the container is alerted.
-    alerted = Signal(unicode)
+    alerted = Signal(str)
 
     class FrameState(QDockFrame.FrameState):
         """ A private class for managing container drag state.
@@ -287,7 +291,7 @@ class QDockContainer(QDockFrame):
         item = self.dockItem()
         if item is not None:
             return item.title()
-        return u''
+        return ''
 
     def icon(self):
         """ Get the icon for the container.
@@ -490,7 +494,7 @@ class QDockContainer(QDockFrame):
             parent = parent.parent()
 
     def parentDockTabWidget(self):
-        """ Get the parent dock area of the container.
+        """ Get the parent dock tab of the container.
 
         Returns
         -------
@@ -500,9 +504,12 @@ class QDockContainer(QDockFrame):
 
         """
         parent = self.parent()
+        parent_area = self.parentDockArea()
         while parent is not None:
             if isinstance(parent, QDockTabWidget):
                 return parent
+            elif parent is parent_area:
+                return None
             parent = parent.parent()
 
     def unplug(self):
@@ -556,7 +563,7 @@ class QDockContainer(QDockFrame):
         self.float()
         self.raiseFrame()
         title_bar = self.dockItem().titleBarWidget()
-        title_pos = QPoint(title_bar.width() / 2, title_bar.height() / 2)
+        title_pos = QPoint(title_bar.width() // 2, title_bar.height() // 2)
         margins = self.layout().contentsMargins()
         offset = QPoint(margins.left(), margins.top())
         state.press_pos = title_bar.mapTo(self, title_pos) + offset
@@ -591,8 +598,14 @@ class QDockContainer(QDockFrame):
             if pinned:
                 if not self.frame_state.in_dock_bar:
                     position = _closestDockBar(self)
+                    parent_is_floating = isinstance(area.parent(), QDockWindow)
+                    # Do not close a floating window when pinning the last item.
+                    if parent_is_floating:
+                        area.parent().frame_state.in_pin_event = True
                     self.unplug()
                     area.addToDockBar(self, position)
+                    if parent_is_floating:
+                        area.parent().frame_state.in_pin_event = False
             else:
                 position = area.dockBarPosition(self)
                 if position is not None:
@@ -645,7 +658,7 @@ class QDockContainer(QDockFrame):
 
         """
         bar = self.dockItem().titleBarWidget()
-        if bar.isVisible() and bar.geometry().contains(event.pos()):
+        if bar.isVisible() and bar.geometry().contains(mouse_event_pos(event)):
             self.frame_state.mouse_title = True
             return self.titleBarMousePressEvent(event)
         return False
@@ -704,7 +717,7 @@ class QDockContainer(QDockFrame):
         if event.button() == Qt.LeftButton:
             state = self.frame_state
             if state.press_pos is None:
-                state.press_pos = event.pos()
+                state.press_pos = mouse_event_pos(event)
                 state.start_pos = self.pos()
                 return True
         return False
@@ -725,7 +738,7 @@ class QDockContainer(QDockFrame):
         # If dragging and floating, move the container's position and
         # notify the manager of that the container was mouse moved. If
         # the container is maximized, it is first restored before.
-        global_pos = event.globalPos()
+        global_pos = global_pos_from_event(event)
         if state.dragging:
             if self.isWindow():
                 target_pos = global_pos - state.press_pos
@@ -733,7 +746,7 @@ class QDockContainer(QDockFrame):
             return True
 
         # Ensure the drag has crossed the app drag threshold.
-        dist = (event.pos() - state.press_pos).manhattanLength()
+        dist = (mouse_event_pos(event) - state.press_pos).manhattanLength()
         if dist <= QApplication.startDragDistance():
             return True
 

@@ -1,14 +1,15 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2013, Nucleic Development Team.
+| Copyright (c) 2013-2025, Nucleic Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |
-| The full license is in the file COPYING.txt, distributed with this software.
+| The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 #include <Python.h>
 
 
-extern "C" {
+namespace enaml
+{
 
 /* Call a function with an optional locals mapping.
 
@@ -18,18 +19,19 @@ dynamic scoping. The code below is a slightly tweaked `function_call`
 from Python's funcobject.c
 
 */
-static PyObject*
-call_func( PyObject* mod, PyObject* args )
+PyObject*
+call_func( PyObject* mod, PyObject *const *args, Py_ssize_t nargs )
 {
-    PyObject* func;
-    PyObject* func_args;
-    PyObject* func_kwargs;
-    PyObject* func_locals = Py_None;
-
-    if( !PyArg_UnpackTuple( args, "call_func", 3, 4, &func, &func_args, &func_kwargs, &func_locals ) )
+    if( !(nargs == 4 || nargs == 3) )
     {
+        PyErr_SetString( PyExc_TypeError, "call_func must have 3 or 4 arguments" );
         return 0;
     }
+
+    PyObject* func = args[0];
+    PyObject* func_args = args[1];
+    PyObject* func_kwargs = args[2];
+    PyObject* func_locals = nargs == 4 ? args[3] : Py_None;
 
     if( !PyFunction_Check( func ) )
     {
@@ -63,11 +65,11 @@ call_func( PyObject* mod, PyObject* args )
     if( ( argdefs ) && PyTuple_Check( argdefs ) )
     {
         defaults = &PyTuple_GET_ITEM( reinterpret_cast<PyTupleObject*>( argdefs ), 0 );
-        num_defaults = PyTuple_Size( argdefs );
+        num_defaults = PyTuple_GET_SIZE( argdefs );
     }
 
     PyObject** keywords = 0;
-    Py_ssize_t num_keywords = PyDict_Size( func_kwargs );
+    Py_ssize_t num_keywords = PyDict_GET_SIZE( func_kwargs );
     if( num_keywords > 0 )
     {
         keywords = PyMem_NEW( PyObject*, 2 * num_keywords );
@@ -85,13 +87,13 @@ call_func( PyObject* mod, PyObject* args )
     }
 
     PyObject* result = PyEval_EvalCodeEx(
-        reinterpret_cast<PyCodeObject*>( PyFunction_GET_CODE( func ) ),
+        PyFunction_GET_CODE( func ),
         PyFunction_GET_GLOBALS( func ),
         func_locals,
         &PyTuple_GET_ITEM( func_args, 0 ),
-        PyTuple_Size( func_args ),
+        PyTuple_GET_SIZE( func_args ),
         keywords, num_keywords, defaults, num_defaults,
-        PyFunction_GET_CLOSURE( func )
+        NULL, PyFunction_GET_CLOSURE( func )
     );
 
     if( keywords )
@@ -101,19 +103,51 @@ call_func( PyObject* mod, PyObject* args )
  }
 
 
+// Module definition
+namespace
+{
+
+
+int
+funchelper_modexec( PyObject *mod )
+{
+    return 0;
+}
+
 static PyMethodDef
 funchelper_methods[] = {
-    { "call_func", ( PyCFunction )call_func, METH_VARARGS,
+    { "call_func", ( PyCFunction )call_func, METH_FASTCALL,
       "call_func(func, args, kwargs[, locals])" },
     { 0 } // sentinel
 };
 
 
-PyMODINIT_FUNC
-initfunchelper( void )
+PyModuleDef_Slot funchelper_slots[] = {
+    {Py_mod_exec, reinterpret_cast<void*>( funchelper_modexec ) },
+    {0, NULL}
+};
+
+
+struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "funchelper",
+        "funchelper extension module",
+        0,
+        funchelper_methods,
+        funchelper_slots,
+        NULL,
+        NULL,
+        NULL
+};
+
+
+}  // namespace
+
+
+}  // namespace enaml
+
+
+PyMODINIT_FUNC PyInit_funchelper( void )
 {
-    PyObject* mod = Py_InitModule( "funchelper", funchelper_methods );
+    return PyModuleDef_Init( &enaml::moduledef );
 }
-
-} // extern "C"
-

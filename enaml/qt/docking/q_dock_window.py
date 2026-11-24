@@ -1,17 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Bool, Typed
 
+from enaml.qt.compat import global_pos_from_event
 from enaml.qt.QtCore import (
     Qt, QMetaObject, QMargins, QPoint, QRect, QSize, Signal
 )
-from enaml.qt.QtGui import QFrame, QHBoxLayout, QLayout
+from enaml.qt.QtWidgets import QFrame, QHBoxLayout, QLayout
 
+from ..compat import mouse_event_pos
 from .event_types import DockAreaContentsChanged
 from .q_bitmap_button import QBitmapButton, QCheckedBitmapButton
 from .q_dock_area import QDockArea
@@ -95,8 +97,14 @@ class QDockWindowButtons(QFrame):
         link_button.setCheckedBitmap(LINKED_BUTTON.toBitmap())
         link_button.setIconSize(QSize(20, 15))
         link_button.setVisible(self._buttons & self.LinkButton)
-        link_button.setToolTip('Link Window')
-        link_button.setCheckedToolTip('Unlink Window')
+        link_button.setToolTip(
+            'Link Window\n\n'
+            'Floating windows snapped together move together when they are linked.'
+        )
+        link_button.setCheckedToolTip(
+            'Unlink Window\n\n'
+            'Floating windows snapped together move together when they are linked.'
+        )
 
         layout = QHBoxLayout()
         layout.setContentsMargins(QMargins(0, 0, 0, 0))
@@ -191,6 +199,9 @@ class QDockWindow(QDockFrame):
 
         #: Whether or not the window is being dragged by the user.
         dragging = Bool(False)
+
+        #: Whether a dock item is in the process of being pinned.
+        in_pin_event = Bool(False)
 
         #: Whether the window is inside it's close event.
         in_close_event = Bool(False)
@@ -359,7 +370,11 @@ class QDockWindow(QDockFrame):
         will close the window when the dock area is empty.
 
         """
-        if event.type() == DockAreaContentsChanged and area.isEmpty():
+        if (
+            event.type() == DockAreaContentsChanged
+            and not self.frame_state.in_pin_event
+            and area.isEmpty()
+        ):
             # Hide the window so that it doesn't steal events from
             # the floating window when this window is closed.
             self.hide()
@@ -405,7 +420,7 @@ class QDockWindow(QDockFrame):
         if event.button() == Qt.LeftButton:
             geo = self.titleBarGeometry()
             geo.setRight(self._title_buttons.geometry().left())
-            if geo.contains(event.pos()):
+            if geo.contains(mouse_event_pos(event)):
                 self.toggleMaximized()
                 event.accept()
 
@@ -416,7 +431,8 @@ class QDockWindow(QDockFrame):
         over the dock window buttons.
 
         """
-        if self._title_buttons.geometry().contains(event.pos()):
+        pos = mouse_event_pos(event)
+        if self._title_buttons.geometry().contains(pos):
             self.unsetCursor()
         else:
             super(QDockWindow, self).hoverMoveEvent(event)
@@ -433,7 +449,7 @@ class QDockWindow(QDockFrame):
         if event.button() == Qt.LeftButton:
             state = self.frame_state
             if state.press_pos is None:
-                state.press_pos = event.pos()
+                state.press_pos = mouse_event_pos(event)
                 return True
         return False
 
@@ -448,7 +464,7 @@ class QDockWindow(QDockFrame):
         """
         state = self.frame_state
         if state.press_pos is not None:
-            global_pos = event.globalPos()
+            global_pos = global_pos_from_event(event)
             if self.isMaximized():
                 coeff = state.press_pos.x() / float(self.width())
                 self.showNormal()
@@ -476,7 +492,7 @@ class QDockWindow(QDockFrame):
         if event.button() == Qt.LeftButton:
             state = self.frame_state
             if state.press_pos is not None:
-                self.manager().drag_release_frame(self, event.globalPos())
+                self.manager().drag_release_frame(self, global_pos_from_event(event))
                 state.dragging = False
                 state.press_pos = None
                 return True

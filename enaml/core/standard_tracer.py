@@ -1,58 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Atom, atomref
 
 from .alias import Alias
 from .code_tracing import CodeTracer
-
-
-class SubscriptionObserver(object):
-    """ An observer object which manages a tracer subscription.
-
-    """
-    __slots__ = ('ref', 'name')
-
-    def __init__(self, owner, name):
-        """ Initialize a SubscriptionObserver.
-
-        Parameters
-        ----------
-        owner : Declarative
-            The declarative owner of interest.
-
-        name : string
-            The name to which the operator is bound.
-
-        """
-        self.ref = atomref(owner)
-        self.name = name
-
-    def __nonzero__(self):
-        """ The notifier is valid when it has an internal owner.
-
-        The atom observer mechanism will remove the observer when it
-        tests boolean False.
-
-        """
-        return bool(self.ref)
-
-    def __call__(self, change):
-        """ The handler for the change notification.
-
-        This will be invoked by the Atom observer mechanism when the
-        item which is being observed changes.
-
-        """
-        if self.ref:
-            owner = self.ref()
-            engine = owner._d_engine
-            if engine is not None:
-                engine.update(owner, self.name)
+from .subscription_observer import SubscriptionObserver
 
 
 class StandardTracer(CodeTracer):
@@ -62,7 +19,7 @@ class StandardTracer(CodeTracer):
     (obj, name) pairs of atom items discovered during tracing.
 
     """
-    __slots__ = ('owner', 'name', 'items')
+    __slots__ = ('owner', 'name', 'key', 'items')
 
     def __init__(self, owner, name):
         """ Initialize a StandardTracer.
@@ -70,12 +27,13 @@ class StandardTracer(CodeTracer):
         """
         self.owner = owner
         self.name = name
+        self.key = '_[%s|trace]' % name
         self.items = set()
 
     #--------------------------------------------------------------------------
     # Utility Methods
     #--------------------------------------------------------------------------
-    def trace_atom(self, obj, name):
+    def trace_atom(self, obj: Atom, name: str):
         """ Add the atom object and name pair to the traced items.
 
         Parameters
@@ -105,7 +63,7 @@ class StandardTracer(CodeTracer):
         """
         owner = self.owner
         name = self.name
-        key = '_[%s|trace]' % name
+        key = self.key
         storage = owner._d_storage
 
         # invalidate the old observer so that it can be collected
@@ -121,7 +79,7 @@ class StandardTracer(CodeTracer):
                 obj.observe(d_name, observer)
 
     #--------------------------------------------------------------------------
-    # AbstractScopeListener Interface
+    # CodeTracer Interface
     #--------------------------------------------------------------------------
     def dynamic_load(self, obj, attr, value):
         """ Called when an object attribute is dynamically loaded.
@@ -133,9 +91,6 @@ class StandardTracer(CodeTracer):
         if isinstance(obj, Atom):
             self.trace_atom(obj, attr)
 
-    #--------------------------------------------------------------------------
-    # CodeTracer Interface
-    #--------------------------------------------------------------------------
     def load_attr(self, obj, attr):
         """ Called before the LOAD_ATTR opcode is executed.
 
@@ -146,18 +101,16 @@ class StandardTracer(CodeTracer):
         if isinstance(obj, Atom):
             self.trace_atom(obj, attr)
 
-    def call_function(self, func, argtuple, argspec):
-        """ Called before the CALL_FUNCTION opcode is executed.
+    def call_function(self, func, argtuple: tuple, nargs: int):
+        """ Called before the CALL opcode is executed.
 
         This will trace the func if it is the builtin `getattr` and the
         object is an Atom instance. See also: `CodeTracer.call_function`
 
         """
-        nargs = argspec & 0xFF
-        nkwargs = (argspec >> 8) & 0xFF
-        if (func is getattr and (nargs == 2 or nargs == 3) and nkwargs == 0):
+        if (func is getattr and (nargs == 2 or nargs == 3)):
             obj, attr = argtuple[0], argtuple[1]
-            if isinstance(obj, Atom) and isinstance(attr, basestring):
+            if isinstance(obj, Atom) and isinstance(attr, str):
                 self.trace_atom(obj, attr)
 
     def return_value(self, value):

@@ -1,13 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-import cPickle
+from __future__ import print_function
 
-from atom.api import Unicode
+import pickle
+
+from atom.api import Str
 
 from enaml.widgets.api import Container
 from enaml.workbench.ui.api import Workspace
@@ -17,7 +19,7 @@ with enaml.imports():
     from persistent_view import PersistentManifest, create_new_area
 
 
-print 'Imported Persistent Workspace!'
+print('Imported Persistent Workspace!')
 
 
 #: Storage for the pickled dock area. This would be saved
@@ -30,7 +32,7 @@ class PersistentWorkspace(Workspace):
 
     """
     #: Storage for the plugin manifest's id.
-    _manifest_id = Unicode()
+    _manifest_id = Str()
 
     def start(self):
         """ Start the workspace instance.
@@ -61,14 +63,14 @@ class PersistentWorkspace(Workspace):
         """
         global PICKLED_DOCK_AREA
         area = self.content.find('the_dock_area')
-        PICKLED_DOCK_AREA = cPickle.dumps(area, -1)
+        PICKLED_DOCK_AREA = pickle.dumps(area, -1)
 
     def load_area(self):
         """ Load the dock area into the workspace content.
 
         """
         if PICKLED_DOCK_AREA is not None:
-            area = cPickle.loads(PICKLED_DOCK_AREA)
+            area = pickle.loads(PICKLED_DOCK_AREA)
         else:
             area = create_new_area()
         area.set_parent(self.content)

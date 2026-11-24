@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of using the live editor applib components.
 
@@ -12,6 +12,9 @@ stitched together to form a live Enaml code editor application.
 
 << autodoc-me >>
 """
+import sys
+import traceback
+
 from enaml.applib.live_editor_model import LiveEditorModel
 from enaml.applib.live_editor_view import (
     ModelEditorPanel, ViewEditorPanel, TracebackPanel, ViewPanel
@@ -20,7 +23,7 @@ from enaml.layout.api import HSplitLayout, AreaLayout, DockBarLayout
 from enaml.widgets.api import Window, Container, DockArea, DockItem
 
 
-MODEL_TEXT = """\
+MODEL_TEXT = """
 from atom.api import *
 
 
@@ -30,7 +33,7 @@ class DemoModel(Atom):
 """
 
 
-VIEW_TEXT = """\
+VIEW_TEXT = """
 from enaml.widgets.api import *
 from enaml.layout.api import *
 
@@ -52,6 +55,16 @@ enamldef Main(Window):
         view_item='DemoContainer',
         view_filename='demo.enaml',
     )
+
+    func handle_uncaught_exception(exc, value, tb):
+        """Send uncaught exception to the model to avoid crashing the editor."""
+        msg = "".join(traceback.format_exception(exc, value, tb))
+        print(msg) # Print to console in case there was a startup error
+        editor_model.traceback = msg
+
+    initialized::
+        sys.excepthook = handle_uncaught_exception
+
     Container:
         padding = 0
         DockArea:

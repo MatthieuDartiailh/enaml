@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    Bool, IntEnum, Unicode, Coerced, Typed, ForwardTyped, observe
-)
+from enum import IntFlag
+
+from atom.api import Bool, Str, Coerced, Typed, ForwardTyped
 
 from enaml.colors import ColorMember
-from enaml.core.declarative import d_, d_func
+from enaml.core.declarative import d_, d_func, observe
 from enaml.fonts import FontMember
 from enaml.layout.geometry import Size
 from enaml.styling import Stylable
@@ -77,7 +77,7 @@ class ProxyWidget(ProxyToolkitObject):
         raise NotImplementedError
 
 
-class Feature(IntEnum):
+class Feature(IntFlag):
     """ An IntEnum defining the advanced widget features.
 
     """
@@ -122,15 +122,15 @@ class Widget(ToolkitObject, Stylable):
     maximum_size = d_(Coerced(Size, (-1, -1)))
 
     #: The tool tip to show when the user hovers over the widget.
-    tool_tip = d_(Unicode())
+    tool_tip = d_(Str())
 
     #: The status tip to show when the user hovers over the widget.
-    status_tip = d_(Unicode())
+    status_tip = d_(Str())
 
     #: Set the extra features to enable for this widget. This value must
     #: be provided when the widget is instantiated. Runtime changes to
     #: this value are ignored.
-    features = d_(Coerced(Feature.Flags))
+    features = d_(Coerced(Feature, (0,)))
 
     #: A reference to the ProxyWidget object.
     proxy = Typed(ProxyWidget)

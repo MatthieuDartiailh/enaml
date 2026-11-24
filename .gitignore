@@ -10,8 +10,21 @@
 /build
 /dist
 /docs/build
+/enaml/version.py
 /tools/pygments/build
 /tools/pygments/dist
+/.mypy_cache
+/.spyproject
+/.pytest_cache
+/.vscode
+/.eggs
+/.cache
 
+.dmypy.json
 .gitignore~
 *.orig
+
+
+lextab*.py
+parsetab*.py
+version.py

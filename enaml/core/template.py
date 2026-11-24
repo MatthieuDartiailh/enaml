@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from types import FunctionType
 
+from bytecode import CompilerFlags
 from atom.api import Atom, List, Str, Tuple, Typed
 
-from .byteplay import CO_VARARGS
 from .compiler_nodes import TemplateNode
 
 
@@ -44,7 +44,7 @@ class TemplateInstance(Atom):
         items = self.node(parent)
         if items and kwargs:
             for item in items:
-                for key, value in kwargs.iteritems():
+                for key, value in kwargs.items():
                     setattr(item, key, value)
         return items
 
@@ -169,8 +169,8 @@ class Template(Atom):
             n_params = len(spec.paramspec)
             if n_args < n_params:
                 continue
-            n_total = n_params + len(spec.func.func_defaults or ())
-            variadic = spec.func.func_code.co_flags & CO_VARARGS
+            n_total = n_params + len(spec.func.__defaults__ or ())
+            variadic = spec.func.__code__.co_flags & CompilerFlags.VARARGS
             if n_args > n_total and not variadic:
                 continue
 
@@ -179,7 +179,7 @@ class Template(Atom):
                 argspec = self.make_paramspec(args)
 
             # Scoring a match is done by ranking the arguments using a
-            # closeness meausure. If an argument is an exact match to
+            # closeness measure. If an argument is an exact match to
             # the parameter, it gets a score of 0. If an argument is a
             # subtype of a type parameter, it gets a score equal to the
             # index of the type in the mro of the subtype. If the arg

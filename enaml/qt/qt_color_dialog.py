@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Int, Typed
 
@@ -11,7 +11,8 @@ from enaml.colors import Color
 from enaml.widgets.color_dialog import ProxyColorDialog
 
 from .QtCore import Signal
-from .QtGui import QColor, QColorDialog
+from .QtGui import QColor
+from .QtWidgets import QColorDialog
 
 from .qt_toolkit_dialog import QtToolkitDialog
 
@@ -97,7 +98,7 @@ class QtColorDialog(QtToolkitDialog, ProxyColorDialog):
         """ Get the default window title for the color dialog.
 
         """
-        return u'Select Color'
+        return 'Select Color'
 
     #--------------------------------------------------------------------------
     # Signal Handlers

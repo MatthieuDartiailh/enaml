@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of how constraints can be used to create fluid layouts.
 
@@ -19,6 +19,7 @@ acheive with traditional box style layouts.
 
 << autodoc-me >>
 """
+from __future__ import print_function
 from enaml.layout.api import hbox, vbox, spacer, align
 from enaml.widgets.api import Window, Html, Container, PushButton
 
@@ -50,7 +51,7 @@ enamldef Main(Window):
             text = 'Add'
         PushButton: remove_button:
             text = 'Remove'
-            clicked :: print 'removed'
+            clicked :: print('removed')
         PushButton: change_mode_button:
             text = 'Change Mode'
         PushButton: share_button:

@@ -1,14 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from . import QT_API
+from qtpy.QtGui import *
 
-
-if QT_API == 'pyqt':
-    from PyQt4.QtGui import *
-else:
-    from PySide.QtGui import *

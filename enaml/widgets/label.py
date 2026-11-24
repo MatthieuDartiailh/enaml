@@ -1,15 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    Typed, ForwardTyped, Unicode, Enum, Event, observe, set_default
-)
+from atom.api import Typed, ForwardTyped, Str, Enum, Event, set_default
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .control import Control, ProxyControl
 
@@ -36,7 +34,7 @@ class Label(Control):
 
     """
     #: The unicode text for the label.
-    text = d_(Unicode())
+    text = d_(Str())
 
     #: The horizontal alignment of the text in the widget area.
     align = d_(Enum('left', 'right', 'center', 'justify'))

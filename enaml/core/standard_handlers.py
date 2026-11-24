@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from types import FunctionType
 
@@ -57,7 +57,7 @@ class StandardReadHandler(ReadHandler, HandlerMixin):
 
         """
         func = self.func
-        f_globals = func.func_globals
+        f_globals = func.__globals__
         f_builtins = f_globals['__builtins__']
         f_locals = self.get_locals(owner)
         scope = DynamicScope(owner, f_locals, f_globals, f_builtins)
@@ -75,7 +75,7 @@ class StandardWriteHandler(WriteHandler, HandlerMixin):
 
         """
         func = self.func
-        f_globals = func.func_globals
+        f_globals = func.__globals__
         f_builtins = f_globals['__builtins__']
         f_locals = self.get_locals(owner)
         scope = DynamicScope(owner, f_locals, f_globals, f_builtins, change)
@@ -85,7 +85,7 @@ class StandardWriteHandler(WriteHandler, HandlerMixin):
 class StandardTracedReadHandler(ReadHandler, HandlerMixin):
     """ An expression read handler which traces code execution.
 
-    This handler is used in conjuction with the standard '<<' operator.
+    This handler is used in conjunction with the standard '<<' operator.
 
     """
     def __call__(self, owner, name):
@@ -93,7 +93,7 @@ class StandardTracedReadHandler(ReadHandler, HandlerMixin):
 
         """
         func = self.func
-        f_globals = func.func_globals
+        f_globals = func.__globals__
         f_builtins = f_globals['__builtins__']
         f_locals = self.get_locals(owner)
         tr = StandardTracer(owner, name)
@@ -112,7 +112,7 @@ class StandardInvertedWriteHandler(WriteHandler, HandlerMixin):
 
         """
         func = self.func
-        f_globals = func.func_globals
+        f_globals = func.__globals__
         f_builtins = f_globals['__builtins__']
         f_locals = self.get_locals(owner)
         scope = DynamicScope(owner, f_locals, f_globals, f_builtins)

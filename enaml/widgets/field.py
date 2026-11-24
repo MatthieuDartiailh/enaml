@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Bool, Int, Unicode, Enum, List, Typed, ForwardTyped, observe, set_default
+    Bool, Int, Str, Enum, List, Typed, ForwardTyped, set_default
 )
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.validator import Validator
 
 from .control import Control, ProxyControl
@@ -31,6 +31,9 @@ class ProxyField(ProxyControl):
     def set_submit_triggers(self, triggers):
         raise NotImplementedError
 
+    def set_sync_time(self, time):
+        raise NotImplementedError
+
     def set_placeholder(self, placeholder):
         raise NotImplementedError
 
@@ -43,6 +46,9 @@ class ProxyField(ProxyControl):
     def set_read_only(self, read_only):
         raise NotImplementedError
 
+    def set_text_align(self, text_align):
+        raise NotImplementedError
+
     def field_text(self):
         raise NotImplementedError
 
@@ -52,10 +58,10 @@ class Field(Control):
 
     """
     #: The unicode text to display in the field.
-    text = d_(Unicode())
+    text = d_(Str())
 
-    #: The mask to use for text input:
-    #:  http://qt-project.org/doc/qt-4.8/qlineedit.html#inputMask-prop
+    #: The mask to use for text input
+    #: http://qt-project.org/doc/qt-4.8/qlineedit.html#inputMask-prop
     #:
     #: The summary of the mask grammar is as follows:
     #: A   ASCII alphabetic character required. A-Z, a-z.
@@ -81,7 +87,7 @@ class Field(Control):
     #: The mask consists of a string of mask characters and separators, optionally
     #: followed by a semicolon and the character used for blanks
     #: Eg: 9 digit phone number: (999) 999-9999;_
-    mask = d_(Unicode())
+    mask = d_(Str())
 
     #: The validator to use for this field. If the validator provides
     #: a client side validator, then text will only be submitted if it
@@ -98,9 +104,14 @@ class Field(Control):
         ['lost_focus', 'return_pressed']
     ))
 
+    #: Time in ms after which the client submit its text to the server for
+    #: validation and update when the user stop typing. This is used only when
+    #: the 'auto_sync' mode is part of the submit_triggers.
+    sync_time = d_(Int(300))
+
     #: The grayed-out text to display if the field is empty and the
     #: widget doesn't have focus. Defaults to the empty string.
-    placeholder = d_(Unicode())
+    placeholder = d_(Str())
 
     #: How to display the text in the field. Valid values are 'normal'
     #: which displays the text as normal, 'password' which displays the
@@ -115,6 +126,9 @@ class Field(Control):
     #: Whether or not the field is read only. Defaults to False.
     read_only = d_(Bool(False))
 
+    #: Alignment for the text inside the field. Defaults to 'left'.
+    text_align = d_(Enum('left', 'right', 'center'))
+
     #: How strongly a component hugs it's contents' width. Fields ignore
     #: the width hug by default, so they expand freely in width.
     hug_width = set_default('ignore')
@@ -126,7 +140,7 @@ class Field(Control):
     # Observers
     #--------------------------------------------------------------------------
     @observe('text', 'mask', 'submit_triggers', 'placeholder', 'echo_mode',
-        'max_length', 'read_only')
+        'max_length', 'read_only', 'text_align', 'sync_time')
     def _update_proxy(self, change):
         """ An observer which sends state change to the proxy.
 
@@ -151,4 +165,4 @@ class Field(Control):
         """
         if self.proxy_is_active:
             return self.proxy.field_text()
-        return u''
+        return ''

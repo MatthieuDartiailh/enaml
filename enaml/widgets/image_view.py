@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Bool, Typed, ForwardTyped, observe, set_default
+from atom.api import Bool, Typed, ForwardTyped, set_default
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.image import Image
 
 from .control import Control, ProxyControl
@@ -30,6 +30,9 @@ class ProxyImageView(ProxyControl):
         raise NotImplementedError
 
     def set_preserve_aspect_ratio(self, preserve):
+        raise NotImplementedError
+
+    def get_aspect_ratio(self):
         raise NotImplementedError
 
 
@@ -57,6 +60,15 @@ class ImageView(Control):
 
     #: A reference to the ProxyImageView object.
     proxy = Typed(ProxyImageView)
+
+    def layout_constraints(self):
+        """Add constraints to preserve the aspect ratio.
+
+        """
+        if self.proxy_is_active and self.preserve_aspect_ratio:
+            ratio = self.proxy.get_aspect_ratio()
+            return self.constraints + [self.width == ratio*self.height]
+        return self.constraints
 
     #--------------------------------------------------------------------------
     # Observers

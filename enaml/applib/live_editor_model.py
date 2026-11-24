@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import linecache
 import traceback
@@ -16,6 +16,16 @@ from enaml.core.object import Object
 from enaml.core.enaml_compiler import EnamlCompiler
 from enaml.core.parser import parse
 from enaml.widgets.widget import Widget
+
+try:
+    import jedi
+    COMPLETION_AVAILABLE = True
+except ImportError:
+    COMPLETION_AVAILABLE = False
+
+
+ENAML_KEYWORDS = ['enamldef', 'attr', 'alias', 'func', 'template', 'class',
+                  'with', 'else', 'while']
 
 
 def _fake_linecache(text, filename):
@@ -31,7 +41,7 @@ def _fake_linecache(text, filename):
 
     """
     size = len(text)
-    mtime = 1343290295L
+    mtime = int(1343290295)
     lines = text.splitlines()
     lines = [l + '\n' for l in lines]
     linecache.cache[filename] = size, mtime, lines, filename
@@ -105,7 +115,7 @@ class LiveEditorModel(Atom):
     #: An optional filename to use when compiling the enaml code.
     view_filename = Str('__live_view__.enaml')
 
-    #: A string which holds the most recent tracekback.
+    #: A string which holds the most recent traceback.
     traceback = Str()
 
     #: The module created from the model text.
@@ -176,7 +186,7 @@ class LiveEditorModel(Atom):
                 module = ModuleType(filename.rsplit('.', 1)[0])
                 module.__file__ = filename
                 namespace = module.__dict__
-                exec code in namespace
+                exec(code, namespace)
                 model = namespace.get(self.model_item, lambda: None)()
                 self.compiled_model = model
                 self._model_module = module
@@ -209,7 +219,7 @@ class LiveEditorModel(Atom):
                 module.__file__ = filename
                 namespace = module.__dict__
                 with enaml.imports():
-                    exec code in namespace
+                    exec(code, namespace)
                 view = namespace.get(self.view_item, lambda: None)()
                 if isinstance(view, Object) and 'model' in view.members():
                     view.model = self.compiled_model
@@ -229,6 +239,38 @@ class LiveEditorModel(Atom):
             self.traceback = traceback.format_exc()
         else:
             self.traceback = ''
+
+    def autocomplete(self, source, position):
+        """ Obtain autocompletion suggestions for the source text using jedi .
+        if available.
+
+        """
+        if not COMPLETION_AVAILABLE or not source:
+            return ENAML_KEYWORDS
+        try:
+            # Use jedi to get suggestions
+            line, column = position
+            script = jedi.Script(source, line+1, column)
+
+            # Get suggestions
+            results = []
+            for c in script.completions():
+                results.append(c.name)
+
+                # Try to get a signature if the docstring matches
+                # something Scintilla will use (ex "func(..." or "Class(...")
+                # Scintilla ignores docstrings without a comma in the args
+                if c.type in ['function', 'class', 'instance']:
+                    docstring = c.docstring()
+                    if docstring.startswith("{}(".format(c.name)):
+                        results.append(docstring)
+                        continue
+
+            return results + ENAML_KEYWORDS
+        except Exception:
+            # Autocompletion may fail for random reasons so catch all errors
+            # as we don't want the editor to quit because of this
+            return ENAML_KEYWORDS
 
     def relink_view(self):
         """ Relink the compiled view with the compiled model.

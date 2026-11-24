@@ -1,20 +1,21 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of using the `Menu` widget as a context menu.
 
 << autodoc-me >>
 """
+from __future__ import print_function
 from enaml.widgets.api import Window, Container, Field, Menu, Action
 
 
 enamldef SampleAction(Action):
     text = '%s action %d' % (parent.title, parent.children.index(self))
-    triggered :: print text
+    triggered :: print(text)
 
 
 enamldef SampleMenu(Menu):

@@ -1,14 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+from __future__ import unicode_literals
+
 from enaml.workbench.workbench import Workbench
 
 
-UI_PLUGIN = u'enaml.workbench.ui'
+UI_PLUGIN = 'enaml.workbench.ui'
 
 
 class UIWorkbench(Workbench):

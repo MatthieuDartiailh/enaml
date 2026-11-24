@@ -1,20 +1,30 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from weakref import ref
 
-from enaml.qt.QtCore import Qt, QPoint, QSize, QMetaObject, QEvent
+from enaml.qt.compat import global_pos_from_event
+from enaml.qt.QtCore import Qt, QPoint, QPointF, QSize, QMetaObject, QEvent, QRect
 from enaml.qt.QtGui import (
-    QApplication, QTabBar, QTabWidget, QMouseEvent, QResizeEvent, QStyle,
-    QCursor, QStylePainter, QStyleOptionTabV3, QPixmap, QPainter
+    QMouseEvent, QResizeEvent, QCursor, QPainter, QPixmap
 )
+from enaml.qt.QtWidgets import (
+    QApplication, QTabBar, QTabWidget, QSplitter, QStyle, QStylePainter
+)
+from enaml.qt.QtWidgets import QStyleOptionTab
 
+from enaml.qt.qt_menu import QCustomMenu
+
+from ..compat import mouse_event_pos
 from .event_types import QDockItemEvent, DockTabSelected
+from .q_dock_area import QDockArea
 from .q_bitmap_button import QBitmapButton
+from .q_dock_title_bar import QDockTitleBar
+from .q_dock_placeholder import QDockPlaceholder
 from .utils import repolish
 from .xbms import CLOSE_BUTTON
 
@@ -138,7 +148,7 @@ class QDockTabBar(QTabBar):
 
         """
         button = self.sender()
-        for index in xrange(self.count()):
+        for index in range(self.count()):
             if self.tabButton(index, QTabBar.RightSide) is button:
                 self.tabCloseRequested.emit(index)
 
@@ -171,11 +181,11 @@ class QDockTabBar(QTabBar):
 
         """
         # Force an internal update of the stylesheet rules
-        self.setProperty(u'alert', level)
+        self.setProperty('alert', level)
         repolish(self)
 
         # Setup the style option for the control
-        opt = QStyleOptionTabV3()
+        opt = QStyleOptionTab()
         self.initStyleOption(opt, index)
         opt.rect.moveTo(0, 0)
 
@@ -184,7 +194,7 @@ class QDockTabBar(QTabBar):
         normal = QPixmap(opt.rect.size())
         normal.fill(Qt.transparent)
         painter = QStylePainter(normal, self)
-        painter.initFrom(self)
+        self.initPainter(painter)
         painter.drawControl(QStyle.CE_TabBarTab, opt)
 
         # Snap the selected pixmap
@@ -192,11 +202,11 @@ class QDockTabBar(QTabBar):
         selected = QPixmap(opt.rect.size())
         selected.fill(Qt.transparent)
         painter = QStylePainter(selected, self)
-        painter.initFrom(self)
+        self.initPainter(painter)
         painter.drawControl(QStyle.CE_TabBarTab, opt)
 
         # Reset the internal stylesheet style
-        self.setProperty(u'alert', None)
+        self.setProperty('alert', None)
         repolish(self)
 
         # Update the internal tab data
@@ -232,7 +242,7 @@ class QDockTabBar(QTabBar):
         """ Handle a tab insertion in the tab bar.
 
         This handler will create the close button for the tab and then
-        update its visibilty depending on whether or not the dock item
+        update its visibility depending on whether or not the dock item
         is closable. It will also build the internal tab data structure
         for the new tab. This method assumes that this tab bar is
         parented by a QDockTabWidget.
@@ -250,6 +260,9 @@ class QDockTabBar(QTabBar):
         self.setCloseButtonVisible(index, container.closable())
         self._tab_data.insert(index, _TabData(container))
 
+        # Update the visibility of the close button on the overall tab.
+        self.parent().setGlobalCloseButtonVisible()
+
     def tabRemoved(self, index):
         """ Handle a tab removal from the tab bar.
 
@@ -262,6 +275,9 @@ class QDockTabBar(QTabBar):
         if container is not None:
             container.alerted.disconnect(self._onAlerted)
 
+        # Update the visibility of the close button on the overall tab.
+        self.parent().setGlobalCloseButtonVisible()
+
     def mousePressEvent(self, event):
         """ Handle the mouse press event for the tab bar.
 
@@ -272,7 +288,7 @@ class QDockTabBar(QTabBar):
         super(QDockTabBar, self).mousePressEvent(event)
         self._has_mouse = False
         if event.button() == Qt.LeftButton:
-            index = self.tabAt(event.pos())
+            index = self.tabAt(mouse_event_pos(event))
             if index != -1:
                 self._has_mouse = True
                 data = self._tab_data[index]
@@ -281,13 +297,13 @@ class QDockTabBar(QTabBar):
                     # likey a no-op, but just in case
                     container.dockItem().clearAlert()
         elif event.button() == Qt.RightButton:
-            index = self.tabAt(event.pos())
+            index = self.tabAt(mouse_event_pos(event))
             if index != -1:
                 button = self.tabButton(index, QTabBar.RightSide)
-                if button.geometry().contains(event.pos()):
+                if button.geometry().contains(mouse_event_pos(event)):
                     return
                 item = self.parent().widget(index).dockItem()
-                item.titleBarRightClicked.emit(event.globalPos())
+                item.titleBarRightClicked.emit(global_pos_from_event(event))
                 # Emitting the clicked signal may have caused a popup
                 # menu to open, which will have grabbed the mouse. When
                 # this happens, the hover leave event is not sent and
@@ -308,7 +324,7 @@ class QDockTabBar(QTabBar):
         super(QDockTabBar, self).mouseMoveEvent(event)
         if not self._has_mouse:
             return
-        pos = event.pos()
+        pos = mouse_event_pos(event)
         if self.rect().contains(pos):
             return
         x = max(0, min(pos.x(), self.width()))
@@ -320,10 +336,18 @@ class QDockTabBar(QTabBar):
             # The button must be Qt.LeftButton, not event.button().
             btn = Qt.LeftButton
             mod = event.modifiers()
-            evt = QMouseEvent(QEvent.MouseButtonRelease, pos, btn, btn, mod)
+            gpos = global_pos_from_event(event)
+            evt = QMouseEvent(
+                QEvent.MouseButtonRelease,
+                QPointF(pos),
+                QPointF(gpos),
+                btn,
+                btn,
+                mod
+            )
             QApplication.sendEvent(self, evt)
             container = self.parent().widget(self.currentIndex())
-            container.untab(event.globalPos())
+            container.untab(gpos)
             self._has_mouse = False
 
     def mouseReleaseEvent(self, event):
@@ -363,6 +387,7 @@ class QDockTabWidget(QTabWidget):
     instances used elsewhere in the application.
 
     """
+
     def __init__(self, parent=None):
         """ Initialize a QDockTabWidget.
 
@@ -379,6 +404,24 @@ class QDockTabWidget(QTabWidget):
         self.setTabsClosable(True)
         self.setDocumentMode(True)
         self.setMovable(True)
+        self._is_maximized = False
+        self._placeholder = None
+
+        corner_widget = QDockTitleBar()
+        corner_widget.setObjectName('docktab-corner-widget')
+        corner_widget.setButtons(
+            QDockTitleBar.MaximizeButton |
+            QDockTitleBar.CloseButton | QDockTitleBar.TabsButton)
+        self.setCornerWidget(corner_widget)
+        corner_widget.tabsButtonClicked.connect(
+            self._onCornerTabsButtonClicked)
+        corner_widget.restoreButtonClicked.connect(
+            self._onCornerRestoreButtonClicked)
+        corner_widget.maximizeButtonClicked.connect(
+            self._onCornerMaximizeButtonClicked)
+        corner_widget.closeButtonClicked.connect(
+            self._onCornerCloseButtonClicked)
+
         self.tabBar().setDrawBase(False)
         self.tabCloseRequested.connect(self._onTabCloseRequested)
         self.currentChanged.connect(self._onCurrentChanged)
@@ -386,6 +429,22 @@ class QDockTabWidget(QTabWidget):
     #--------------------------------------------------------------------------
     # Private API
     #--------------------------------------------------------------------------
+    def parentDockArea(self):
+        """ Get the parent dock area of the container.
+
+        Returns
+        -------
+        result : QDockArea or None
+            The nearest ancestor which is an instance of QDockArea, or
+            None if no such ancestor exists.
+
+        """
+        parent = self.parent()
+        while parent is not None:
+            if isinstance(parent, QDockArea):
+                return parent
+            parent = parent.parent()
+
     def _onTabCloseRequested(self, index):
         """ Handle the close request for the given tab index.
 
@@ -412,9 +471,106 @@ class QDockTabWidget(QTabWidget):
             event = QDockItemEvent(DockTabSelected, container.objectName())
             QApplication.postEvent(area, event)
 
+    def _onCornerTabsButtonClicked(self, event):
+        """ Opens a context menu that lists all tabs.
+
+        """
+        context_menu = QCustomMenu(self)
+        context_menu.setContextMenu(True)
+        current_index = self.currentIndex()
+        for i in range(self.count()):
+            tab = self.widget(i)
+            if tab is not None:
+                action = context_menu.addAction(tab.title())
+                action.setCheckable(True)
+                action.setChecked(i == current_index)
+                icon = self.tabIcon(i)
+                if icon is not None:
+                    # FIXME This overlays the icon over the checkbox
+                    action.setIcon(icon)
+                action.setData(i)
+        action = context_menu.exec_(QCursor.pos())
+        if action is not None:
+            i = action.data()
+            self.setCurrentIndex(i)
+        context_menu.setContextMenu(False)
+        del context_menu
+
+    def _onCornerMaximizeButtonClicked(self, event):
+        """ Handler which maximizes the tab area.
+
+        """
+        self.showMaximized()
+
+    def _onCornerRestoreButtonClicked(self, event):
+        """ Handler which restores the tab area to the normal view.
+
+        """
+        self.showNormal()
+
+    def _onCornerCloseButtonClicked(self, event):
+        """ Handler which closes all closable tabs.
+
+        """
+        tab_bar = self.tabBar()
+        for i in range(tab_bar.count()):
+            button = tab_bar.tabButton(i, QTabBar.RightSide)
+            if button is not None and button.isVisibleTo(tab_bar):
+                tab_bar.tabCloseRequested.emit(i)
+
     #--------------------------------------------------------------------------
     # Public API
     #--------------------------------------------------------------------------
+    def showMaximized(self):
+        """ Set this widget as the maximized widget in the dock area.
+
+        """
+        if self._is_maximized:
+            return
+        area = self.parentDockArea()
+        if area is None:
+            return
+        corner_widget = self.cornerWidget()
+        btns = corner_widget.buttons()
+        btns |= QDockTitleBar.RestoreButton
+        btns &= ~QDockTitleBar.MaximizeButton
+        corner_widget.setButtons(btns)
+
+        # Create a placeholder in the layout and maximize the widget
+        placeholder = self._placeholder = QDockPlaceholder(self)
+        self._is_maximized = True
+        area.setMaximizedWidget(self)
+
+    def showNormal(self):
+        """ Set this widget as the maximized widget in the dock area.
+
+        """
+        placeholder = self._placeholder
+        if not self._is_maximized or placeholder is None:
+            return
+        area = self.parentDockArea()
+        if area is None:
+            return
+        corner_widget = self.cornerWidget()
+        btns = corner_widget.buttons()
+        btns &= ~QDockTitleBar.RestoreButton
+        btns |= QDockTitleBar.MaximizeButton
+        corner_widget.setButtons(btns)
+
+        self._is_maximized = False
+        area.setMaximizedWidget(None)
+
+        # Restore this widget into the placeholder and discard
+        placeholder.restore()
+        del placeholder
+        self._placeholder = None
+
+    def isMaximized(self):
+        """ Return whether this widget is maximized.
+
+        """
+        return self._is_maximized
+
     def setCloseButtonVisible(self, index, visible):
         """ Set the close button visibility for the given tab index.
 
@@ -428,3 +584,14 @@ class QDockTabWidget(QTabWidget):
 
         """
         self.tabBar().setCloseButtonVisible(index, visible)
+
+    def setGlobalCloseButtonVisible(self):
+        """Set the visibility of the global tab close button."""
+
+        corner_widget = self.cornerWidget()
+        buttons = (QDockTitleBar.MaximizeButton | QDockTitleBar.TabsButton)
+        # Update visibility of the close button, we hide the button if no tab is
+        # closable.
+        if any(self.widget(i).closable() for i in range(self.count())):
+            buttons |= QDockTitleBar.CloseButton
+        corner_widget.setButtons(buttons)

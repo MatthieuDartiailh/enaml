@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 #: A static mapping of language theme token name to lexer attribute name.
 TOKENS = {
@@ -465,6 +465,7 @@ TOKENS = {
         "decorator": "Decorator",
         "default": "Default",
         "double_quoted_string": "DoubleQuotedString",
+        "double_quoted_fstring": "DoubleQuotedFString",
         "function_method_name": "FunctionMethodName",
         "highlighted_identifier": "HighlightedIdentifier",
         "identifier": "Identifier",
@@ -472,8 +473,11 @@ TOKENS = {
         "number": "Number",
         "operator": "Operator",
         "single_quoted_string": "SingleQuotedString",
+        "single_quoted_fstring": "SingleQuotedFString",
         "triple_double_quoted_string": "TripleDoubleQuotedString",
+        "triple_double_quoted_fstring": "TripleDoubleQuotedFString",
         "triple_single_quoted_string": "TripleSingleQuotedString",
+        "triple_single_quoted_fstring": "TripleSingleQuotedFString",
         "unclosed_string": "UnclosedString"
     },
     "ruby": {

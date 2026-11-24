@@ -1,24 +1,30 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ A simple example plugin application.
 
-This example serves to demostrates the concepts described the accompanying
+This example serves to demonstrate the concepts described the accompanying
 developer crash source document.
 
 """
+import enaml
 from enaml.workbench.ui.api import UIWorkbench
 
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-if __name__ == '__main__':
-    import enaml
+def main():
     with enaml.imports():
         from sample_plugin import SampleManifest
 
     workbench = UIWorkbench()
     workbench.register(SampleManifest())
     workbench.run()
+
+
+if __name__ == '__main__':
+    main()

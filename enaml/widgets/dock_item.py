@@ -1,19 +1,18 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    Coerced, Event, Unicode, Bool, Range, Typed, ForwardTyped, observe
-)
+from atom.api import Coerced, Event, Str, Bool, Range, Typed, ForwardTyped
 
 from enaml.application import deferred_call
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 from enaml.icon import Icon
 from enaml.layout.geometry import Size
 
+from .close_event import CloseEvent
 from .container import Container
 from .widget import Widget, ProxyWidget
 
@@ -58,7 +57,7 @@ class DockItem(Widget):
 
     """
     #: The title to use in the title bar.
-    title = d_(Unicode())
+    title = d_(Str())
 
     #: Whether or the not the title is user editable.
     title_editable = d_(Bool(False))
@@ -80,6 +79,13 @@ class DockItem(Widget):
 
     #: An event emitted when the title bar is right clicked.
     title_bar_right_clicked = d_(Event(), writable=False)
+
+    #: An event fired when the user request the dock item to be closed.
+    #: This will happen when the user clicks on the "X" button in the
+    #: title bar button, or when the 'close' method is called. The
+    #: payload will be a CloseEvent object which will allow code to
+    #: veto the close event and prevent the item from closing.
+    closing = d_(Event(CloseEvent), writable=False)
 
     #: An event emitted when the dock item is closed. The item will be
     #: destroyed after this event has completed.
@@ -146,7 +152,9 @@ class DockItem(Widget):
     def _item_closed(self):
         """ Called by the proxy when the toolkit item is closed.
 
+        This is performed as a deferred call so that the window may fully
+        close before the declaration is potentially destroyed.
+
         """
-        # TODO allow the user to veto the close request
         self.closed()
-        deferred_call(self.destroy)
+        self.destroy()

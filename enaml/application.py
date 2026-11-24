@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from heapq import heappush, heappop
 from itertools import count
@@ -270,7 +270,7 @@ class Application(Atom):
         callback : callable
             The callable object to execute at some point in the future.
 
-        *args, **kwargs
+        args, kwargs
             Any additional positional and keyword arguments to pass to
             the callback.
 
@@ -290,7 +290,7 @@ class Application(Atom):
         callback : callable
             The callable object to execute at some point in the future.
 
-        *args, **kwargs
+        args, kwargs
             Any additional positional and keyword arguments to pass to
             the callback.
 
@@ -412,7 +412,7 @@ class Application(Atom):
         heap = self._task_heap
         with self._heap_lock:
             needs_start = len(heap) == 0
-            item = (-priority, self._counter.next(), task)
+            item = (-priority, next(self._counter), task)
             heappush(heap, item)
         if needs_start:
             if self.is_main_thread():
@@ -462,7 +462,7 @@ def deferred_call(callback, *args, **kwargs):
     callback : callable
         The callable object to execute at some point in the future.
 
-    *args, **kwargs
+    args, kwargs
         Any additional positional and keyword arguments to pass to
         the callback.
 
@@ -490,7 +490,7 @@ def timed_call(ms, callback, *args, **kwargs):
     callback : callable
         The callable object to execute at some point in the future.
 
-    *args, **kwargs
+    args, kwargs
         Any additional positional and keyword arguments to pass to
         the callback.
 

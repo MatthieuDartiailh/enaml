@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example layout which is impossible with typical layout systems.
 
@@ -19,8 +19,11 @@ Note that this example also demonstrates that constraints may be defined
 on any subclass of `ConstraintsWidget`. They need not be confined to a
 `Container`.
 
+Requires numpy to be installed.
+
 << autodoc-me >>
 """
+from __future__ import print_function
 import numpy as np
 from enaml.widgets.api import MainWindow, Container, PushButton, Label
 from enaml.core.include import Include
@@ -79,7 +82,7 @@ enamldef SimpleButton(PushButton):
     """
     hug_width = 'required'
     hug_height = 'required'
-    clicked :: print '%s clicked' % text
+    clicked :: print('%s clicked' % text)
 
 
 enamldef Main(MainWindow):
@@ -99,4 +102,4 @@ enamldef Main(MainWindow):
                 h_center == cntr.h_center,
             ]
             text = 'Button Ring'
-            font = 'bold 12pt arial'
+            font = 'italic small-caps bold expanded 12pt arial'

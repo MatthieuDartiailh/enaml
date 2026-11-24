@@ -1,22 +1,23 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import IntEnum
+from enum import IntEnum
 
 from enaml.qt.QtCore import (
     Qt, QSize, QPoint, QRect, QMargins, QEvent, QObject, QPropertyAnimation,
     Signal
 )
-from enaml.qt.QtGui import (
+from enaml.qt.QtWidgets import (
     QBoxLayout, QSizePolicy, QFrame, QPushButton, QStyle, QStyleOption,
     QStylePainter, QStyleOptionButton, QApplication, QVBoxLayout, QHBoxLayout,
     QLayout
 )
 
+from ..compat import mouse_event_pos
 from .event_types import (
     QDockItemEvent, DockItemExtended, DockItemRetracted,
     DockAreaContentsChanged
@@ -131,7 +132,7 @@ class QDockBar(QFrame):
 
         """
         layout = self.layout()
-        for index in xrange(layout.count()):
+        for index in range(layout.count()):
             item = layout.itemAt(index)
             if item.widget() is not None:
                 return False
@@ -207,7 +208,7 @@ class QDockBarButton(QPushButton):
         """ A slot which can be connected to an 'alerted' signal.
 
         """
-        self.setProperty(u'alert', level or None)
+        self.setProperty('alert', level or None)
         repolish(self)
 
     #--------------------------------------------------------------------------
@@ -282,7 +283,7 @@ class QDockBarItemHandle(QFrame):
         """
         event.ignore()
         if event.button() == Qt.LeftButton:
-            self._press_pos = event.pos()
+            self._press_pos = mouse_event_pos(event)
             event.accept()
 
     def mouseReleaseEvent(self, event):
@@ -300,7 +301,7 @@ class QDockBarItemHandle(QFrame):
         """
         event.ignore()
         if not self._press_pos.isNull():
-            self.handleMoved.emit(event.pos() - self._press_pos)
+            self.handleMoved.emit(mouse_event_pos(event) - self._press_pos)
             event.accept()
 
 
@@ -498,7 +499,7 @@ class QDockBarManager(QObject):
             animation.stop()
             animation.finished.disconnect()
         else:
-            animation = QPropertyAnimation(item, 'geometry')
+            animation = QPropertyAnimation(item, b'geometry')
             item.setAnimation(animation)
         return animation
 
@@ -819,7 +820,7 @@ class QDockBarManager(QObject):
 
         """
         res = []
-        for value in self._widgets.itervalues():
+        for value in self._widgets.values():
             if isinstance(value, QDockBarItem):
                 res.append((value.widget(), value.position()))
         return res
@@ -912,7 +913,7 @@ class QDockBarManager(QObject):
         """
         if event.type() == QEvent.Resize:
             active = self._active_items
-            for item, slide_out in active.iteritems():
+            for item, slide_out in active.items():
                 start, end = self._animationGeo(item)
                 animation = item.animation()
                 if slide_out:

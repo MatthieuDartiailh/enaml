@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import re
 
-from atom.api import Atom, Bool, Typed, Enum, Str, Unicode
+from atom.api import Atom, Bool, Typed, Enum, Str, Str
 
 
 class Validator(Atom):
@@ -20,7 +20,7 @@ class Validator(Atom):
     #: An optional message to associate with the validator. This message
     #: may be used by the toolkit to display information to the user
     #: about what went wrong.
-    message = Unicode()
+    message = Str()
 
     def validate(self, text):
         """ Validate the text as the user types.

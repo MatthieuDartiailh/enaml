@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.flow_item import ProxyFlowItem
 
 from .QtCore import QSize, QEvent
-from .QtGui import QFrame, QLayout
+from .QtWidgets import QFrame, QLayout
 
 from .q_flow_layout import QFlowLayout, AbstractFlowWidget, FlowLayoutData
 from .q_single_widget_layout import QSingleWidgetLayout
@@ -236,7 +236,7 @@ class QtFlowItem(QtWidget, ProxyFlowItem):
         self.set_ortho_stretch(d.ortho_stretch)
 
     def init_layout(self):
-        """ Initialize the layout for the underyling widget.
+        """ Initialize the layout for the underlying widget.
 
         """
         super(QtFlowItem, self).init_layout()

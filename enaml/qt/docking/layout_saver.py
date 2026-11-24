@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import defaultdict
 
@@ -96,6 +96,14 @@ class LayoutSaver(NodeVisitor):
             self.init_floating_node(layout, container)
         self.stack.append(layout)
 
+    def visit_QDockPlaceholder(self, placeholder):
+        """ Visit a QDockPlaceholder node.
+
+        This delegates to the placeholder widget.
+
+        """
+        self.visit(placeholder.getPlaceholder())
+
     def visit_QDockTabWidget(self, tabs):
         """ Visit a QDockTabWidget node.
 
@@ -104,10 +112,11 @@ class LayoutSaver(NodeVisitor):
 
         """
         children = []
-        for index in xrange(tabs.count()):
+        for index in range(tabs.count()):
             self.visit(tabs.widget(index))
             children.append(self.stack.pop())
         layout = TabLayout(*children)
+        layout.maximized = tabs.isMaximized()
         layout.index = tabs.currentIndex()
         layout.tab_position = self.TAB_POSITION[tabs.tabPosition()]
         self.stack.append(layout)
@@ -120,7 +129,7 @@ class LayoutSaver(NodeVisitor):
 
         """
         children = []
-        for index in xrange(splitter.count()):
+        for index in range(splitter.count()):
             self.visit(splitter.widget(index))
             children.append(self.stack.pop())
         layout = SplitLayout(*children)
@@ -144,7 +153,7 @@ class LayoutSaver(NodeVisitor):
         bar_data = defaultdict(list)
         for container, position in area.dockBarContainers():
             bar_data[position].append(container.objectName())
-        for bar_pos, names in bar_data.iteritems():
+        for bar_pos, names in bar_data.items():
             bar = DockBarLayout(*names, position=self.BAR_POSITIONS[bar_pos])
             layout.dock_bars.append(bar)
         maxed = area.maximizedWidget()

@@ -1,14 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of using Looper to generate widgets from an iterable.
 
 << autodoc-me >>
 """
+from __future__ import print_function
 from enaml.core.api import Looper
 from enaml.layout.api import vbox, hbox, align
 from enaml.widgets.api import (
@@ -34,17 +35,18 @@ enamldef Main(Window):
             text = 'Print Items'
             clicked ::
                 for item in looper.items:
-                    print item
+                    print(item)
         ScrollArea: scroller:
             Container:
+                # Note that a Looper expects to iterate over unique values.
+                # Passing duplicate values can lead to crashes.
                 Looper: looper:
                     iterable << field.text.split()
                     Field:
-                        placeholder = 'Field %d: %s' % (loop_index, loop_item)
+                        placeholder = 'Field %d: %s' % (loop.index, loop.item)
                     PushButton:
-                        text = 'pb %s' % loop_index
+                        text = 'pb %s' % loop.index
                     Slider:
-                        value :: print 'Slider %d changed' % loop_index
+                        value :: print('Slider %d changed' % loop.index)
                     Html:
-                        source << '<h1><center>%s</center></h1>' % loop_item
-
+                        source << '<h1><center>%s</center></h1>' % loop.item

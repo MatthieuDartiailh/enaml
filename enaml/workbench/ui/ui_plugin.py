@@ -1,10 +1,12 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+from __future__ import unicode_literals
+
 from atom.api import Typed
 
 from enaml.application import Application
@@ -24,17 +26,17 @@ with enaml.imports():
     from .workbench_window import WorkbenchWindow
 
 
-ACTIONS_POINT = u'enaml.workbench.ui.actions'
+ACTIONS_POINT = 'enaml.workbench.ui.actions'
 
-APPLICATION_FACTORY_POINT = u'enaml.workbench.ui.application_factory'
+APPLICATION_FACTORY_POINT = 'enaml.workbench.ui.application_factory'
 
-BRANDING_POINT = u'enaml.workbench.ui.branding'
+BRANDING_POINT = 'enaml.workbench.ui.branding'
 
-WINDOW_FACTORY_POINT = u'enaml.workbench.ui.window_factory'
+WINDOW_FACTORY_POINT = 'enaml.workbench.ui.window_factory'
 
-WORKSPACES_POINT = u'enaml.workbench.ui.workspaces'
+WORKSPACES_POINT = 'enaml.workbench.ui.workspaces'
 
-AUTOSTART_POINT = u'enaml.workbench.ui.autostart'
+AUTOSTART_POINT = 'enaml.workbench.ui.autostart'
 
 
 class UIPlugin(Plugin):

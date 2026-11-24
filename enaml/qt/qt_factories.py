@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 def action_factory():
     from .qt_action import QtAction
@@ -13,6 +13,11 @@ def action_factory():
 def action_group_factory():
     from .qt_action_group import QtActionGroup
     return QtActionGroup
+
+
+def button_group_factory():
+    from .qt_button_group import QtButtonGroup
+    return QtButtonGroup
 
 
 def calendar_factory():
@@ -303,6 +308,7 @@ def window_factory():
 QT_FACTORIES = {
     'Action': action_factory,
     'ActionGroup': action_group_factory,
+    'ButtonGroup': button_group_factory,
     'Calendar': calendar_factory,
     'CheckBox': check_box_factory,
     'ColorDialog': color_dialog_factory,

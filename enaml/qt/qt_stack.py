@@ -1,16 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Int, IntEnum, Typed
+from enum import IntEnum
+
+from atom.api import Int, Typed
 
 from enaml.widgets.stack import ProxyStack
 
 from .QtCore import QTimer, QEvent, Signal
-from .QtGui import QStackedWidget, QPixmap
+from .QtGui import QPixmap
+from .QtWidgets import QStackedWidget
 
 from .q_pixmap_painter import QPixmapPainter
 from .q_pixmap_transition import (

@@ -1,9 +1,9 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2013, Nucleic Development Team.
+| Copyright (c) 2013-2025, Nucleic Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |
-| The full license is in the file COPYING.txt, distributed with this software.
+| The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
 #include "pythonhelpersex"
 
@@ -378,7 +378,7 @@ type_check_expr( PyObject* mod, PyObject* args )
         PyErr_Format(
             PyExc_TypeError,
             "expression value has invalid type '%s'",
-            value->ob_type->tp_name
+            Py_TYPE( value )->tp_name
         );
         return 0;
     }
@@ -461,7 +461,7 @@ validate_spec( PyObject* mod, PyObject* args )
         PyErr_Format(
             "template parameter %d has unhashable type: '%s'",
             PyInt_AS_LONG( index ),
-            spec->ob_type->tp_name
+            Py_TYPE( spec )->tp_name
         );
         return 0;
     }

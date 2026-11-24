@@ -1,15 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.widgets.toolkit_dialog import ProxyToolkitDialog
 
-from .QtGui import QDialog
+from .QtWidgets import QDialog
 
 from .qt_toolkit_object import QtToolkitObject
 
@@ -45,7 +45,7 @@ class QtToolkitDialog(QtToolkitObject, ProxyToolkitDialog):
         window title. The base implementation returns an empty string.
 
         """
-        return u''
+        return ''
 
     #--------------------------------------------------------------------------
     # Signal Handlers

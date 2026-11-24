@@ -1,24 +1,47 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2013, Nucleic Development Team.
+| Copyright (c) 2013-2025, Nucleic Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
 |
-| The full license is in the file COPYING.txt, distributed with this software.
+| The full license is in the file LICENSE, distributed with this software.
 |----------------------------------------------------------------------------*/
-#include "inttypes.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include "pythonhelpers.h"
+#include <cppy/cppy.h>
+#include "platstdint.h"
 
-using namespace PythonHelpers;
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
+#endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#endif
+
+
+namespace enaml
+{
 
 enum FontStyle
 {
     Normal,
     Italic,
     Oblique
+};
+
+
+enum FontStretch
+{
+    UltraCondensed,
+    ExtraCondensed,
+    Condensed,
+    SemiCondensed,
+    Unstretched,
+    SemiExpanded,
+    Expanded,
+    ExtraExpanded,
+    UltraExpanded
 };
 
 
@@ -32,18 +55,32 @@ enum FontCaps
 };
 
 
-typedef struct {
-    PyObject_HEAD
+// POD struct - all member fields are considered private
+struct Font
+{
+	PyObject_HEAD
     PyObject* tkdata;   // Toolkit specific font representation
     PyObject* family;   // Font family name as a string
     int32_t pointsize;
     int32_t weight;
     FontStyle style;
     FontCaps caps;
-} Font;
+    FontStretch stretch;
+
+	static PyType_Spec TypeObject_Spec;
+
+    static PyTypeObject* TypeObject;
+
+	static bool Ready();
+
+};
 
 
-static PyObject*
+namespace
+{
+
+
+PyObject*
 Font_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
 {
     PyObject* family;
@@ -51,11 +88,12 @@ Font_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
     int32_t weight = -1;
     FontStyle style = Normal;
     FontCaps caps = MixedCase;
-    static char* kwlist[] = { "family", "size", "weight", "style", "caps", 0 };
+    FontStretch stretch = Unstretched;
+    static char* kwlist[] = { "family", "size", "weight", "style", "caps", "stretch", 0 };
     if( !PyArg_ParseTupleAndKeywords(
-        args, kwargs, "S|iiii", kwlist, &family, &pointsize, &weight, &style, &caps ) )
+        args, kwargs, "U|iiiii", kwlist, &family, &pointsize, &weight, &style, &caps, &stretch ) )
         return 0;
-    PyObjectPtr fontptr( PyType_GenericNew( type, args, kwargs ) );
+    cppy::ptr fontptr( PyType_GenericNew( type, args, kwargs ) );
     if( !fontptr )
         return 0;
     Font* font = reinterpret_cast<Font*>( fontptr.get() );
@@ -65,20 +103,23 @@ Font_new( PyTypeObject* type, PyObject* args, PyObject* kwargs )
     font->weight = std::max( -1, std::min( weight, 99 ) );
     font->style = ( style < Normal || style > Oblique ) ? Normal : style;
     font->caps = ( caps < MixedCase || caps > Capitalize ) ? MixedCase : caps;
+    font->stretch = ( stretch < UltraCondensed || stretch > UltraExpanded ) ? Unstretched : stretch;
     return fontptr.release();
 }
 
 
-static void
+void
 Font_dealloc( Font* self )
 {
+    PyTypeObject *tp = Py_TYPE(self);
     Py_CLEAR( self->tkdata );
     Py_CLEAR( self->family );
-    self->ob_type->tp_free( reinterpret_cast<PyObject*>( self ) );
+    tp->tp_free( pyobject_cast( self ) );
+    Py_DECREF(tp);
 }
 
 
-static PyObject*
+PyObject*
 Font_repr( Font* self )
 {
     static const char* style_reprs[] = {
@@ -87,72 +128,87 @@ Font_repr( Font* self )
         "style=Oblique, "
     };
     static const char* caps_reprs[] = {
-        "caps=MixedCase)",
-        "caps=AllUppercase)",
-        "caps=AllLowercase)",
-        "caps=SmallCaps)",
-        "caps=Capitalize)"
+        "caps=MixedCase",
+        "caps=AllUppercase",
+        "caps=AllLowercase",
+        "caps=SmallCaps",
+        "caps=Capitalize"
+    };
+    static const char* stretch_reprs[] = {
+        "stretch=UltraCondensed)",
+        "stretch=ExtraCondensed)",
+        "stretch=Condensed)",
+        "stretch=SemiCondensed)",
+        "stretch=Unstretched)",
+        "stretch=SemiExpanded)",
+        "stretch=Expanded)",
+        "stretch=ExtraExpanded)",
+        "stretch=UltraExpanded)"
     };
     std::ostringstream ostr;
-    ostr << "Font(family=\"" << PyString_AsString( self->family ) << "\", ";
+    ostr << "Font(family=\"" << PyUnicode_AsUTF8( self->family ) << "\", ";
     ostr << "pointsize=" << self->pointsize << ", ";
     ostr << "weight=" << self->weight << ", ";
-    ostr << style_reprs[self->style] << caps_reprs[self->caps];
-    return PyString_FromString(ostr.str().c_str());
+    ostr << style_reprs[self->style] << caps_reprs[self->caps] << stretch_reprs[self->stretch];
+    return PyUnicode_FromString( ostr.str().c_str() );
 };
 
 
-static PyObject*
+PyObject*
 Font_get_family( Font* self, void* context )
 {
-    Py_INCREF( self->family );
-    return self->family;
+    return cppy::incref( self->family );
 }
 
 
-static PyObject*
+PyObject*
 Font_get_pointsize( Font* self, void* context )
 {
-    return PyInt_FromLong( self->pointsize );
+    return PyLong_FromLong( self->pointsize );
 }
 
 
-static PyObject*
+PyObject*
 Font_get_weight( Font* self, void* context )
 {
-    return PyInt_FromLong( self->weight );
+    return PyLong_FromLong( self->weight );
 }
 
 
-static PyObject*
+PyObject*
 Font_get_style( Font* self, void* context )
 {
-    return PyInt_FromLong( static_cast<long>( self->style ) );
+    return PyLong_FromLong( static_cast<long>( self->style ) );
 }
 
 
-static PyObject*
+PyObject*
 Font_get_caps( Font* self, void* context )
 {
-    return PyInt_FromLong( static_cast<long>( self->caps ) );
+    return PyLong_FromLong( static_cast<long>( self->caps ) );
+}
+
+PyObject*
+Font_get_stretch( Font* self, void* context )
+{
+    return PyLong_FromLong( static_cast<long>( self->stretch ) );
 }
 
 
-static PyObject*
+PyObject*
 Font_get_tkdata( Font* self, void* context )
 {
     if( !self->tkdata )
         Py_RETURN_NONE;
-    Py_INCREF( self->tkdata );
-    return self->tkdata;
+    return cppy::incref( self->tkdata );
 }
 
 
-static int
+int
 Font_set_tkdata( Font* self, PyObject* value, void* context )
 {
     // don't let users do something silly which would require GC
-    if( reinterpret_cast<PyObject*>( self ) == value )
+    if( pyobject_cast( self ) == value )
         return 0;
     PyObject* old = self->tkdata;
     self->tkdata = value;
@@ -174,128 +230,126 @@ Font_getset[] = {
       "Get the style enum for the font." },
     { "caps", ( getter )Font_get_caps, 0,
       "Get the caps enum for the font." },
+    { "stretch", ( getter )Font_get_stretch, 0,
+      "Get the stretch enum for the font." },
     { "_tkdata", ( getter )Font_get_tkdata, ( setter )Font_set_tkdata,
       "Get and set the toolkit specific font representation." },
     { 0 } // sentinel
 };
 
 
-PyTypeObject Font_Type = {
-    PyObject_HEAD_INIT( 0 )
-    0,                                      /* ob_size */
-    "fontext.Font",                         /* tp_name */
-    sizeof( Font ),                         /* tp_basicsize */
-    0,                                      /* tp_itemsize */
-    (destructor)Font_dealloc,               /* tp_dealloc */
-    (printfunc)0,                           /* tp_print */
-    (getattrfunc)0,                         /* tp_getattr */
-    (setattrfunc)0,                         /* tp_setattr */
-    (cmpfunc)0,                             /* tp_compare */
-    (reprfunc)Font_repr,                    /* tp_repr */
-    (PyNumberMethods*)0,                    /* tp_as_number */
-    (PySequenceMethods*)0,                  /* tp_as_sequence */
-    (PyMappingMethods*)0,                   /* tp_as_mapping */
-    (hashfunc)0,                            /* tp_hash */
-    (ternaryfunc)0,                         /* tp_call */
-    (reprfunc)0,                            /* tp_str */
-    (getattrofunc)0,                        /* tp_getattro */
-    (setattrofunc)0,                        /* tp_setattro */
-    (PyBufferProcs*)0,                      /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,                     /* tp_flags */
-    0,                                      /* Documentation string */
-    (traverseproc)0,                        /* tp_traverse */
-    (inquiry)0,                             /* tp_clear */
-    (richcmpfunc)0,                         /* tp_richcompare */
-    0,                                      /* tp_weaklistoffset */
-    (getiterfunc)0,                         /* tp_iter */
-    (iternextfunc)0,                        /* tp_iternext */
-    (struct PyMethodDef*)0,                 /* tp_methods */
-    (struct PyMemberDef*)0,                 /* tp_members */
-    Font_getset,                            /* tp_getset */
-    0,                                      /* tp_base */
-    0,                                      /* tp_dict */
-    (descrgetfunc)0,                        /* tp_descr_get */
-    (descrsetfunc)0,                        /* tp_descr_set */
-    0,                                      /* tp_dictoffset */
-    (initproc)0,                            /* tp_init */
-    (allocfunc)PyType_GenericAlloc,         /* tp_alloc */
-    (newfunc)Font_new,                      /* tp_new */
-    (freefunc)0,                            /* tp_free */
-    (inquiry)0,                             /* tp_is_gc */
-    0,                                      /* tp_bases */
-    0,                                      /* tp_mro */
-    0,                                      /* tp_cache */
-    0,                                      /* tp_subclasses */
-    0,                                      /* tp_weaklist */
-    (destructor)0                           /* tp_del */
+static PyType_Slot Nonlocals_Type_slots[] = {
+    { Py_tp_dealloc, void_cast( Font_dealloc ) },        /* tp_dealloc */
+    { Py_tp_repr, void_cast( Font_repr ) },              /* tp_repr */
+    { Py_tp_getset, void_cast( Font_getset ) },          /* tp_getset */
+    { Py_tp_new, void_cast( Font_new ) },                /* tp_new */
+    { Py_tp_alloc, void_cast( PyType_GenericAlloc ) },   /* tp_alloc */
+    { 0, 0 },
 };
 
 
-static PyMethodDef
-fontext_methods[] = {
-    { 0 } // Sentinel
+}  // namespace
+
+
+// Initialize static variables (otherwise the compiler eliminates them)
+PyTypeObject* Font::TypeObject = NULL;
+
+
+PyType_Spec Font::TypeObject_Spec = {
+	"enaml.fontext.Font",              /* tp_name */
+	sizeof( Font ),               /* tp_basicsize */
+	0,                                 /* tp_itemsize */
+	Py_TPFLAGS_DEFAULT,                /* tp_flags */
+    Nonlocals_Type_slots               /* slots */
 };
 
 
-static PyObject*
+bool Font::Ready()
+{
+    // The reference will be handled by the module to which we will add the type
+	TypeObject = pytype_cast( PyType_FromSpec( &TypeObject_Spec ) );
+    if( !TypeObject )
+    {
+        return false;  // LCOV_EXCL_LINE (failed to create type)
+    }
+    return true;
+}
+
+
+// Module definition
+namespace
+{
+
+
+PyObject*
 new_enum_class( const char* name )
 {
-    PyObjectPtr pyname( PyString_FromString( name ) );
+    cppy::ptr pyname( PyUnicode_FromString( name ) );
     if( !pyname )
-        return 0;
-    PyObjectPtr args( PyTuple_New( 0 ) );
+        return 0;  // LCOV_EXCL_LINE (failed to create string)
+    cppy::ptr args( PyTuple_New( 0 ) );
     if( !args )
-        return 0;
-    PyDictPtr kwargs( PyDict_New() );
+        return 0;  // LCOV_EXCL_LINE (failed to create tuple)
+    cppy::ptr kwargs( PyDict_New() );
     if( !kwargs )
-        return 0;
-    PyObjectPtr modname( PyString_FromString( "fontext" ) );
+        return 0;  // LCOV_EXCL_LINE (failed to create dict)
+    cppy::ptr modname( PyUnicode_FromString( "fontext" ) );
     if( !modname )
-        return 0;
-    if( !kwargs.set_item( "__module__", modname ) )
-        return 0;
-    PyObjectPtr callargs( PyTuple_Pack( 3, pyname.get(), args.get(), kwargs.get() ) );
+        return 0;  // LCOV_EXCL_LINE (failed to create string)
+    if( PyDict_SetItemString( kwargs.get(), "__module__", modname.get() ) != 0 )
+        return 0;  // LCOV_EXCL_LINE (failed to set dict item)
+    cppy::ptr callargs( PyTuple_Pack( 3, pyname.get(), args.get(), kwargs.get() ) );
     if( !callargs )
-        return 0;
-    PyObjectPtr newclass( PyObject_CallObject( reinterpret_cast<PyObject*>( &PyType_Type ), callargs.get() ) );
+        return 0;  // LCOV_EXCL_LINE (failed to create tuple)
+    cppy::ptr newclass( PyObject_CallObject( pyobject_cast( &PyType_Type ), callargs.get() ) );
     if( !newclass )
-        return 0;
+        return 0;  // LCOV_EXCL_LINE (failed to create class)
     // TODO make these enums more flexible
-    reinterpret_cast<PyTypeObject*>( newclass.get() )->tp_new = 0;
+    pytype_cast( newclass.get() )->tp_new = 0;
     return newclass.release();
 }
 
 
-static int
+int
 add_enum( PyObject* cls, const char* name, long value )
 {
-    PyObjectPtr pyint( PyInt_FromLong( value ) );
+    cppy::ptr pyint( PyLong_FromLong( value ) );
     if( !pyint )
-        return -1;
+    {
+        return -1;  // LCOV_EXCL_LINE (failed to create int)
+    }
     return PyObject_SetAttrString( cls, name, pyint.get() );
 }
 
 
-PyMODINIT_FUNC
-initfontext( void )
+int
+fontext_modexec( PyObject *mod )
 {
-    if( PyType_Ready( &Font_Type ) )
-        return;
-    PyObject* mod = Py_InitModule( "fontext", fontext_methods );
-    if( !mod )
-        return;
-    PyObject* PyFontStyle = new_enum_class( "FontStyle" );
+    if( !Font::Ready() )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed type creation)
+    }
+    cppy::ptr PyFontStyle( new_enum_class( "FontStyle" ) );
     if( !PyFontStyle )
-        return;
-    PyObject* PyFontCaps = new_enum_class( "FontCaps" );
+    {
+        return -1;  // LCOV_EXCL_LINE (failed enum creation)
+    }
+    cppy::ptr PyFontCaps( new_enum_class( "FontCaps" ) );
     if( !PyFontCaps )
-        return;
+    {
+        return -1;  // LCOV_EXCL_LINE (failed enum creation)
+    }
+    cppy::ptr PyFontStretch( new_enum_class( "FontStretch" ) );
+    if( !PyFontStretch )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed enum creation)
+    }
 
-    #define AddEnum( cls, e ) \
-        do { \
-            if( add_enum( cls, #e, e ) < 0 ) \
-                return; \
-        } while( 0 )
+#define AddEnum( cls, e ) \
+    do { \
+        if( add_enum( cls.get(), #e, e ) < 0 ) \
+            return -1; \
+    } while( 0 )
 
     AddEnum( PyFontStyle, Normal );
     AddEnum( PyFontStyle, Italic );
@@ -307,8 +361,77 @@ initfontext( void )
     AddEnum( PyFontCaps, SmallCaps );
     AddEnum( PyFontCaps, Capitalize );
 
-    Py_INCREF( ( PyObject* )( &Font_Type ) );
-    PyModule_AddObject( mod, "Font", ( PyObject* )( &Font_Type ) );
-    PyModule_AddObject( mod, "FontStyle", PyFontStyle );
-    PyModule_AddObject( mod, "FontCaps", PyFontCaps );
+    AddEnum( PyFontStretch, UltraCondensed );
+    AddEnum( PyFontStretch, ExtraCondensed );
+    AddEnum( PyFontStretch, Condensed );
+    AddEnum( PyFontStretch, SemiCondensed );
+    AddEnum( PyFontStretch, Unstretched );
+    AddEnum( PyFontStretch, SemiExpanded );
+    AddEnum( PyFontStretch, Expanded );
+    AddEnum( PyFontStretch, ExtraExpanded );
+    AddEnum( PyFontStretch, UltraExpanded );
+
+
+    // Font
+    cppy::ptr font( pyobject_cast( Font::TypeObject ) );
+	if( PyModule_AddObject( mod, "Font", font.get() ) < 0 )
+	{
+		return -1;  // LCOV_EXCL_LINE (failed type addition to module)
+	}
+    font.release();
+
+    if( PyModule_AddObject( mod, "FontStyle", PyFontStyle.get() ) < 0 )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed type addition to module)
+    }
+    PyFontStyle.release();
+
+    if( PyModule_AddObject( mod, "FontCaps", PyFontCaps.get() ) < 0 )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed type addition to module)
+    }
+    PyFontCaps.release();
+
+    if( PyModule_AddObject( mod, "FontStretch", PyFontStretch.get() ) < 0 )
+    {
+        return -1;  // LCOV_EXCL_LINE (failed type addition to module)
+    }
+    PyFontStretch.release();
+
+    return 0;
+}
+
+static PyMethodDef
+fontext_methods[] = {
+    { 0 }  // Sentinel
+};
+
+
+PyModuleDef_Slot fontext_slots[] = {
+    {Py_mod_exec, reinterpret_cast<void*>( fontext_modexec ) },
+    {0, NULL}
+};
+
+
+struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "fontext",
+        "fontext extension module",
+        0,
+        fontext_methods,
+        fontext_slots,
+        NULL,
+        NULL,
+        NULL
+};
+
+}  // namespace
+
+
+}  // namespace enaml
+
+
+PyMODINIT_FUNC PyInit_fontext( void )
+{
+    return PyModuleDef_Init( &enaml::moduledef );
 }

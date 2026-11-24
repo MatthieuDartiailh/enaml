@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from .constrainable import ContentsConstrainable, ConstrainableMixin
 from .constraint_helper import ConstraintHelper
@@ -42,6 +42,6 @@ class BoxHelper(ConstraintHelper, ConstrainableMixin):
             a_attrs = b_attrs = BOUNDARY_ATTRS
             if isinstance(component, ContentsConstrainable):
                 b_attrs = CONTENT_BOUNDARY_ATTRS
-            f = lambda (a, b): getattr(self, a) == getattr(component, b)
-            cns.extend(f(z) for z in zip(a_attrs, b_attrs))
+            f = lambda a, b: getattr(self, a) == getattr(component, b)
+            cns.extend(f(a, b) for a, b in zip(a_attrs, b_attrs))
         return cns

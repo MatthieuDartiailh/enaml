@@ -1,19 +1,19 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import sys
 
 from atom.api import Typed, atomref
 
+from enaml.widgets.close_event import CloseEvent
 from enaml.widgets.main_window import ProxyMainWindow
-from enaml.widgets.window import CloseEvent
 
 from .QtCore import Qt
-from .QtGui import QMainWindow
+from .QtWidgets import QMainWindow
 
 from .q_deferred_caller import deferredCall
 from .qt_container import QtContainer

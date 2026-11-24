@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed, ForwardTyped
 
@@ -28,6 +28,17 @@ class RawWidget(Control):
     known ahead of time, and Enaml does provide an implementation of
     the required widget. This can be used as a hook to inject custom
     widgets into an Enaml widget hierarchy.
+
+    Notes
+    -----
+    When using the Qt backend, note that PySide requires weakrefs for using
+    bound methods as slots. PyQt doesn't, but executes unsafe code if not using
+    weakrefs. So you should add the following line to your class.
+    __slots__ = ('__weakref__',) or pass the keyword argument
+    enable_weakrefs=True to the metaclass::
+
+        class MyWidget(RawWidget, enable_weakref=True):
+            pass
 
     """
     #: A reference to the proxy Control object.

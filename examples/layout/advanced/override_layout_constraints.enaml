@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2015, Nucleic Development Team.
+# Copyright (c) 2015-2024, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example which demonstrates overriding `layout_constraints`.
 
@@ -14,7 +14,7 @@ from a single expression would be difficult or impossible.
 
 << autodoc-me >>
 """
-from itertools import izip_longest
+from itertools import zip_longest
 
 from enaml.layout.api import align, grid
 from enaml.widgets.api import Window, Container, Field, Label, PushButton
@@ -27,7 +27,7 @@ enamldef Main(Window):
             rows = []
             widgets = self.visible_widgets()
             row_iters = (iter(widgets),) * 2
-            rows = list(izip_longest(*row_iters))
+            rows = list(zip_longest(*row_iters))
             return [grid(*rows)] + [align('v_center', *row) for row in rows]
         Label:
             text = 'Name'

@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Atom, List, Typed
 from atom.datastructures.api import sortedmap
@@ -124,7 +124,7 @@ class ExpressionEngine(Atom):
     #: A private set of guard tuples for preventing feedback loops.
     _guards = Typed(set, ())
 
-    def __nonzero__(self):
+    def __bool__(self):
         """ Get the boolean value for the engine.
 
         An expression engine will test boolean False if there are

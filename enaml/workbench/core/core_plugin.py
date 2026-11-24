@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from collections import defaultdict
 
@@ -15,7 +15,7 @@ from .command import Command
 from .execution_event import ExecutionEvent
 
 
-COMMANDS_POINT = u'enaml.workbench.core.commands'
+COMMANDS_POINT = 'enaml.workbench.core.commands'
 
 
 class CorePlugin(Plugin):

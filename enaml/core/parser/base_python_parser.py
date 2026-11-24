@@ -1,0 +1,916 @@
+8# --------------------------------------------------------------------------------------
+# Copyright (c) 2021-2026, Nucleic Development Team.
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file LICENSE, distributed with this software.
+# --------------------------------------------------------------------------------------
+# NOTE This is a vendored version of the pegen base python parser included in
+# the header of python grammar DO NOT EDIT
+
+import ast
+import enum
+import sys
+import tokenize
+from typing import (
+    Any,
+    List,
+    NoReturn,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
+
+from pegen.parser import (
+    FSTRING_END,
+    FSTRING_START,
+    Parser,
+    memoize,
+)
+from pegen.tokenizer import Tokenizer
+
+try:
+    from token import (
+        TSTRING_END,
+        TSTRING_MIDDLE,
+        TSTRING_START,
+    )
+except ImportError:
+    # On Python version on which t-string are not supported
+    # use unmatchable token values
+    TSTRING_END = -1001
+    TSTRING_MIDDLE = -1002
+    TSTRING_START = -1003
+
+# Singleton ast nodes, created once for efficiency
+Load = ast.Load()
+Store = ast.Store()
+Del = ast.Del()
+
+Node = TypeVar("Node")
+FC = TypeVar("FC", ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+EXPR_NAME_MAPPING = {
+    ast.Attribute: "attribute",
+    ast.Subscript: "subscript",
+    ast.Starred: "starred",
+    ast.Name: "name",
+    ast.List: "list",
+    ast.Tuple: "tuple",
+    ast.Lambda: "lambda",
+    ast.Call: "function call",
+    ast.BoolOp: "expression",
+    ast.BinOp: "expression",
+    ast.UnaryOp: "expression",
+    ast.GeneratorExp: "generator expression",
+    ast.Yield: "yield expression",
+    ast.YieldFrom: "yield expression",
+    ast.Await: "await expression",
+    ast.ListComp: "list comprehension",
+    ast.SetComp: "set comprehension",
+    ast.DictComp: "dict comprehension",
+    ast.Dict: "dict literal",
+    ast.Set: "set display",
+    ast.JoinedStr: "f-string expression",
+    ast.FormattedValue: "f-string expression",
+    ast.Compare: "comparison",
+    ast.IfExp: "conditional expression",
+    ast.NamedExpr: "named expression",
+}
+if hasattr(ast, "TemplateStr"):
+    EXPR_NAME_MAPPING[ast.TemplateStr] = "t-string expression"
+if hasattr(ast, "Interpolation"):
+    EXPR_NAME_MAPPING[ast.Interpolation] = "t-string expression"
+
+
+class Target(enum.Enum):
+    FOR_TARGETS = enum.auto()
+    STAR_TARGETS = enum.auto()
+    DEL_TARGETS = enum.auto()
+
+
+class BasePythonParser(Parser):
+    #: Name of the source file, used in error reports
+    filename: str
+
+    def __init__(
+        self,
+        tokenizer: Tokenizer,
+        *,
+        verbose: bool = False,
+        filename: str = "<unknown>",
+        py_version: Optional[tuple] = None,
+    ) -> None:
+        super().__init__(tokenizer, verbose=verbose)
+        self.filename = filename
+        self.py_version = (
+            min(py_version, sys.version_info) if py_version else sys.version_info
+        )
+        self._fstring_raw_stack: List[bool] = []
+        self._tstring_raw_stack: List[bool] = []
+
+    @memoize
+    def fstring_start(self) -> Optional[tokenize.TokenInfo]:
+        tok = self._tokenizer.peek()
+        if tok.type == FSTRING_START:
+            tok = self._tokenizer.getnext()
+            self._fstring_raw_stack.append("r" in tok.string.lower())
+            return tok
+        return None
+
+    @memoize
+    def tstring_start(self) -> Optional[tokenize.TokenInfo]:
+        tok = self._tokenizer.peek()
+        if tok.type == TSTRING_START:
+            tok = self._tokenizer.getnext()
+            self._tstring_raw_stack.append("r" in tok.string.lower())
+            return tok
+        return None
+
+    @memoize
+    def tstring_middle(self) -> Optional[tokenize.TokenInfo]:
+        tok = self._tokenizer.peek()
+        if tok.type == TSTRING_MIDDLE:
+            return self._tokenizer.getnext()
+        return None
+
+    @memoize
+    def TSTRING_START(self) -> Optional[tokenize.TokenInfo]:
+        return self.tstring_start()
+
+    @memoize
+    def TSTRING_MIDDLE(self) -> Optional[tokenize.TokenInfo]:
+        return self.tstring_middle()
+
+    @memoize
+    def TSTRING_END(self) -> Optional[tokenize.TokenInfo]:
+        return self.tstring_end()
+
+    @memoize
+    def fstring_end(self) -> Optional[tokenize.TokenInfo]:
+        tok = self._tokenizer.peek()
+        if tok.type == FSTRING_END:
+            tok = self._tokenizer.getnext()
+            if self._fstring_raw_stack:
+                self._fstring_raw_stack.pop()
+            return tok
+        return None
+
+    @memoize
+    def tstring_end(self) -> Optional[tokenize.TokenInfo]:
+        tok = self._tokenizer.peek()
+        if tok.type == TSTRING_END:
+            tok = self._tokenizer.getnext()
+            if self._tstring_raw_stack:
+                self._tstring_raw_stack.pop()
+            return tok
+        return None
+
+    def parse(self, rule: str, call_invalid_rules: bool = False) -> Optional[ast.AST]:
+        self.call_invalid_rules = call_invalid_rules
+        res = getattr(self, rule)()
+
+        if res is None:
+            # Grab the last token that was parsed in the first run to avoid
+            # polluting a generic error reports with progress made by invalid rules.
+            last_token = self._tokenizer.diagnose()
+
+            if not call_invalid_rules:
+                self.call_invalid_rules = True
+
+                # Reset the parser cache to be able to restart parsing from the
+                # beginning.
+                self._reset(0)  # type: ignore
+                self._cache.clear()
+
+                res = getattr(self, rule)()
+
+            self.raise_raw_syntax_error(
+                "invalid syntax", last_token.start, last_token.end
+            )
+
+        return res
+
+    def check_version(
+        self, min_version: Tuple[int, ...], error_msg: str, node: Node
+    ) -> Node:
+        """Check that the python version is high enough for a rule to apply."""
+        if self.py_version >= min_version:
+            return node
+        else:
+            raise SyntaxError(
+                f"{error_msg} is only supported in Python {min_version} and above."
+            )
+
+    def raise_indentation_error(self, msg: str) -> None:
+        """Raise an indentation error."""
+        last_token = self._tokenizer.diagnose()
+        args = (
+            self.filename,
+            last_token.start[0],
+            last_token.start[1] + 1,
+            last_token.line,
+            last_token.end[0],
+            last_token.end[1] + 1,
+        )
+        raise IndentationError(msg, args)
+
+    def _advance_location(self, start: tuple[int, int], text: str) -> tuple[int, int]:
+        line, col = start
+        for ch in text:
+            if ch in ("\n", "\r"):
+                line += 1
+                col = 0
+            else:
+                col += 1
+        return line, col
+
+    def _source_offset(self, start: tuple[int, int], end: tuple[int, int]) -> int:
+        line, col = start
+        offset = 0
+        while line < end[0]:
+            offset += len(self._tokenizer.get_lines([line])[0]) - col
+            line += 1
+            col = 0
+        offset += end[1] - col
+        return offset
+
+    def _is_raw_fstring(self) -> bool:
+        return bool(self._fstring_raw_stack) and self._fstring_raw_stack[-1]
+
+    def _is_raw_tstring(self) -> bool:
+        return bool(self._tstring_raw_stack) and self._tstring_raw_stack[-1]
+
+    def _decode_fstring_literal(self, text: str, *, raw: Optional[bool] = None) -> str:
+        """Decode escape sequences in a literal f-string segment unless the f-string is raw."""
+        if raw is None:
+            raw = self._is_raw_fstring()
+        if raw:
+            return text
+        return text.encode("utf-8").decode("unicode_escape")
+
+    def _decode_tstring_literal(self, text: str, *, raw: Optional[bool] = None) -> str:
+        """Decode escape sequences in a literal t-string segment unless the t-string is raw."""
+        if raw is None:
+            raw = self._is_raw_tstring()
+        if raw:
+            return text
+        return text.encode("utf-8").decode("unicode_escape")
+
+    def fstring_debug_prefix(
+        self,
+        lbrace: tokenize.TokenInfo,
+        debug_expr: tokenize.TokenInfo,
+        rbrace: tokenize.TokenInfo,
+    ) -> str:
+        """Reconstruct the literal prefix emitted before a debug f-string value."""
+        start = lbrace.end
+        stop = rbrace.start
+        lines = self._tokenizer.get_lines(list(range(start[0], stop[0] + 1)))
+
+        if start[0] == stop[0]:
+            inside = lines[0][start[1] : stop[1]]
+        else:
+            pieces = []
+            for i, line_no in enumerate(range(start[0], stop[0] + 1)):
+                line = lines[i]
+                if line_no == start[0]:
+                    pieces.append(line[start[1] :])
+                elif line_no == stop[0]:
+                    pieces.append(line[: stop[1]])
+                else:
+                    pieces.append(line)
+            inside = "".join(pieces)
+
+        eq_offset = self._source_offset(lbrace.end, debug_expr.start)
+        for idx in range(eq_offset + 1, len(inside)):
+            if inside[idx] in ("!", ":"):
+                prefix = inside[:idx]
+                return self._decode_fstring_literal(prefix, raw=self._is_raw_fstring())
+        return self._decode_fstring_literal(inside, raw=self._is_raw_fstring())
+
+    def fstring_debug_value(
+        self,
+        value: ast.AST,
+        lbrace: tokenize.TokenInfo,
+        debug_expr: Optional[tokenize.TokenInfo],
+        conversion: Optional[int],
+        format_spec: Optional[ast.AST],
+        rbrace: tokenize.TokenInfo,
+    ) -> ast.AST:
+        """Build the AST for a debug f-string replacement field."""
+        if debug_expr is None:
+            return ast.FormattedValue(
+                value=value,
+                conversion=(conversion if conversion is not None else -1),
+                format_spec=format_spec,
+                lineno=lbrace.start[0],
+                col_offset=lbrace.start[1],
+                end_lineno=rbrace.end[0],
+                end_col_offset=rbrace.end[1],
+            )
+
+        prefix = self.fstring_debug_prefix(lbrace, debug_expr, rbrace)
+        prefix_start = lbrace.end
+        prefix_end = self._advance_location(prefix_start, prefix)
+        formatted = ast.FormattedValue(
+            value=value,
+            conversion=(
+                conversion
+                if conversion is not None
+                else (ord("r") if format_spec is None else -1)
+            ),
+            format_spec=format_spec,
+            lineno=lbrace.start[0],
+            col_offset=lbrace.start[1],
+            end_lineno=rbrace.end[0],
+            end_col_offset=rbrace.end[1],
+        )
+        return ast.JoinedStr(
+            values=[
+                ast.Constant(
+                    value=prefix,
+                    lineno=prefix_start[0],
+                    col_offset=prefix_start[1],
+                    end_lineno=prefix_end[0],
+                    end_col_offset=prefix_end[1],
+                ),
+                formatted,
+            ],
+            lineno=lbrace.start[0],
+            col_offset=lbrace.start[1],
+            end_lineno=rbrace.end[0],
+            end_col_offset=rbrace.end[1],
+        )
+
+    def tstring_debug_prefix(
+        self,
+        lbrace: tokenize.TokenInfo,
+        debug_expr: tokenize.TokenInfo,
+        rbrace: tokenize.TokenInfo,
+    ) -> str:
+        """Reconstruct the literal prefix emitted before a debug t-string value."""
+        start = lbrace.end
+        stop = rbrace.start
+        lines = self._tokenizer.get_lines(list(range(start[0], stop[0] + 1)))
+
+        if start[0] == stop[0]:
+            inside = lines[0][start[1] : stop[1]]
+        else:
+            pieces = []
+            for i, line_no in enumerate(range(start[0], stop[0] + 1)):
+                line = lines[i]
+                if line_no == start[0]:
+                    pieces.append(line[start[1] :])
+                elif line_no == stop[0]:
+                    pieces.append(line[: stop[1]])
+                else:
+                    pieces.append(line)
+            inside = "".join(pieces)
+
+        eq_offset = self._source_offset(lbrace.end, debug_expr.start)
+        for idx in range(eq_offset + 1, len(inside)):
+            if inside[idx] in ("!", ":"):
+                prefix = inside[:idx]
+                return self._decode_tstring_literal(prefix, raw=self._is_raw_tstring())
+        return self._decode_tstring_literal(inside, raw=self._is_raw_tstring())
+
+    def _tstring_expression_text(
+        self,
+        lbrace: tokenize.TokenInfo,
+        rbrace: tokenize.TokenInfo,
+        *,
+        debug_expr: Optional[tokenize.TokenInfo] = None,
+    ) -> str:
+        start = lbrace.end
+        stop = rbrace.start
+        lines = self._tokenizer.get_lines(list(range(start[0], stop[0] + 1)))
+
+        if start[0] == stop[0]:
+            inside = lines[0][start[1] : stop[1]]
+        else:
+            pieces = []
+            for i, line_no in enumerate(range(start[0], stop[0] + 1)):
+                line = lines[i]
+                if line_no == start[0]:
+                    pieces.append(line[start[1] :])
+                elif line_no == stop[0]:
+                    pieces.append(line[: stop[1]])
+                else:
+                    pieces.append(line)
+            inside = "".join(pieces)
+
+        if debug_expr is not None:
+            expr_end = self._source_offset(lbrace.end, debug_expr.start)
+            return inside[:expr_end]
+
+        depth = 0
+        for i, ch in enumerate(inside):
+            if ch in "([{":
+                depth += 1
+            elif ch in ")]}":
+                if depth:
+                    depth -= 1
+            elif depth == 0:
+                if ch in ("!", ":"):
+                    if ch == "!" and i + 1 < len(inside) and inside[i + 1] == "=":
+                        continue
+                    return inside[:i].rstrip()
+                if ch == "=" and (i + 1 >= len(inside) or inside[i + 1] != "="):
+                    return inside[:i].rstrip()
+        return inside.rstrip()
+
+    def tstring_debug_value(
+        self,
+        value: ast.AST,
+        lbrace: tokenize.TokenInfo,
+        debug_expr: Optional[tokenize.TokenInfo],
+        conversion: Optional[int],
+        format_spec: Optional[ast.AST],
+        rbrace: tokenize.TokenInfo,
+    ) -> ast.AST:
+        """Build the AST for a debug t-string replacement field."""
+        expr_text = self._tstring_expression_text(lbrace, rbrace, debug_expr=debug_expr)
+
+        if debug_expr is None:
+            return ast.Interpolation(
+                value=value,
+                str=expr_text,
+                conversion=(conversion if conversion is not None else -1),
+                format_spec=format_spec,
+                lineno=lbrace.start[0],
+                col_offset=lbrace.start[1],
+                end_lineno=rbrace.end[0],
+                end_col_offset=rbrace.end[1],
+            )
+
+        prefix = self.tstring_debug_prefix(lbrace, debug_expr, rbrace)
+        prefix_start = lbrace.end
+        prefix_end = self._advance_location(prefix_start, prefix)
+        formatted = ast.Interpolation(
+            value=value,
+            str=expr_text,
+            conversion=(
+                conversion
+                if conversion is not None
+                else (ord("r") if format_spec is None else -1)
+            ),
+            format_spec=format_spec,
+            lineno=lbrace.start[0],
+            col_offset=lbrace.start[1],
+            end_lineno=rbrace.end[0],
+            end_col_offset=rbrace.end[1],
+        )
+        return ast.TemplateStr(
+            values=[
+                ast.Constant(
+                    value=prefix,
+                    lineno=prefix_start[0],
+                    col_offset=prefix_start[1],
+                    end_lineno=prefix_end[0],
+                    end_col_offset=prefix_end[1],
+                ),
+                formatted,
+            ],
+            lineno=lbrace.start[0],
+            col_offset=lbrace.start[1],
+            end_lineno=rbrace.end[0],
+            end_col_offset=rbrace.end[1],
+        )
+
+    def get_expr_name(self, node) -> str:
+        """Get a descriptive name for an expression."""
+        # See https://github.com/python/cpython/blob/master/Parser/pegen.c#L161
+        assert node is not None
+        node_t = type(node)
+        if node_t is ast.Constant:
+            v = node.value
+            if v is Ellipsis:
+                return "ellipsis"
+            elif v is None:
+                return str(v)
+            # Avoid treating 1 as True through == comparison
+            elif v is True:
+                return str(v)
+            elif v is False:
+                return str(v)
+            else:
+                return "literal"
+
+        try:
+            return EXPR_NAME_MAPPING[node_t]
+        except KeyError:
+            raise ValueError(
+                f"unexpected expression in assignment {type(node).__name__} "
+                f"(line {node.lineno})."
+            )
+
+    def get_invalid_target(
+        self, target: Target, node: Optional[ast.AST]
+    ) -> Optional[ast.AST]:
+        """Get the meaningful invalid target for different assignment type."""
+        if node is None:
+            return None
+
+        # We only need to visit List and Tuple nodes recursively as those
+        # are the only ones that can contain valid names in targets when
+        # they are parsed as expressions. Any other kind of expression
+        # that is a container (like Sets or Dicts) is directly invalid and
+        # we do not need to visit it recursively.
+        if isinstance(node, (ast.List, ast.Tuple)):
+            for e in node.elts:
+                if (inv := self.get_invalid_target(target, e)) is not None:
+                    return inv
+        elif isinstance(node, ast.Starred):
+            if target is Target.DEL_TARGETS:
+                return node
+            return self.get_invalid_target(target, node.value)
+        elif isinstance(node, ast.Compare):
+            # This is needed, because the `a in b` in `for a in b` gets parsed
+            # as a comparison, and so we need to search the left side of the comparison
+            # for invalid targets.
+            if target is Target.FOR_TARGETS:
+                if isinstance(node.ops[0], ast.In):
+                    return self.get_invalid_target(target, node.left)
+                return None
+
+            return node
+        elif isinstance(node, (ast.Name, ast.Subscript, ast.Attribute)):
+            return None
+
+        return node
+
+    def set_expr_context(self, node, context):
+        """Set the context (Load, Store, Del) of an ast node."""
+        node.ctx = context
+        return node
+
+    def ensure_real(self, number: tokenize.TokenInfo) -> float:
+        value = ast.literal_eval(number.string)
+        if type(value) is complex:
+            self.raise_syntax_error_known_location(
+                "real number required in complex literal", number
+            )
+        return value
+
+    def ensure_imaginary(self, number: tokenize.TokenInfo) -> complex:
+        value = ast.literal_eval(number.string)
+        if type(value) is not complex:
+            self.raise_syntax_error_known_location(
+                "imaginary number required in complex literal", number
+            )
+        return value
+
+    def check_fstring_conversion(
+        self, mark: tokenize.TokenInfo, name: tokenize.TokenInfo
+    ) -> int:
+        if mark.end != name.start:
+            self.raise_syntax_error_known_range(
+                "f-string: conversion type must come right after the exclamanation mark",
+                mark,
+                name,
+            )
+
+        s = name.string
+        if len(s) > 1 or s not in ("s", "r", "a"):
+            self.raise_syntax_error_known_location(
+                f"f-string: invalid conversion character '{s}': expected 's', 'r', or 'a'",
+                name,
+            )
+
+        return ord(s)
+
+    def _concat_strings_in_constant(self, parts) -> ast.Constant:
+        s = ast.literal_eval(parts[0].string)
+        for ss in parts[1:]:
+            s += ast.literal_eval(ss.string)
+        args = dict(
+            value=s,
+            lineno=parts[0].start[0],
+            col_offset=parts[0].start[1],
+            end_lineno=parts[-1].end[0],
+            end_col_offset=parts[0].end[1],
+        )
+        if parts[0].string.startswith("u"):
+            args["kind"] = "u"
+        return ast.Constant(**args)
+
+    def _flatten_joinedstr_values(self, values):
+        """Unwrap nested JoinedStr/TemplateStr nodes while preserving value order.
+
+        Empty Constant nodes are filtered out.
+
+        """
+        flattened = []
+        template_type = getattr(ast, "TemplateStr", None)
+        for value in values:
+            if isinstance(value, ast.JoinedStr) or (
+                template_type is not None and isinstance(value, template_type)
+            ):
+                flattened.extend(self._flatten_joinedstr_values(value.values))
+            elif isinstance(value, ast.Constant) and value.value == "":
+                continue
+            else:
+                flattened.append(value)
+        return flattened
+
+    def concatenate_strings(self, parts):
+        """Concatenate multiple tokens and template-like literal AST nodes."""
+        start = end = None
+        template_type = getattr(ast, "TemplateStr", None)
+        if isinstance(parts[0], ast.JoinedStr) or (
+            template_type is not None and isinstance(parts[0], template_type)
+        ):
+            start = parts[0].lineno, parts[0].col_offset
+        if isinstance(parts[-1], ast.JoinedStr) or (
+            template_type is not None and isinstance(parts[-1], template_type)
+        ):
+            end = parts[-1].end_lineno, parts[-1].end_col_offset
+
+        seen_joined = False
+        seen_template = False
+        values = []
+        ss = []
+        for p in parts:
+            if isinstance(p, ast.JoinedStr) or (
+                template_type is not None and isinstance(p, template_type)
+            ):
+                seen_joined = True
+                seen_template = seen_template or (
+                    template_type is not None and isinstance(p, template_type)
+                )
+                if ss:
+                    values.append(self._concat_strings_in_constant(ss))
+                    ss.clear()
+                values.extend(self._flatten_joinedstr_values(p.values))
+            else:
+                ss.append(p)
+
+        if ss:
+            values.append(self._concat_strings_in_constant(ss))
+
+        consolidated = []
+        for p in values:
+            if (
+                consolidated
+                and isinstance(consolidated[-1], ast.Constant)
+                and isinstance(p, ast.Constant)
+            ):
+                consolidated[-1].value += p.value
+                consolidated[-1].end_lineno = p.end_lineno
+                consolidated[-1].end_col_offset = p.end_col_offset
+            else:
+                consolidated.append(p)
+
+        if not seen_joined and len(values) == 1 and isinstance(values[0], ast.Constant):
+            return values[0]
+
+        cls = (
+            ast.TemplateStr
+            if seen_template and hasattr(ast, "TemplateStr")
+            else ast.JoinedStr
+        )
+        return cls(
+            values=consolidated,
+            lineno=start[0] if start else values[0].lineno,
+            col_offset=start[1] if start else values[0].col_offset,
+            end_lineno=end[0] if end else values[-1].end_lineno,
+            end_col_offset=end[1] if end else values[-1].end_col_offset,
+        )
+
+    def generate_ast_for_string(self, tokens):
+        """Generate AST nodes for strings."""
+        err_args = None
+        line_offset = tokens[0].start[0]
+        line = line_offset
+        col_offset = 0
+        source = "(\n"
+        for t in tokens:
+            n_line = t.start[0] - line
+            if n_line:
+                col_offset = 0
+            source += """\n""" * n_line + " " * (t.start[1] - col_offset) + t.string
+            line, col_offset = t.end
+        source += "\n)"
+        try:
+            m = ast.parse(source)
+        except SyntaxError as err:
+            args = (
+                err.filename,
+                err.lineno + line_offset - 2,
+                err.offset,
+                err.text,
+                err.end_lineno + line_offset - 2,
+                err.end_offset,
+            )
+            err_args = (err.msg, args)
+            # Ensure we do not keep the frame alive longer than necessary
+            # by explicitly deleting the error once we got what we needed out
+            # of it
+            del err
+
+        # Avoid getting a triple nesting in the error report that does not
+        # bring anything relevant to the traceback.
+        if err_args is not None:
+            raise SyntaxError(*err_args)
+
+        node = m.body[0].value
+        # Since we asked Python to parse an alterred source starting at line 2
+        # we alter the lineno of the returned AST to recover the right line.
+        # If the string start at line 1, tha AST says 2 so we need to decrement by 1
+        # hence the -2.
+        ast.increment_lineno(node, line_offset - 2)
+        return node
+
+    def extract_import_level(self, tokens: List[tokenize.TokenInfo]) -> int:
+        """Extract the relative import level from the tokens preceding the module name.
+
+        '.' count for one and '...' for 3.
+
+        """
+        level = 0
+        for t in tokens:
+            if t.string == ".":
+                level += 1
+            else:
+                level += 3
+        return level
+
+    def set_decorators(self, target: FC, decorators: list) -> FC:
+        """Set the decorators on a function or class definition."""
+        target.decorator_list = decorators
+        return target
+
+    def get_comparison_ops(self, pairs):
+        return [op for op, _ in pairs]
+
+    def get_comparators(self, pairs):
+        return [comp for _, comp in pairs]
+
+    def set_arg_type_comment(self, arg, type_comment):
+        if type_comment:
+            arg.type_comment = type_comment
+        return arg
+
+    def make_arguments(
+        self,
+        pos_only: Optional[List[Tuple[ast.arg, None]]],
+        pos_only_with_default: List[Tuple[ast.arg, Any]],
+        param_no_default: Optional[List[Tuple[ast.arg, None]]],
+        param_default: Optional[List[Tuple[ast.arg, Any]]],
+        after_star: Optional[
+            Tuple[Optional[ast.arg], List[Tuple[ast.arg, Any]], Optional[ast.arg]]
+        ],
+    ) -> ast.arguments:
+        """Build a function definition arguments."""
+        defaults = (
+            [d for _, d in pos_only_with_default if d is not None]
+            if pos_only_with_default
+            else []
+        )
+        defaults += (
+            [d for _, d in param_default if d is not None] if param_default else []
+        )
+
+        pos_only = pos_only or pos_only_with_default
+
+        # Because we need to combine pos only with and without default even
+        # the version with no default is a tuple
+        pos_only = [p for p, _ in pos_only]
+        params = (param_no_default or []) + (
+            [p for p, _ in param_default] if param_default else []
+        )
+
+        # If after_star is None, make a default tuple
+        after_star = after_star or (None, [], None)
+
+        return ast.arguments(
+            posonlyargs=pos_only,
+            args=params,
+            defaults=defaults,
+            vararg=after_star[0],
+            kwonlyargs=[p for p, _ in after_star[1]],
+            kw_defaults=[d for _, d in after_star[1]],
+            kwarg=after_star[2],
+        )
+
+    def _build_syntax_error(
+        self,
+        message: str,
+        start: Optional[Tuple[int, int]] = None,
+        end: Optional[Tuple[int, int]] = None,
+    ) -> SyntaxError:
+        line_from_token = start is None and end is None
+        if start is None or end is None:
+            tok = self._tokenizer.diagnose()
+            start = start or tok.start
+            end = end or tok.end
+
+        if line_from_token:
+            line = tok.line
+        else:
+            # End is used only to get the proper text
+            line = "\\n".join(
+                self._tokenizer.get_lines(list(range(start[0], end[0] + 1)))
+            )
+
+        # tokenize.py index column offset from 0 while Cpython index column
+        # offset at 1 when reporting SyntaxError, so we need to increment
+        # the column offset when reporting the error.
+        args = (self.filename, start[0], start[1] + 1, line, end[0], end[1] + 1)
+
+        return SyntaxError(message, args)
+
+    def raise_raw_syntax_error(
+        self,
+        message: str,
+        start: Optional[Tuple[int, int]] = None,
+        end: Optional[Tuple[int, int]] = None,
+    ) -> NoReturn:
+        raise self._build_syntax_error(message, start, end)
+
+    def make_syntax_error(self, message: str) -> SyntaxError:
+        return self._build_syntax_error(message)
+
+    def expect_forced(self, res: Any, expectation: str) -> Optional[tokenize.TokenInfo]:
+        if res is None:
+            last_token = self._tokenizer.diagnose()
+            end = last_token.start
+            if sys.version_info >= (3, 12) or last_token.type != 4:  # i.e. not a \n
+                end = last_token.end
+            self.raise_raw_syntax_error(
+                f"expected {expectation}", last_token.start, end
+            )
+        return res
+
+    def raise_syntax_error(self, message: str) -> NoReturn:
+        """Raise a syntax error."""
+        tok = self._tokenizer.diagnose()
+        raise self._build_syntax_error(
+            message,
+            tok.start,
+            tok.end if sys.version_info >= (3, 12) or tok.type != 4 else tok.start,
+        )
+
+    def raise_syntax_error_known_location(
+        self, message: str, node: Union[ast.AST, tokenize.TokenInfo]
+    ) -> NoReturn:
+        """Raise a syntax error that occured at a given AST node."""
+        if isinstance(node, tokenize.TokenInfo):
+            start = node.start
+            end = node.end
+        else:
+            start = node.lineno, node.col_offset
+            end = node.end_lineno, node.end_col_offset
+
+        raise self._build_syntax_error(message, start, end)
+
+    def raise_syntax_error_known_range(
+        self,
+        message: str,
+        start_node: Union[ast.AST, tokenize.TokenInfo],
+        end_node: Union[ast.AST, tokenize.TokenInfo],
+    ) -> NoReturn:
+        if isinstance(start_node, tokenize.TokenInfo):
+            start = start_node.start
+        else:
+            start = start_node.lineno, start_node.col_offset
+
+        if isinstance(end_node, tokenize.TokenInfo):
+            end = end_node.end
+        else:
+            end = end_node.end_lineno, end_node.end_col_offset
+
+        raise self._build_syntax_error(message, start, end)
+
+    def raise_syntax_error_starting_from(
+        self, message: str, start_node: Union[ast.AST, tokenize.TokenInfo]
+    ) -> NoReturn:
+        if isinstance(start_node, tokenize.TokenInfo):
+            start = start_node.start
+        else:
+            start = start_node.lineno, start_node.col_offset
+
+        last_token = self._tokenizer.diagnose()
+
+        raise self._build_syntax_error(message, start, last_token.start)
+
+    def raise_syntax_error_invalid_target(
+        self, target: Target, node: Optional[ast.AST]
+    ) -> None:
+        invalid_target = self.get_invalid_target(target, node)
+
+        if invalid_target is None:
+            return None
+
+        if target in (Target.STAR_TARGETS, Target.FOR_TARGETS):
+            msg = f"cannot assign to {self.get_expr_name(invalid_target)}"
+        else:
+            msg = f"cannot delete {self.get_expr_name(invalid_target)}"
+
+        self.raise_syntax_error_known_location(msg, invalid_target)
+
+    def raise_syntax_error_on_next_token(self, message: str) -> NoReturn:
+        next_token = self._tokenizer.peek()
+        raise self._build_syntax_error(message, next_token.start, next_token.end)

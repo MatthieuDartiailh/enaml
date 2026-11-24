@@ -1,5 +1,7 @@
 .. _tut_person:
 
+.. highlight:: enaml
+
 Person tutorial
 ===============================================================================
 
@@ -12,7 +14,7 @@ Here is the Enaml file (:download:`download here
 <../../../examples/tutorial/person/person_view.enaml>`):
 
 .. literalinclude:: ../../../examples/tutorial/person/person_view.enaml
-    :language: python
+    :language: enaml
 
 Here is the Python code (:download:`download here
 <../../../examples/tutorial/person/person.py>`):
@@ -154,9 +156,9 @@ the attribute names of the ``person`` object used by the ``PersonForm`` in the
     """ A simple class representing a person object.
 
     """
-    last_name = Unicode()
+    last_name = Str()
 
-    first_name = Unicode()
+    first_name = Str()
 
     age = Range(low=0)
 
@@ -173,9 +175,9 @@ the attribute names of the ``person`` object used by the ``PersonForm`` in the
                 first=self.first_name, last=self.last_name, age=self.age,
             )
             print s
-            
+
 Note that our ``Person`` class is designed to print out the name and age of the
-person when the ``age`` attribute changes. 
+person when the ``age`` attribute changes.
 
 Hooking up an Enaml View to an Atom Object
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -197,7 +199,9 @@ In the code block for launching the script from the command line, we create a
 
         app.start()
 
-Running it from the command line, we see::
+Running it from the command line, we see
+
+.. code-block:: shell
 
     $ python person.py
 

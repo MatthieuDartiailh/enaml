@@ -1,15 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import List, Typed
 
 from . import block_compiler as block
 from . import compiler_common as cmn
 from .enaml_ast import ConstExpr, Template
+from ..compat import PY313
 
 
 def collect_local_names(node):
@@ -121,7 +122,13 @@ class FirstPassTemplateCompiler(block.FirstPassBlockCompiler):
         cg.set_lineno(node.lineno)
 
         # Create the template compiler node and store in the node list.
+        # Python 3.11 and 3.12 requires a NULL before a function that is not a method
+        # Python 3.13 one after
+        if not PY313:
+            cg.push_null()
         cmn.load_helper(cg, 'template_node')
+        if PY313:
+            cg.push_null()
         cg.load_fast(cmn.SCOPE_KEY)
         cg.call_function(1)
         cmn.store_node(cg, index)
@@ -132,8 +139,8 @@ class FirstPassTemplateCompiler(block.FirstPassBlockCompiler):
 
         # Update the internal node ids for the hierarchy.
         cmn.load_node(cg, 0)
-        cg.load_attr('update_id_nodes')
-        cg.call_function()
+        cg.load_method('update_id_nodes')
+        cg.call_function(is_method=True)
         cg.pop_top()
 
         # Load the compiler node list for returning.
@@ -164,9 +171,17 @@ class FirstPassTemplateCompiler(block.FirstPassBlockCompiler):
         if node.typename:
             with cg.try_squash_raise():
                 cg.dup_top()
+                # Python 3.11 and 3.12 requires a NULL before a function that is not a method
+                # Python 3.13 one after
+                if not PY313:
+                    cg.push_null()
+                    cg.rot_two()
                 cmn.load_helper(cg, 'type_check_expr')
                 cg.rot_two()
-                cmn.load_name(cg, node.typename, names)
+                if PY313:
+                    cg.push_null()
+                    cg.rot_two()
+                cmn.load_typename(cg, node.typename, names)
                 cg.call_function(2)
                 cg.pop_top()
 
@@ -316,7 +331,13 @@ class TemplateCompiler(cmn.CompilerBase):
 
         # Prepare the code block for execution.
         cmn.fetch_helpers(cg)
+        # Python 3.11 and 3.12 requires a NULL before a function that is not a method
+        # Python 3.13 one after
+        if not PY313:
+            cg.push_null()
         cmn.load_helper(cg, 'make_object')
+        if PY313:
+            cg.push_null()
         cg.call_function()
         cg.store_fast(cmn.SCOPE_KEY)
 
@@ -343,8 +364,16 @@ class TemplateCompiler(cmn.CompilerBase):
 
         # Add the template scope to the node.
         cg.dup_top()
+        # Python 3.11 and 3.12 requires a NULL before a function that is not a method
+        # Python 3.13 one after
+        if not PY313:
+            cg.push_null()
+            cg.rot_two()
         cmn.load_helper(cg, 'add_template_scope')
         cg.rot_two()
+        if PY313:
+            cg.push_null()
+            cg.rot_two()
         cg.load_const(tuple(param_names + const_names))
         for name in param_names:
             cg.load_fast(name)

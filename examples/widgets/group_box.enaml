@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ An example of the `GroupBox` widget.
 
@@ -12,6 +12,7 @@ an optional bounding box and title.
 
 << autodoc-me >>
 """
+from __future__ import print_function
 from enaml.layout.api import vbox, hbox, spacer, align
 from enaml.widgets.api import (
     Window, Container, GroupBox, Form, Label, Field, CheckBox, ComboBox,
@@ -55,8 +56,8 @@ enamldef Main(Window):
         PushButton: push:
             text = "Submit"
             clicked ::
-                print 'Submit'
-                print multiline.text
+                print('Submit')
+                print(multiline.text)
         ComboBox: combo_box:
             index = 0
             items = ['left', 'center', 'right']

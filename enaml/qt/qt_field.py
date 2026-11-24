@@ -1,16 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+import warnings
 from atom.api import Int, Typed
 
 from enaml.widgets.field import ProxyField
 
-from .QtCore import QTimer, Signal
-from .QtGui import QLineEdit
+from .QtCore import QTimer, Signal, Qt
+from .QtWidgets import QLineEdit
 
 from .qt_control import QtControl
 
@@ -19,6 +20,12 @@ ECHO_MODES = {
     'normal': QLineEdit.Normal,
     'password': QLineEdit.Password,
     'silent': QLineEdit.NoEcho
+}
+
+ALIGN_OPTIONS = {
+    'left': Qt.AlignLeft,
+    'right': Qt.AlignRight,
+    'center': Qt.AlignCenter,
 }
 
 
@@ -76,12 +83,13 @@ class QtField(QtControl, ProxyField):
         self.set_max_length(d.max_length)
         self.set_read_only(d.read_only)
         self.set_submit_triggers(d.submit_triggers)
+        self.set_text_align(d.text_align)
         self.widget.textEdited.connect(self.on_text_edited)
 
     #--------------------------------------------------------------------------
     # Private API
     #--------------------------------------------------------------------------
-    def _validate_and_apply(self):
+    def _verify_and_apply(self):
         """ Validate and apply the text in the control.
 
         """
@@ -107,10 +115,10 @@ class QtField(QtControl, ProxyField):
         # A temporary hack until styles are implemented
         if not self._guard & ERROR_FLAG:
             self._guard |= ERROR_FLAG
-            s = u'QLineEdit { border: 2px solid red; background: rgb(255, 220, 220); }'
+            s = 'QLineEdit { border: 2px solid red; background: rgb(255, 220, 220); }'
             self.widget.setStyleSheet(s)
             v = self.declaration.validator
-            self.widget.setToolTip(v and v.message or u'')
+            self.widget.setToolTip(v and v.message or '')
 
     def _clear_error_state(self):
         """ Clear the error state of the widget.
@@ -119,8 +127,10 @@ class QtField(QtControl, ProxyField):
         # A temporary hack until styles are implemented
         if self._guard & ERROR_FLAG:
             self._guard &= ~ERROR_FLAG
-            self.widget.setStyleSheet(u'')
-            self.widget.setToolTip(u'')
+            # Replace the widget's "error" stylesheet with
+            # the one defined in the declaration
+            self.refresh_style_sheet()
+            self.widget.setToolTip('')
 
     def _maybe_valid(self, text):
         """ Get whether the text is valid or can be valid.
@@ -144,7 +154,7 @@ class QtField(QtControl, ProxyField):
         """
         self._guard |= TEXT_GUARD
         try:
-            self._validate_and_apply()
+            self._verify_and_apply()
         finally:
             self._guard &= ~TEXT_GUARD
 
@@ -183,14 +193,18 @@ class QtField(QtControl, ProxyField):
         """
         widget = self.widget
         handler = self.on_submit_text
-        try:
-            widget.lostFocus.disconnect()
-        except (TypeError, RuntimeError):  # was never connected
-            pass
-        try:
-            widget.returnPressed.disconnect()
-        except (TypeError, RuntimeError):  # was never connected
-            pass
+        # Pyside raises a warning if disconnecting a signal that was never
+        # connected. We catch and ignore these warnings.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            try:
+                widget.lostFocus.disconnect()
+            except (TypeError, RuntimeError):  # was never connected
+                pass
+            try:
+                widget.returnPressed.disconnect()
+            except (TypeError, RuntimeError):  # was never connected
+                pass
         if 'lost_focus' in triggers:
             widget.lostFocus.connect(handler)
         if 'return_pressed' in triggers:
@@ -199,12 +213,19 @@ class QtField(QtControl, ProxyField):
             if self._text_timer is None:
                 timer = self._text_timer = QTimer()
                 timer.setSingleShot(True)
-                timer.setInterval(300)
+                timer.setInterval(self.declaration.sync_time)
                 timer.timeout.connect(handler)
         else:
             if self._text_timer is not None:
                 self._text_timer.stop()
                 self._text_timer = None
+
+    def set_sync_time(self, time):
+        """ Set the sync time for the widget.
+
+        """
+        if self._text_timer is not None:
+            self._text_timer.setInterval(self.declaration.sync_time)
 
     def set_placeholder(self, text):
         """ Set the placeholder text of the widget.
@@ -231,6 +252,13 @@ class QtField(QtControl, ProxyField):
 
         """
         self.widget.setReadOnly(read_only)
+
+    def set_text_align(self, text_align):
+        """ Set the alignment for the text in the field.
+
+        """
+        qt_align = ALIGN_OPTIONS[text_align]
+        self.widget.setAlignment(qt_align)
 
     def field_text(self):
         """ Get the text stored in the widget.

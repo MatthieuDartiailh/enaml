@@ -1,13 +1,18 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 import sys
-from setuptools import setup, find_packages, Extension
+from setuptools import Extension, setup
+from setuptools.command.build_py import build_py
+from setuptools.command.develop import develop
 
+from cppy import CppyBuildExt
+
+# Use the env var ENAML_DISABLE_FH4 to disable linking against VCRUNTIME140_1.dll
 
 ext_modules = [
     Extension(
@@ -41,7 +46,7 @@ ext_modules = [
         language='c++',
     ),
     Extension(
-        'enaml.core.dynamicscope',
+        'enaml.core._dynamicscope',
         ['enaml/src/dynamicscope.cpp'],
         language='c++',
     ),
@@ -49,7 +54,17 @@ ext_modules = [
         'enaml.core.alias',
         ['enaml/src/alias.cpp'],
         language='c++',
-    )
+    ),
+    Extension(
+        'enaml.core.declarative_function',
+        ['enaml/src/declarative_function.cpp'],
+        language='c++',
+    ),
+    Extension(
+        'enaml.core.subscription_observer',
+        ['enaml/src/subscription_observer.cpp'],
+        language='c++',
+    ),
 ]
 
 
@@ -65,27 +80,7 @@ if sys.platform == 'win32':
 
 
 setup(
-    name='enaml',
-    version='0.9.8',
-    author='The Nucleic Development Team',
-    author_email='sccolbert@gmail.com',
-    url='https://github.com/nucleic/enaml',
-    description='Declarative DSL for building rich user interfaces in Python',
-    long_description=open('README.rst').read(),
-    requires=['atom', 'PyQt', 'ply', 'kiwisolver'],
-    install_requires=['distribute', 'atom >= 0.3.8', 'kiwisolver >= 0.1.2', 'ply >= 3.4'],
-    packages=find_packages(),
-    package_data={
-        'enaml.applib': ['*.enaml'],
-        'enaml.stdlib': ['*.enaml'],
-        'enaml.workbench.core': ['*.enaml'],
-        'enaml.workbench.ui': ['*.enaml'],
-        'enaml.qt.docking': [
-            'dock_images/*.png',
-            'dock_images/*.py',
-            'enaml_dock_resources.qrc'
-        ],
-    },
-    entry_points={'console_scripts': ['enaml-run = enaml.runner:main']},
+    use_scm_version=True,
     ext_modules=ext_modules,
+    cmdclass={'build_ext': CppyBuildExt},
 )

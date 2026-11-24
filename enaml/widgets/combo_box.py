@@ -1,16 +1,15 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import (
-    Bool, List, Int, Property, Unicode, Typed, ForwardTyped, set_default,
-    observe
+    Bool, List, Int, Property, Str, Typed, ForwardTyped, set_default
 )
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .control import Control, ProxyControl
 
@@ -40,8 +39,8 @@ class ComboBox(Control):
     See `ObjectCombo` for a more robust combo box control.
 
     """
-    #: The unicode strings to display in the combo box.
-    items = d_(List(Unicode()))
+    #: The strings to display in the combo box.
+    items = d_(List(Str()))
 
     #: The integer index of the currently selected item. If the index
     #: falls outside the range of items, the item will be deselected.
@@ -70,7 +69,7 @@ class ComboBox(Control):
         items = self.items
         idx = self.index
         if idx < 0 or idx >= len(items):
-            return u''
+            return ''
         return items[idx]
 
     #--------------------------------------------------------------------------

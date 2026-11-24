@@ -1,18 +1,20 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import Atom, IntEnum, Typed, Coerced
+from enum import IntFlag
+
+from atom.api import Atom, Typed, Coerced, Tuple, Int
 
 from .application import Application
 from .image import Image
 from .mime_data import MimeData
 
 
-class DropAction(IntEnum):
+class DropAction(IntFlag):
     """ An enum defining the possible drop actions.
 
     """
@@ -56,11 +58,15 @@ class DragData(Atom):
 
     #: The supported drop actions of the drag data. This is an OR'd
     #: combination of the available DropAction flags.
-    supported_actions = Coerced(DropAction.Flags, (DropAction.Move,))
+    supported_actions = Coerced(DropAction, (DropAction.Move,))
 
     #: The image to use for the drag. If this is not provided, the
     #: toolkit will choose a suitable default value.
     image = Typed(Image)
+
+    #: The x,y position the drag image appears under the cursor.
+    #: If not provided, this is the last position of the cursor in the widget.
+    hotspot = Tuple(item=Int())
 
 
 class DropEvent(Atom):
@@ -110,7 +116,7 @@ class DropEvent(Atom):
 
         Returns
         -------
-        result : DropAction.Flags
+        result : DropAction
             The combination of possible drop actions.
 
         """

@@ -1,16 +1,16 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024,, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from atom.api import Typed
 
 from enaml.application import Application, ProxyResolver
 
 from .QtCore import QThread
-from .QtGui import QApplication
+from .QtWidgets import QApplication
 
 from .q_deferred_caller import deferredCall, timedCall
 from .qt_factories import QT_FACTORIES
@@ -27,12 +27,22 @@ class QtApplication(Application):
     #: The private QApplication instance.
     _qapp = Typed(QApplication)
 
-    def __init__(self):
+    def __init__(self,  appname=None):
         """ Initialize a QtApplication.
+
+        Parameters
+        ----------
+        appname : str, optional
+            Explicit application name to use for setting the WM_CLASS attribute
+            on Linux.
 
         """
         super(QtApplication, self).__init__()
-        self._qapp = QApplication.instance() or QApplication([])
+        if appname is not None:
+            self._qapp = QApplication.instance() or QApplication([appname])
+        else:
+            self._qapp = QApplication.instance() or QApplication([])
+
         self.resolver = ProxyResolver(factories=QT_FACTORIES)
 
     #--------------------------------------------------------------------------
@@ -65,7 +75,7 @@ class QtApplication(Application):
         callback : callable
             The callable object to execute at some point in the future.
 
-        *args, **kwargs
+        args, kwargs
             Any additional positional and keyword arguments to pass to
             the callback.
 
@@ -85,7 +95,7 @@ class QtApplication(Application):
         callback : callable
             The callable object to execute at some point in the future.
 
-        *args, **kwargs
+        args, kwargs
             Any additional positional and keyword arguments to pass to
             the callback.
 

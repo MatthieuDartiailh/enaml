@@ -1,12 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 from enaml.qt.QtCore import QSize
-from enaml.qt.QtGui import QFrame, QIcon, QPainter
+from enaml.qt.QtGui import QIcon, QPainter
+from enaml.qt.QtWidgets import QFrame
 
 
 class QIconWidget(QFrame):
@@ -92,8 +93,8 @@ class QIconWidget(QFrame):
         size = self._icon_size
         if not size.isValid():
             size = QSize(16, 16)
-        left, top, right, bottom = self.getContentsMargins()
-        return size + QSize(left + right, top + bottom)
+        m = self.contentsMargins()
+        return size + QSize(m.left() + m.right(), m.top() + m.bottom())
 
     def paintEvent(self, event):
         """ Handle the paint event for the widget.

@@ -1,17 +1,11 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from . import QT_API
-if QT_API != 'pyqt':
-    msg = 'the Qt Scintilla widget is only available when using PyQt'
-    raise ImportError(msg)
-
-from PyQt4 import Qsci
-
+from . import Qsci
 
 
 class PythonLexer(Qsci.QsciLexerPython):
@@ -30,7 +24,7 @@ class PythonLexer(Qsci.QsciLexerPython):
         'SystemError SystemExit TabError True TypeError UnboundLocalError '
         'UnicodeDecodeError UnicodeEncodeError UnicodeError '
         'UnicodeTranslateError UnicodeWarning UserWarning ValueError Warning '
-        'WindowsError ZeroDivisionError abs all any apply basestring bin bool '
+        'WindowsError ZeroDivisionError abs all any apply bin bool '
         'buffer bytearray bytes callable chr classmethod cmp coerce compile '
         'complex delattr dict dir divmod enumerate eval execfile file filter'
         'float format frozenset getattr globals hasattr hash help hex id input'
@@ -57,7 +51,7 @@ class EnamlLexer(PythonLexer):
     """ A custom Python lexer which adds Enaml keywords.
 
     """
-    enaml_kwds = " enamldef attr event"
+    enaml_kwds = " enamldef attr event alias template func"
 
     def keywords(self, kwset):
         kwds = super(EnamlLexer, self).keywords(kwset)
@@ -107,5 +101,5 @@ LEXERS = {
 
 #: A static mapping of lexer class to theme language name.
 LEXERS_INV = {}
-for key, value in LEXERS.iteritems():
+for key, value in LEXERS.items():
     LEXERS_INV[value] = key

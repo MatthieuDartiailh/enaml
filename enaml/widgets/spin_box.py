@@ -1,15 +1,13 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
-from atom.api import (
-    Int, Bool, Range, Unicode, Typed, ForwardTyped, observe, set_default
-)
+from atom.api import Int, Bool, Range, Str, Typed, ForwardTyped, set_default
 
-from enaml.core.declarative import d_
+from enaml.core.declarative import d_, observe
 
 from .control import Control, ProxyControl
 
@@ -64,15 +62,15 @@ class SpinBox(Control):
     value = d_(Int(0))
 
     #: An optional prefix to include in the displayed text.
-    prefix = d_(Unicode())
+    prefix = d_(Str())
 
     #: An optional suffix to include in the displayed text.
-    suffix = d_(Unicode())
+    suffix = d_(Str())
 
     #: Optional text to display when the spin box is at its minimum.
     #: This allows the developer to indicate to the user a special
     #: significance to the minimum value e.g. "Auto"
-    special_value_text = d_(Unicode())
+    special_value_text = d_(Str())
 
     #: The step size for the spin box. Defaults to 1.
     single_step = d_(Range(low=1))

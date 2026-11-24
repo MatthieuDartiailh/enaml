@@ -1,15 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
+import datetime
+
 from atom.api import Typed
 
 from enaml.widgets.time_selector import ProxyTimeSelector
 
-from .QtGui import QTimeEdit
+from .QtWidgets import QTimeEdit
 
 from .qt_bounded_time import QtBoundedTime, CHANGED_GUARD
 
@@ -51,7 +53,9 @@ class QtTimeSelector(QtBoundedTime, ProxyTimeSelector):
             The current control time as a time object.
 
         """
-        return self.widget.time().toPython()
+        time = self.widget.time()
+        return datetime.time(time.hour(), time.minute(), time.second(),
+                             time.msec() * 1000)
 
     def set_minimum(self, time):
         """ Set the widget's minimum time.

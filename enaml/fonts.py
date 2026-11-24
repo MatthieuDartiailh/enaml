@@ -1,16 +1,17 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2013, Nucleic Development Team.
+# Copyright (c) 2013-2025, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ A utility module for dealing with CSS3 font strings.
 
 """
+
 from atom.api import Coerced
 
-from .fontext import Font, FontStyle, FontCaps
+from .fontext import Font, FontStyle, FontCaps, FontStretch
 
 
 #: A mapping from CSS font style keyword to style enum
@@ -18,6 +19,20 @@ _STYLES = {
     'normal': FontStyle.Normal,
     'italic': FontStyle.Italic,
     'oblique': FontStyle.Oblique,
+}
+
+
+#: A mapping from CSS font strecth keyword to style enum
+_STRETCH = {
+    'ultra-condensed': FontStretch.UltraCondensed,
+    'extra-condensed': FontStretch.ExtraCondensed,
+    'condensed': FontStretch.Condensed,
+    'semi-condensed': FontStretch.SemiCondensed,
+    'normal': FontStretch.Unstretched,
+    'semi-expanded': FontStretch.SemiExpanded,
+    'expanded': FontStretch.Expanded,
+    'extra-expanded': FontStretch.ExtraExpanded,
+    'ultra-expanded': FontStretch.UltraExpanded,
 }
 
 
@@ -111,18 +126,15 @@ def parse_font(font):
     families = []
     optionals = []
     for token in tokens:
-        if token in _STYLES or token in _VARIANTS or token in _WEIGHTS:
-            if len(sizes) > 0 or len(families) > 0:
-                return None
+        if (token in _STYLES or token in _VARIANTS or
+                token in _WEIGHTS or token in _STRETCH):
             optionals.append(token)
         elif token in _SIZES or token[-2:] in _UNITS:
-            if len(families) > 0:
-                return None
             sizes.append(token)
         else:
             families.append(token)
 
-    if len(optionals) > 3:
+    if len(optionals) > 4:
         return None
     if len(sizes) != 1:
         return None
@@ -132,6 +144,7 @@ def parse_font(font):
     style = None
     variant = None
     weight = None
+    stretch = None
 
     for opt in optionals:
         if opt == 'normal':
@@ -148,6 +161,10 @@ def parse_font(font):
             if weight is not None:
                 return None
             weight = opt
+        elif opt in _STRETCH:
+            if stretch is not None:
+                return None
+            stretch = opt
         else:
             return None
 
@@ -166,15 +183,16 @@ def parse_font(font):
     weight = _WEIGHTS[weight] if weight else _WEIGHTS['normal']
     style = _STYLES[style] if style else _STYLES['normal']
     variant = _VARIANTS[variant] if variant else _VARIANTS['normal']
+    stretch = _STRETCH[stretch] if stretch else _STRETCH['normal']
 
-    return Font(family, size, weight, style, variant)
+    return Font(family, size, weight, style, variant, stretch)
 
 
 def coerce_font(font):
     """ The coercing function for the FontMember.
 
     """
-    if isinstance(font, basestring):
+    if isinstance(font, str):
         return parse_font(font)
 
 
@@ -185,6 +203,10 @@ class FontMember(Coerced):
     font will be parsed into a Font object. If the parsing fails,
     the font will be None.  Font strings must be given in CSS grammar,
     e.g. 'bold 12pt arial', which is order dependant.
+
+    The order is the following:
+
+    style variant weight stretch size family
 
     """
     __slots__ = ()

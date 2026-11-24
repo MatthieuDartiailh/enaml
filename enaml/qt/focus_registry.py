@@ -1,14 +1,14 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2014, Nucleic Development Team.
+# Copyright (c) 2014-2024,, Nucleic Development Team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
-# The full license is in the file COPYING.txt, distributed with this software.
+# The full license is in the file LICENSE, distributed with this software.
 #------------------------------------------------------------------------------
 """ A simple registry module for tracking focus widget mappings.
 
 """
-from .QtGui import QApplication
+from .QtWidgets import QApplication
 
 
 #: The internal mapping of widget to proxy object.
