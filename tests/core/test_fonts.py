@@ -10,10 +10,21 @@ import pytest
 
 from enaml.fonts import (coerce_font, Font, _SIZES, _UNITS, _WEIGHTS, _STYLES,
                          _VARIANTS, _STRETCH)
+from enaml.fontext import FontStyle, FontStretch, FontCaps
 
 # The order defining a CSS3 string is:
 # style variant weight stretch size line-height family.
 # In our case line-height is not supported
+
+
+def test_native_font_constants():
+    assert FontStyle.Normal == 0
+    assert FontStyle.Italic == 1
+    assert FontStyle.Oblique == 2
+    assert FontStretch.Unstretched == 4
+    assert FontStretch.UltraExpanded == 8
+    assert FontCaps.MixedCase == 0
+    assert FontCaps.SmallCaps == 3
 
 
 @pytest.mark.parametrize('family', ['Helvetica', 'Arial'])

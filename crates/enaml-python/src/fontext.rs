@@ -11,40 +11,66 @@ type FontReduceArgs = (String, i32, i32, i32, i32, i32);
 
 // --------------------------------------------------------------------------------------
 // FontStyle - represents text style (normal, italic, oblique)
-#[pyclass(immutable_type, module = "fontext")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum FontStyle {
-    Normal = 0,
-    Italic = 1,
-    Oblique = 2,
+#[pyclass(module = "fontext")]
+pub struct FontStyle {}
+
+#[pymethods]
+#[allow(non_upper_case_globals)]
+impl FontStyle {
+    #[classattr]
+    const Normal: i32 = 0;
+    #[classattr]
+    const Italic: i32 = 1;
+    #[classattr]
+    const Oblique: i32 = 2;
 }
 
 // --------------------------------------------------------------------------------------
 // FontStretch - represents font width variations
-#[pyclass(immutable_type, module = "fontext")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum FontStretch {
-    UltraCondensed = 0,
-    ExtraCondensed = 1,
-    Condensed = 2,
-    SemiCondensed = 3,
-    Unstretched = 4,
-    SemiExpanded = 5,
-    Expanded = 6,
-    ExtraExpanded = 7,
-    UltraExpanded = 8,
+#[pyclass(module = "fontext")]
+pub struct FontStretch {}
+
+#[pymethods]
+#[allow(non_upper_case_globals)]
+impl FontStretch {
+    #[classattr]
+    const UltraCondensed: i32 = 0;
+    #[classattr]
+    const ExtraCondensed: i32 = 1;
+    #[classattr]
+    const Condensed: i32 = 2;
+    #[classattr]
+    const SemiCondensed: i32 = 3;
+    #[classattr]
+    const Unstretched: i32 = 4;
+    #[classattr]
+    const SemiExpanded: i32 = 5;
+    #[classattr]
+    const Expanded: i32 = 6;
+    #[classattr]
+    const ExtraExpanded: i32 = 7;
+    #[classattr]
+    const UltraExpanded: i32 = 8;
 }
 
 // --------------------------------------------------------------------------------------
 // FontCaps - represents font capitalization variants
-#[pyclass(immutable_type, module = "fontext")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum FontCaps {
-    MixedCase = 0,
-    AllUppercase = 1,
-    AllLowercase = 2,
-    SmallCaps = 3,
-    Capitalize = 4,
+#[pyclass(module = "fontext")]
+pub struct FontCaps {}
+
+#[pymethods]
+#[allow(non_upper_case_globals)]
+impl FontCaps {
+    #[classattr]
+    const MixedCase: i32 = 0;
+    #[classattr]
+    const AllUppercase: i32 = 1;
+    #[classattr]
+    const AllLowercase: i32 = 2;
+    #[classattr]
+    const SmallCaps: i32 = 3;
+    #[classattr]
+    const Capitalize: i32 = 4;
 }
 
 /// Font descriptor for Enaml UI elements

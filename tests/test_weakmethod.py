@@ -60,3 +60,18 @@ def test_handling_bad_arguments():
     with pytest.raises(TypeError) as exc:
         WeakMethod(CObj.meth)
     assert "MethodType" in exc.value.args[0]
+
+
+def test_weakmethod_cache_tracks_owner_lifetime():
+    """Test that the Rust cache is keyed by owner lifetime."""
+    first_owner = CObj()
+    first = WeakMethod(first_owner.meth)
+    assert first is WeakMethod(first_owner.meth)
+
+    del first_owner
+    gc.collect()
+
+    second_owner = CObj()
+    second = WeakMethod(second_owner.meth)
+    assert second is WeakMethod(second_owner.meth)
+    assert second is not first
