@@ -13,9 +13,9 @@ from .fontext import Font, FontStyle, FontCaps, FontStretch
 
 
 # Helper function for unpickling Font objects
-def _reconstruct_font(family, pointsize, pixelsize, weight, style, stretch, caps):
+def _reconstruct_font(family, pointsize, weight, style, caps, stretch):
     """Reconstruct a Font object from pickle."""
-    return Font(family, pointsize, pixelsize, weight, style, stretch, caps)
+    return Font(family, pointsize, weight, style, caps, stretch)
 
 
 #: A mapping from CSS font style keyword to style enum
@@ -194,8 +194,8 @@ def parse_font(font):
     stretch = _STRETCH[stretch] if stretch else _STRETCH["normal"]
 
     # Convert enum objects to their integer values for Rust constructor
-    # Font(family, pointsize, pixelsize=-1, weight=400, style=0, stretch=4, caps=0)
-    return Font(family, size, -1, weight, int(style), int(stretch), int(variant))
+    # Font(family, pointsize=-1, weight=-1, style=0, caps=0, stretch=4)
+    return Font(family, size, weight, int(style), int(variant), int(stretch))
 
 
 def coerce_font(font):

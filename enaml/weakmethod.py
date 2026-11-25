@@ -20,9 +20,11 @@ class WeakMethod(_WeakMethod):
 
     def __new__(cls, *args, **kwargs):
         if kwargs:
-            raise TypeError("WeakMethod() takes no keyword arguments")
+            raise TypeError(
+                "WeakMethod() takes no keyword arguments (%d given)" % len(kwargs)
+            )
         if len(args) != 1:
-            raise TypeError("WeakMethod() takes 1 argument")
+            raise TypeError("WeakMethod() takes 1 argument (%d given)" % len(args))
         method = args[0]
         if getattr(method, "__self__", None) is None:
             raise TypeError("WeakMethod() argument must be a MethodType")

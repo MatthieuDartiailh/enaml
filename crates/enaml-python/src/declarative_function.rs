@@ -14,7 +14,7 @@ use pyo3::types::{PyDict, PyFunction, PyMapping, PyTuple, PyType};
 /// Declarative function descriptor for Enaml DSL.
 ///
 /// Wraps a function with a scope key for use in declarative blocks.
-#[pyclass(module = "enaml._rust")]
+#[pyclass(module = "enaml.declarative_function")]
 pub struct DeclarativeFunction {
     #[pyo3(get)]
     func: Py<PyAny>,
@@ -143,7 +143,7 @@ impl DeclarativeFunction {
 /// Bound declarative method for Enaml DSL.
 ///
 /// Represents a declarative function bound to an instance.
-#[pyclass(module = "enaml._rust")]
+#[pyclass(module = "enaml.declarative_function")]
 pub struct BoundDeclarativeMethod {
     #[pyo3(get)]
     func: Py<PyAny>,

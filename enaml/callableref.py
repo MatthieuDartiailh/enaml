@@ -7,13 +7,7 @@
 # ------------------------------------------------------------------------------
 """Weak references to callable Python objects."""
 
-from enaml._rust import CallableRef as _CallableRef
-
-
-class CallableRef(_CallableRef):
-    """A weak callable reference."""
-
-    __module__ = "enaml.callableref"
+from enaml._rust import CallableRef
 
 
 __all__ = ["CallableRef"]

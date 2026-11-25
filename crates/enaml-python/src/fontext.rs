@@ -7,11 +7,11 @@
 // --------------------------------------------------------------------------------------
 use pyo3::prelude::*;
 
-type FontReduceArgs = (String, i32, i32, i32, i32, i32, i32);
+type FontReduceArgs = (String, i32, i32, i32, i32, i32);
 
 // --------------------------------------------------------------------------------------
 // FontStyle - represents text style (normal, italic, oblique)
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "fontext")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStyle {
     Normal = 0,
@@ -21,7 +21,7 @@ pub enum FontStyle {
 
 // --------------------------------------------------------------------------------------
 // FontStretch - represents font width variations
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "fontext")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStretch {
     UltraCondensed = 0,
@@ -37,7 +37,7 @@ pub enum FontStretch {
 
 // --------------------------------------------------------------------------------------
 // FontCaps - represents font capitalization variants
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "fontext")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontCaps {
     MixedCase = 0,
@@ -48,7 +48,7 @@ pub enum FontCaps {
 }
 
 /// Font descriptor for Enaml UI elements
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml.fontext")]
 pub struct Font {
     #[pyo3(get, set)]
     _tkdata: Option<Py<PyAny>>,
@@ -60,98 +60,105 @@ pub struct Font {
     pointsize: i32,
 
     #[pyo3(get)]
-    pixelsize: i32,
-
-    #[pyo3(get)]
     weight: i32,
-
-    _style: i32,
-    _stretch: i32,
-    _caps: i32,
+    style: i32,
+    caps: i32,
+    stretch: i32,
 }
 
 #[pymethods]
 impl Font {
     #[new]
-    #[pyo3(signature = (family = String::new(), pointsize = -1, pixelsize = -1, weight = 400, style = 0, stretch = 4, caps = 0))]
+    #[pyo3(signature = (family = String::new(), pointsize = -1, weight = -1, style = 0, caps = 0, stretch = 4))]
     pub fn new(
         family: String,
         pointsize: i32,
-        pixelsize: i32,
         weight: i32,
         style: i32,
-        stretch: i32,
         caps: i32,
+        stretch: i32,
     ) -> Self {
+        let pointsize = pointsize.max(-1);
+        let weight = weight.clamp(-1, 99);
+        let style = if (0..=2).contains(&style) { style } else { 0 };
+        let caps = if (0..=4).contains(&caps) { caps } else { 0 };
+        let stretch = if (0..=8).contains(&stretch) {
+            stretch
+        } else {
+            4
+        };
         Font {
             _tkdata: None,
             family,
             pointsize,
-            pixelsize,
             weight,
-            _style: style,
-            _stretch: stretch,
-            _caps: caps,
+            style,
+            caps,
+            stretch,
         }
     }
 
     #[getter]
-    fn style(&self) -> FontStyle {
-        match self._style {
-            0 => FontStyle::Normal,
-            1 => FontStyle::Italic,
-            2 => FontStyle::Oblique,
-            _ => FontStyle::Normal,
-        }
+    fn style(&self) -> i32 {
+        self.style
     }
 
     #[getter]
-    fn stretch(&self) -> FontStretch {
-        match self._stretch {
-            0 => FontStretch::UltraCondensed,
-            1 => FontStretch::ExtraCondensed,
-            2 => FontStretch::Condensed,
-            3 => FontStretch::SemiCondensed,
-            4 => FontStretch::Unstretched,
-            5 => FontStretch::SemiExpanded,
-            6 => FontStretch::Expanded,
-            7 => FontStretch::ExtraExpanded,
-            8 => FontStretch::UltraExpanded,
-            _ => FontStretch::Unstretched,
-        }
+    fn caps(&self) -> i32 {
+        self.caps
     }
 
     #[getter]
-    fn caps(&self) -> FontCaps {
-        match self._caps {
-            0 => FontCaps::MixedCase,
-            1 => FontCaps::AllUppercase,
-            2 => FontCaps::AllLowercase,
-            3 => FontCaps::SmallCaps,
-            4 => FontCaps::Capitalize,
-            _ => FontCaps::MixedCase,
-        }
+    fn stretch(&self) -> i32 {
+        self.stretch
     }
 
     pub fn __repr__(&self) -> String {
         format!(
-            "Font(family='{}', pointsize={}, pixelsize={}, weight={}, style={}, stretch={}, caps={})",
-            self.family, self.pointsize, self.pixelsize, self.weight, self._style, self._stretch, self._caps
+            "Font(family=\"{}\", pointsize={}, weight={}, style={}, caps={}stretch={}",
+            self.family,
+            self.pointsize,
+            self.weight,
+            match self.style {
+                0 => "Normal",
+                1 => "Italic",
+                2 => "Oblique",
+                _ => "Normal",
+            },
+            match self.caps {
+                0 => "MixedCase",
+                1 => "AllUppercase",
+                2 => "AllLowercase",
+                3 => "SmallCaps",
+                4 => "Capitalize",
+                _ => "MixedCase",
+            },
+            match self.stretch {
+                0 => "UltraCondensed)",
+                1 => "ExtraCondensed)",
+                2 => "Condensed)",
+                3 => "SemiCondensed)",
+                4 => "Unstretched)",
+                5 => "SemiExpanded)",
+                6 => "Expanded)",
+                7 => "ExtraExpanded)",
+                8 => "UltraExpanded)",
+                _ => "Unstretched)",
+            }
         )
     }
 
     fn __reduce__(&self, py: Python<'_>) -> PyResult<(Py<PyAny>, FontReduceArgs)> {
-        // Return (_reconstruct_font, (family, pointsize, pixelsize, weight, style, stretch, caps))
+        // Return (_reconstruct_font, (family, pointsize, weight, style, caps, stretch))
         let fonts_module = py.import("enaml.fonts")?;
         let reconstruct = fonts_module.getattr("_reconstruct_font")?;
         let args = (
             self.family.clone(),
             self.pointsize,
-            self.pixelsize,
             self.weight,
-            self._style,
-            self._stretch,
-            self._caps,
+            self.style,
+            self.caps,
+            self.stretch,
         );
         Ok((reconstruct.into(), args))
     }

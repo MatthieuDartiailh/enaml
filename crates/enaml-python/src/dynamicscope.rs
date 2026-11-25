@@ -12,7 +12,7 @@ use pyo3::types::{PyAny, PyDict, PyList, PyMapping, PyMappingMethods, PyString, 
 use pyo3::{intern, prelude::*};
 
 /// User key error exception for missing scope keys.
-#[pyclass(immutable_type, extends = PyKeyError, module = "enaml._rust")]
+#[pyclass(immutable_type, extends = PyKeyError, module = "enaml.core.dynamicscope")]
 pub struct UserKeyError;
 
 #[pymethods]
@@ -72,7 +72,7 @@ fn locate_owner_for_assignment<'py>(
 }
 
 /// Wrapper for accessing owner attributes through the nonlocals mechanism.
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml.core.dynamicscope")]
 pub struct Nonlocals {
     owner_obj: Py<PyAny>,
     tracer_obj: Py<PyAny>,
@@ -283,15 +283,8 @@ fn collect_scope_keys(py: Python<'_>, scope: &Bound<'_, DynamicScope>) -> PyResu
         push_key(&mut keys, &mut seen, key);
     }
 
-    for special in ["self", "change", "__scope__", "_[tracer]", "nonlocals"] {
-        if special == "__scope__" {
-            if !seen.contains(special) {
-                seen.insert(special.to_string());
-                keys.push(special.to_string());
-            }
-        } else {
-            push_key(&mut keys, &mut seen, special.to_string());
-        }
+    for special in ["self", "change"] {
+        push_key(&mut keys, &mut seen, special.to_string());
     }
 
     let scope_borrow = scope.borrow();
@@ -354,7 +347,7 @@ fn collect_scope_keys(py: Python<'_>, scope: &Bound<'_, DynamicScope>) -> PyResu
 /// Dynamic scope for Enaml expressions.
 ///
 /// Implements dynamic scoping with owner hierarchy traversal and change tracking.
-#[pyclass(immutable_type, mapping, module = "enaml._rust")]
+#[pyclass(immutable_type, mapping, module = "enaml.core.dynamicscope")]
 pub struct DynamicScope {
     owner: Py<PyAny>,
     f_locals: Py<PyMapping>,
@@ -703,9 +696,11 @@ impl DynamicScope {
 
     pub fn update(slf: &Bound<'_, Self>, py: Python<'_>, other: &Bound<'_, PyAny>) -> PyResult<()> {
         let Ok(other) = other.cast::<PyMapping>() else {
-            return Err(PyAttributeError::new_err(
-                "update() argument must be a mapping",
-            ));
+            let type_name = other.get_type().name()?.to_string();
+            return Err(PyAttributeError::new_err(format!(
+                "'{}' object has no attribute 'items'",
+                type_name
+            )));
         };
         let items_obj = other.call_method0("items")?;
         let items_iter = items_obj.try_iter()?;
@@ -786,6 +781,9 @@ impl DynamicScope {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("<DynamicScope object at {:p}>", self as *const _)
+        format!(
+            "<enaml.core.dynamicscope.DynamicScope object at {:p}>",
+            self as *const _
+        )
     }
 }

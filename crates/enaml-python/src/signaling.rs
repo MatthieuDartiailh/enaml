@@ -264,14 +264,13 @@ impl BoundSignal {
         let Some(slots) = Signal::slots_for_owner(py, owner.bind(py), signal, false)? else {
             return Ok(py.None());
         };
-        let mut last = py.None();
         for slot_ref in slots.iter() {
             let slot = Signal::resolve_slot(py, &slot_ref)?;
             if !slot.is_none(py) {
-                last = slot.bind(py).call(args, kwargs)?.unbind();
+                slot.bind(py).call(args, kwargs)?;
             }
         }
-        Ok(last)
+        Ok(py.None())
     }
 
     #[pyo3(name = "__call__", signature = (*args, **kwargs))]

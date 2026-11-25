@@ -9,4 +9,6 @@
 
 from enaml._rust import call_func
 
+call_func.__module__ = "enaml.core.funchelper"
+
 __all__ = ["call_func"]

@@ -10,7 +10,7 @@ use pyo3::prelude::*;
 type ColorArgs = (u32, u32, u32, u32);
 
 /// Color class wrapping ARGB value in Qt's #AARRGGBB byte order
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml.colorext")]
 pub struct Color {
     #[pyo3(get, set)]
     _tkdata: Option<Py<PyAny>>,

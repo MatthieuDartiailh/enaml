@@ -32,7 +32,7 @@ impl SubscriptionCallableRef {
 /// Observes object subscriptions and triggers reactive updates when subscribed
 /// attributes change. Stores a reference to the observed object (via weakref if
 /// possible, otherwise via a callable adapter) and the attribute name.
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml.core.subscription_observer")]
 pub struct SubscriptionObserver {
     ref_obj: Py<PyAny>,
     attribute: Py<PyAny>,
@@ -110,42 +110,28 @@ impl SubscriptionObserver {
     }
 
     /// Call the subscription observer callback.
-    pub fn __call__(&self, py: Python<'_>) -> PyResult<()> {
+    pub fn __call__(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         let owner = self.ref_obj.bind(py).call0()?;
         if owner.is_none() {
-            return Ok(());
+            return Ok(py.None());
         }
 
         match owner.getattr("_d_engine") {
             Ok(engine) => {
                 let attr_bound = self.attribute.bind(py);
-                engine.call_method("update", (owner, attr_bound), None)?;
-                Ok(())
+                Ok(engine
+                    .call_method("update", (owner, attr_bound), None)?
+                    .unbind())
             }
-            Err(_) => Ok(()),
+            Err(_) => Ok(py.None()),
         }
     }
 
     /// Return string representation.
-    pub fn __repr__(&self, py: Python<'_>) -> String {
-        let owner_str = match self.ref_obj.bind(py).call0() {
-            Ok(owner) if !owner.is_none() => owner
-                .repr()
-                .map(|r| r.to_string())
-                .unwrap_or_else(|_| "<error>".to_string()),
-            _ => "<dead weakref>".to_string(),
-        };
-
-        let attr_str = self
-            .attribute
-            .bind(py)
-            .repr()
-            .map(|r| r.to_string())
-            .unwrap_or_default();
-
+    pub fn __repr__(&self) -> String {
         format!(
-            "SubscriptionObserver(owner={}, attribute={})",
-            owner_str, attr_str
+            "<enaml.core.subscription_observer.SubscriptionObserver object at {:p}>",
+            self
         )
     }
 }

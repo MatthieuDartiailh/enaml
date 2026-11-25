@@ -74,32 +74,11 @@ impl WeakMethod {
         Ok(result.unbind())
     }
 
-    pub fn __bool__(&self, py: Python<'_>) -> bool {
-        self.owner_ref
-            .bind(py)
-            .call0()
-            .is_ok_and(|owner| !owner.is_none())
+    pub fn __bool__(&self) -> bool {
+        true
     }
 
-    pub fn __repr__(&self, py: Python<'_>) -> String {
-        match self.owner_ref.bind(py).call0() {
-            Ok(owner) if !owner.is_none() => {
-                let owner_repr = owner
-                    .repr()
-                    .map(|value| value.to_string())
-                    .unwrap_or_else(|_| "<error>".to_string());
-                let function_repr = self
-                    .function
-                    .bind(py)
-                    .repr()
-                    .map(|value| value.to_string())
-                    .unwrap_or_else(|_| "<error>".to_string());
-                format!(
-                    "WeakMethod(owner={}, function={})",
-                    owner_repr, function_repr
-                )
-            }
-            _ => "WeakMethod(<dead>)".to_string(),
-        }
+    pub fn __repr__(&self) -> String {
+        format!("<enaml.weakmethod.WeakMethod object at {:p}>", self)
     }
 }

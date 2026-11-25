@@ -14,15 +14,26 @@ use pyo3::types::{PyBool, PyDict, PyTuple};
 #[pyclass(subclass, weakref, module = "enaml.callableref")]
 pub struct CallableRef {
     value_ref: Py<PyAny>,
-    callback_ref: Option<Py<PyAny>>,
 }
 
-fn make_ref(py: Python<'_>, value: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+fn make_ref(
+    py: Python<'_>,
+    value: &Bound<'_, PyAny>,
+    callback: Option<&Bound<'_, PyAny>>,
+) -> PyResult<Py<PyAny>> {
     let weakref = py.import("weakref")?;
-    match weakref.getattr("ref")?.call1((value,)) {
-        Ok(reference) => Ok(reference.unbind()),
-        Err(err) if err.is_instance_of::<PyTypeError>(py) => Ok(value.clone().unbind()),
-        Err(err) => Err(err),
+    let ref_fn = weakref.getattr("ref")?;
+    match callback {
+        Some(callback) => match ref_fn.call((value, callback), None) {
+            Ok(reference) => Ok(reference.unbind()),
+            Err(err) if err.is_instance_of::<PyTypeError>(py) => Ok(value.clone().unbind()),
+            Err(err) => Err(err),
+        },
+        None => match ref_fn.call1((value,)) {
+            Ok(reference) => Ok(reference.unbind()),
+            Err(err) if err.is_instance_of::<PyTypeError>(py) => Ok(value.clone().unbind()),
+            Err(err) => Err(err),
+        },
     }
 }
 
@@ -39,19 +50,14 @@ impl CallableRef {
 #[pymethods]
 impl CallableRef {
     #[new]
-    #[pyo3(signature = (value, callback=None))]
+    #[pyo3(signature = (method, callback=None))]
     pub fn new(
         py: Python<'_>,
-        value: &Bound<'_, PyAny>,
+        method: &Bound<'_, PyAny>,
         callback: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Self> {
-        let callback_ref = match callback {
-            Some(callback) => Some(make_ref(py, callback)?),
-            None => None,
-        };
         Ok(Self {
-            value_ref: make_ref(py, value)?,
-            callback_ref,
+            value_ref: make_ref(py, method, callback)?,
         })
     }
 
@@ -70,36 +76,18 @@ impl CallableRef {
     ) -> PyResult<Py<PyAny>> {
         let value = self.resolve(py);
         if value.is_none(py) {
-            if let Some(callback_ref) = &self.callback_ref {
-                let callback = callback_ref.bind(py).call0()?;
-                if !callback.is_none() {
-                    callback.call0()?;
-                }
-            }
             return Ok(py.None());
         }
         let result = value.bind(py).call(args, kwargs)?;
         Ok(result.unbind())
     }
 
-    pub fn __bool__(&self, py: Python<'_>) -> bool {
-        let value = self.resolve(py);
-        !value.is_none(py)
+    pub fn __bool__(&self) -> bool {
+        true
     }
 
-    pub fn __repr__(&self, py: Python<'_>) -> String {
-        let value = self.resolve(py);
-        if value.is_none(py) {
-            "<dead CallableRef>".to_string()
-        } else {
-            format!(
-                "CallableRef({})",
-                value
-                    .bind(py)
-                    .repr()
-                    .map_or_else(|_| "<error>".to_string(), |v| v.to_string())
-            )
-        }
+    pub fn __repr__(&self) -> String {
+        format!("<enaml.callableref.CallableRef object at {:p}>", self)
     }
 
     pub fn __richcmp__(

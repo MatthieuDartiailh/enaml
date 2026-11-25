@@ -18,7 +18,7 @@ use pyo3::PyVisit;
 /// - chain: A tuple of attribute names to traverse to reach the final attribute
 /// - key: The scope key for looking up in storage
 /// - canset: Whether the alias can be set
-#[pyclass(subclass, weakref, module = "enaml._rust")]
+#[pyclass(subclass, weakref, module = "enaml.alias")]
 pub struct Alias {
     #[pyo3(get)]
     target: Py<PyString>,
