@@ -11,12 +11,12 @@ use pyo3::types::{PyAnyMethods, PyString};
 
 /// Small callable wrapper used when the observed owner cannot be weak-referenced.
 #[pyclass(module = "enaml._rust")]
-pub struct CallableRef {
+pub struct SubscriptionCallableRef {
     value: Py<PyAny>,
 }
 
 #[pymethods]
-impl CallableRef {
+impl SubscriptionCallableRef {
     #[new]
     pub fn new(value: Py<PyAny>) -> Self {
         Self { value }
@@ -45,7 +45,7 @@ fn make_ref(py: Python<'_>, owner: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
     match ref_fn.call1((owner,)) {
         Ok(weak_ref) => Ok(weak_ref.unbind()),
         Err(err) if err.is_instance_of::<PyTypeError>(py) => {
-            let wrapper = Py::new(py, CallableRef::new(owner.clone().unbind()))?;
+            let wrapper = Py::new(py, SubscriptionCallableRef::new(owner.clone().unbind()))?;
             Ok(wrapper.into_any())
         }
         Err(err) => Err(err),
@@ -88,9 +88,9 @@ impl SubscriptionObserver {
 
     /// Set the ref property - can only be set to None.
     #[setter]
-    pub fn set_ref(&mut self, value: &Bound<'_, PyAny>) -> PyResult<()> {
+    pub fn set_ref(&mut self, py: Python<'_>, value: &Bound<'_, PyAny>) -> PyResult<()> {
         if value.is_none() {
-            self.ref_obj = value.py().None().unbind();
+            self.ref_obj = py.None();
             Ok(())
         } else {
             Err(PyTypeError::new_err("ref can only be set to None"))

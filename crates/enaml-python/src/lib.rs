@@ -16,6 +16,9 @@ mod fontext;
 mod funchelper;
 mod subscription_observer;
 mod winutil;
+mod weakmethod;
+mod callableref;
+mod signaling;
 
 use alias::Alias;
 use colorext::Color;
@@ -23,8 +26,11 @@ use declarative_function::{BoundDeclarativeMethod, DeclarativeFunction};
 use dynamicscope::{DynamicScope, Nonlocals, UserKeyError};
 use fontext::Font;
 use funchelper::call_func;
-use subscription_observer::{CallableRef, SubscriptionObserver};
+use subscription_observer::{SubscriptionCallableRef, SubscriptionObserver};
 use winutil::WinEnum;
+use weakmethod::WeakMethod;
+use callableref::CallableRef as PublicCallableRef;
+use signaling::{BoundSignal, Signal};
 
 /// Python module entry point for enaml Rust extensions
 #[pymodule]
@@ -42,8 +48,16 @@ fn _rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Alias>()?;
 
     // SubscriptionObserver classes
-    m.add_class::<CallableRef>()?;
+    m.add_class::<SubscriptionCallableRef>()?;
     m.add_class::<SubscriptionObserver>()?;
+
+    // Public weak callable types
+    m.add_class::<WeakMethod>()?;
+    m.add_class::<PublicCallableRef>()?;
+
+    // Public weak signal types
+    m.add_class::<Signal>()?;
+    m.add_class::<BoundSignal>()?;
 
     // DeclarativeFunction classes
     m.add_class::<DeclarativeFunction>()?;
