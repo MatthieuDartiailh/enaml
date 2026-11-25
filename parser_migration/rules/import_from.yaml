@@ -1,0 +1,68 @@
+schema_version: 1
+peg:
+  rule: "import_from"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 604
+  end_line: 623
+  ownership: "python"
+  return_type: "ast.ImportFrom"
+  memoized: false
+  body_sha256: "d51e3ed3b163cf2d970ae4c634d68db6e14ef2dd0b005561ab3152736d087dba"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "dotted_name"
+    - "import_from_targets"
+    - "invalid_import_from"
+  literals:
+    - "."
+    - "..."
+    - "from"
+    - "import"
+    - "lazy"
+  soft_keywords:
+    - "lazy"
+  ast_targets:
+    - "ImportFrom"
+  ast_references:
+    - "ImportFrom"
+  version_gates:
+    - "3.15"
+    - "3.9"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "FROM_IMPORT_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

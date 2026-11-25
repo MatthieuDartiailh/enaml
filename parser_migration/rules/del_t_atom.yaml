@@ -1,0 +1,68 @@
+schema_version: 1
+peg:
+  rule: "del_t_atom"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1832
+  end_line: 1844
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "835826c0b9d39d45298e2b4ddda882568e2a2b8dbf42412964e940a26b55d3e1"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 4
+  left_recursive: false
+  references:
+    - "del_target"
+    - "del_targets"
+  literals:
+    - "("
+    - ")"
+    - "["
+    - "]"
+  soft_keywords: []
+  ast_targets:
+    - "List"
+    - "Name"
+    - "Tuple"
+  ast_references:
+    - "List"
+    - "Name"
+    - "Tuple"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "LIST_EXPR"
+      - "TUPLE_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

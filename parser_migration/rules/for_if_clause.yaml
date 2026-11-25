@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "for_if_clause"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1676
+  end_line: 1687
+  ownership: "python"
+  return_type: "ast.comprehension"
+  memoized: false
+  body_sha256: "4a00986b43a6742f8edaa88b141730bbc8e15e573695b3a3ec626815a5952583"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "disjunction"
+    - "invalid_for_target"
+    - "star_targets"
+  literals:
+    - "async"
+    - "for"
+    - "if"
+    - "in"
+  soft_keywords: []
+  ast_targets:
+    - "comprehension"
+  ast_references:
+    - "comprehension"
+  version_gates:
+    - "3.6"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "FOR_IF_CLAUSE"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

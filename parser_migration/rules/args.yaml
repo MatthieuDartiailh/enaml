@@ -1,0 +1,62 @@
+schema_version: 1
+peg:
+  rule: "args"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1729
+  end_line: 1739
+  ownership: "python"
+  return_type: "Tuple[list, list]"
+  memoized: false
+  body_sha256: "3f2bceace307350060e59175c2592ded400cf03923d2cfbb285ea484fac72a94"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "assignment_expression"
+    - "expression"
+    - "kwargs"
+    - "starred_expression"
+  literals:
+    - ","
+    - ":="
+    - "="
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "Starred"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

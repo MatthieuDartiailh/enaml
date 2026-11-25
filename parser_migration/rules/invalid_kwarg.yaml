@@ -1,0 +1,61 @@
+schema_version: 1
+peg:
+  rule: "invalid_kwarg"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1900
+  end_line: 1921
+  ownership: "python-recovery"
+  return_type: "NoReturn"
+  memoized: false
+  body_sha256: "b560f217cfbd66d4e013ec10406314c54aceb0054b8eaa11bb905fed08b56e28"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 4
+  left_recursive: false
+  references:
+    - "expression"
+    - "for_if_clauses"
+  literals:
+    - "**"
+    - "="
+    - "False"
+    - "None"
+    - "True"
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recovery"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recovery"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

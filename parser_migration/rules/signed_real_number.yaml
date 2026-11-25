@@ -1,0 +1,61 @@
+schema_version: 1
+peg:
+  rule: "signed_real_number"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1072
+  end_line: 1075
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "1702920e1dbb6467dd40532d2cd2a9190c778dc557df00ca0873b33efcd0b201"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "real_number"
+  literals:
+    - "-"
+  soft_keywords: []
+  ast_targets:
+    - "USub"
+    - "UnaryOp"
+  ast_references:
+    - "USub"
+    - "UnaryOp"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "UNARY_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

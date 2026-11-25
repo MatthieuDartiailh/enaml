@@ -1,0 +1,64 @@
+schema_version: 1
+peg:
+  rule: "listcomp"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1688
+  end_line: 1695
+  ownership: "python"
+  return_type: "ast.ListComp"
+  memoized: false
+  body_sha256: "77d79792bf913635167418241972f80e6f4007c38055ffa5a76dd7d4f2128a60"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "for_if_clauses"
+    - "invalid_comprehension"
+    - "named_expression"
+    - "starred_expression"
+  literals:
+    - "["
+    - "]"
+  soft_keywords: []
+  ast_targets:
+    - "ListComp"
+  ast_references:
+    - "ListComp"
+  version_gates:
+    - "3.15"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "LIST_COMP"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

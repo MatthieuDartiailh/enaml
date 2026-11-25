@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "sum"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1403
+  end_line: 1407
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "b66309bb02ddd7f7b6a65d57c1b1e292d95136d2a87a643cb1af1b554d71618c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: true
+  references:
+    - "sum"
+    - "term"
+  literals:
+    - "+"
+    - "-"
+  soft_keywords: []
+  ast_targets:
+    - "Add"
+    - "BinOp"
+    - "Sub"
+  ast_references:
+    - "Add"
+    - "BinOp"
+    - "Sub"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-infix"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-infix"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "BINARY_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

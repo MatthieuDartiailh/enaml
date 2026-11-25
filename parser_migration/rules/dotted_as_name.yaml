@@ -1,0 +1,58 @@
+schema_version: 1
+peg:
+  rule: "dotted_as_name"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 635
+  end_line: 636
+  ownership: "python"
+  return_type: "ast.alias"
+  memoized: false
+  body_sha256: "bae7bbd31b6e8d46ef58355a990c5c4744a3214129bea5bfb7e99535c0903026"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "dotted_name"
+  literals:
+    - "as"
+  soft_keywords: []
+  ast_targets:
+    - "alias"
+  ast_references:
+    - "alias"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

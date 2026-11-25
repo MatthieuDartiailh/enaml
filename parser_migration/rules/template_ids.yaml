@@ -1,0 +1,60 @@
+schema_version: 1
+peg:
+  rule: "template_ids"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 427
+  end_line: 437
+  ownership: "enaml"
+  return_type: null
+  memoized: false
+  body_sha256: "be83d16d69b941513d442ec2ccc01ebea44cf08d4472699babe473ebb7a50434"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "template_id_termination"
+  literals:
+    - "*"
+    - ","
+  soft_keywords: []
+  ast_targets:
+    - "TemplateIdentifiers"
+  ast_references:
+    - "TemplateIdentifiers"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "TEMPLATE_ID_LIST"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

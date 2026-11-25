@@ -1,0 +1,72 @@
+schema_version: 1
+peg:
+  rule: "with_stmt"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 883
+  end_line: 910
+  ownership: "python"
+  return_type: "Union[ast.With, ast.AsyncWith]"
+  memoized: false
+  body_sha256: "b798241102b2dde0ddaca782d634dd168e2a80fc42aa65b414fc4d22ca64682b"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 6
+  left_recursive: false
+  references:
+    - "block"
+    - "invalid_with_stmt"
+    - "invalid_with_stmt_indent"
+    - "with_item"
+  literals:
+    - "("
+    - ")"
+    - ","
+    - ":"
+    - "async"
+    - "with"
+  soft_keywords: []
+  ast_targets:
+    - "AsyncWith"
+    - "With"
+  ast_references:
+    - "AsyncWith"
+    - "With"
+  version_gates:
+    - "3.5"
+    - "3.9"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "ASYNC_WITH_STMT"
+      - "WITH_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

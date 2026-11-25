@@ -1,0 +1,61 @@
+schema_version: 1
+peg:
+  rule: "lambdef"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1519
+  end_line: 1523
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "1839051df20e5ab784ed03cc50d0898fc8703a05e5cff6ec0758cb75638e296c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "expression"
+    - "lambda_params"
+  literals:
+    - ":"
+    - "lambda"
+  soft_keywords: []
+  ast_targets:
+    - "Lambda"
+  ast_references:
+    - "Lambda"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "LAMBDA_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

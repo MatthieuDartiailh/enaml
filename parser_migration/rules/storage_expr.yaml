@@ -1,0 +1,64 @@
+schema_version: 1
+peg:
+  rule: "storage_expr"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 118
+  end_line: 131
+  ownership: "enaml"
+  return_type: "enaml_ast.StorageExpr"
+  memoized: false
+  body_sha256: "1590e7c3353712d62eca1f034d0e52713aa3f2962c6a2c04b6124d60fb976c5b"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "dec_primary"
+    - "operator_expr"
+  literals:
+    - ":"
+    - "attr"
+    - "event"
+  soft_keywords:
+    - "attr"
+    - "event"
+  ast_targets:
+    - "StorageExpr"
+  ast_references:
+    - "StorageExpr"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "STORAGE_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

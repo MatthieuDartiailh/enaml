@@ -1,0 +1,61 @@
+schema_version: 1
+peg:
+  rule: "alias_expr"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 103
+  end_line: 111
+  ownership: "enaml"
+  return_type: "enaml_ast.AliasExpr"
+  memoized: false
+  body_sha256: "f45a0d52dd384ea48fe6f471559368e5ac17e3b50504611c0515c35f85c51649"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references: []
+  literals:
+    - "."
+    - ":"
+    - "alias"
+  soft_keywords:
+    - "alias"
+  ast_targets:
+    - "AliasExpr"
+  ast_references:
+    - "AliasExpr"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "ALIAS_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

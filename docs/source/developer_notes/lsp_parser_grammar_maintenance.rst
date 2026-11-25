@@ -144,27 +144,25 @@ several parser functions.
 Rule mapping manifest
 =====================
 
-The repository should contain a machine-checkable manifest alongside the
-grammar, for example ``enaml_grammar_map.toml`` in the Rust parser crate.  A
-human-readable entry should look like:
+The repository contains a machine-checkable YAML specification for every PEG
+rule under ``parser_migration/rules/``.  The directory is generated from the
+grammar but its ``migration`` sections are reviewable decisions.  For example,
+``comparison.yaml`` records the PEG source, extracted evidence, classification,
+Rowan nodes, Pratt strategy, PyO3 conversion route, recovery sets, and tests.
 
-.. code-block:: toml
+The specifications are not generated parser code.  They are the reviewable
+contract between the PEG and Rust implementations.  The supported commands are:
 
-   [[rule]]
-   peg_name = "comparison"
-   peg_lines = "1348-1378"
-   classification = "pratt-special"
-   parser = "expr::comparison"
-   syntax_kind = "COMPARE_EXPR"
-   contexts = ["ordinary", "condition", "annotation"]
-   associativity = "chain"
-   recovery = ["comma", "closing_delimiter", "newline"]
-   minimum_version = "all"
-   tests = ["comparison-chain", "comparison-mixed", "comparison-recovery"]
-   note = "Do not lower to nested binary expressions."
+.. code-block:: console
 
-The manifest is not generated parser code.  It is the reviewable contract between
-the PEG and Rust implementations.  A CI check should:
+   python parser_migration/scripts/generate_rule_specs.py
+   python parser_migration/scripts/generate_rule_specs.py --check
+   python parser_migration/scripts/check_rule_specs.py
+   python parser_migration/scripts/check_rule_specs.py --strict
+
+The non-strict checker validates generated evidence and schema completeness.
+The strict mode additionally requires every rule to have a confirmed migration
+decision.  A CI check should:
 
 1. enumerate the top-level PEG rules;
 2. require every public PEG rule to appear in the manifest;

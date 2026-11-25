@@ -1,0 +1,59 @@
+schema_version: 1
+peg:
+  rule: "lambda_param_with_default"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1571
+  end_line: 1573
+  ownership: "python"
+  return_type: "Tuple[ast.arg, Any]"
+  memoized: false
+  body_sha256: "81ea77885b66abdf4a7cb955627fa792bf0d6bc9fa58f1bbde911ffca3671ffa"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "default"
+    - "lambda_param"
+  literals:
+    - ","
+    - ":"
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "arg"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

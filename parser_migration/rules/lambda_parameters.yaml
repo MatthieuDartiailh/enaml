@@ -1,0 +1,60 @@
+schema_version: 1
+peg:
+  rule: "lambda_parameters"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1532
+  end_line: 1546
+  ownership: "python"
+  return_type: "ast.arguments"
+  memoized: false
+  body_sha256: "ff0052046d43105457a84af267f39904d80c8e93e20e5d8ebfd8211b0db5bcaf"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 5
+  left_recursive: false
+  references:
+    - "lambda_param_no_default"
+    - "lambda_param_with_default"
+    - "lambda_slash_no_default"
+    - "lambda_slash_with_default"
+    - "lambda_star_etc"
+  literals: []
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "arguments"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

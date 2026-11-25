@@ -1,0 +1,74 @@
+schema_version: 1
+peg:
+  rule: "function_def_raw"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 706
+  end_line: 761
+  ownership: "python"
+  return_type: "Union[ast.FunctionDef, ast.AsyncFunctionDef]"
+  memoized: false
+  body_sha256: "c74c6c0f3c6dd972a23cc620c193ab52c50677a45e4628c85599e87de87aa8bf"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "block"
+    - "expression"
+    - "func_type_comment"
+    - "invalid_def_raw"
+    - "params"
+    - "type_params"
+  literals:
+    - "("
+    - ")"
+    - "->"
+    - ":"
+    - "async"
+    - "def"
+  soft_keywords: []
+  ast_targets:
+    - "AsyncFunctionDef"
+    - "FunctionDef"
+  ast_references:
+    - "AsyncFunctionDef"
+    - "FunctionDef"
+  version_gates:
+    - "3.12"
+    - "3.5"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "ASYNC_FUNCTION_DEF"
+      - "FUNCTION_DEF"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

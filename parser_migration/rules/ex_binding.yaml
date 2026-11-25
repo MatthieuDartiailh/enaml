@@ -1,0 +1,59 @@
+schema_version: 1
+peg:
+  rule: "ex_binding"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 176
+  end_line: 182
+  ownership: "enaml"
+  return_type: "enaml_ast.ExBinding"
+  memoized: false
+  body_sha256: "8e996531f79eb345bf73487ebf001727046ea342199bb03a91a24daf6065be7d"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "operator_expr"
+  literals:
+    - "."
+  soft_keywords: []
+  ast_targets:
+    - "ExBinding"
+  ast_references:
+    - "ExBinding"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "EX_BINDING"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

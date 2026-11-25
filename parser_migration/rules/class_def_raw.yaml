@@ -1,0 +1,66 @@
+schema_version: 1
+peg:
+  rule: "class_def_raw"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 674
+  end_line: 701
+  ownership: "python"
+  return_type: "ast.ClassDef"
+  memoized: false
+  body_sha256: "13ce2db17af1b5730041d224dcaf119a6410541de2c67cd01fab7ffb61f0340b"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "arguments"
+    - "block"
+    - "invalid_class_def_raw"
+    - "type_params"
+  literals:
+    - "("
+    - ")"
+    - ":"
+    - "class"
+  soft_keywords: []
+  ast_targets:
+    - "ClassDef"
+  ast_references:
+    - "ClassDef"
+  version_gates:
+    - "3.12"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "CLASS_DEF"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

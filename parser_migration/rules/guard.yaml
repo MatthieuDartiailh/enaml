@@ -1,0 +1,57 @@
+schema_version: 1
+peg:
+  rule: "guard"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 997
+  end_line: 998
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "285e6ad6097a6890c1b1500d7f95aeea37e1fe09b1f11f13e5577849270765a7"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 0
+  left_recursive: false
+  references:
+    - "guard"
+    - "named_expression"
+  literals:
+    - "if"
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

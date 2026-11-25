@@ -1,0 +1,61 @@
+schema_version: 1
+peg:
+  rule: "conjunction"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1337
+  end_line: 1340
+  ownership: "python"
+  return_type: null
+  memoized: true
+  body_sha256: "9ffb42293d8e8fd42fa2a2427a6c31f0ba9bfdddedaa862681915fd061695743"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "inversion"
+  literals:
+    - "and"
+  soft_keywords: []
+  ast_targets:
+    - "And"
+    - "BoolOp"
+  ast_references:
+    - "And"
+    - "BoolOp"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "BOOL_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

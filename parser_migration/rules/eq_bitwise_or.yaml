@@ -1,0 +1,58 @@
+schema_version: 1
+peg:
+  rule: "eq_bitwise_or"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1367
+  end_line: 1368
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "aa049d13ee3a5c373c16a52ab11cc7c679a2638c8f16802d05c5ba68dcfe84cb"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 0
+  left_recursive: false
+  references:
+    - "bitwise_or"
+  literals:
+    - "=="
+  soft_keywords: []
+  ast_targets:
+    - "Eq"
+  ast_references:
+    - "Eq"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,59 @@
+schema_version: 1
+peg:
+  rule: "template_argument"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 420
+  end_line: 426
+  ownership: "enaml"
+  return_type: null
+  memoized: false
+  body_sha256: "3ca9ec910e1859aa30f6c27a353e3b30cecda8fedf35549c78983f8d36928557"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "expression"
+  literals: []
+  soft_keywords: []
+  ast_targets:
+    - "Expression"
+    - "PythonExpression"
+  ast_references:
+    - "Expression"
+    - "PythonExpression"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

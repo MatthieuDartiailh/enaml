@@ -1,0 +1,62 @@
+schema_version: 1
+peg:
+  rule: "invalid_import_from"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 2161
+  end_line: 2166
+  ownership: "python-recovery"
+  return_type: null
+  memoized: false
+  body_sha256: "3ada3c07ec56d2150b91f96c6d84e526ebd3a64ab397518294f8246089850152"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "dotted_name"
+    - "import_from_targets"
+  literals:
+    - "."
+    - "..."
+    - "from"
+    - "import"
+    - "lazy"
+  soft_keywords:
+    - "lazy"
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recovery"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recovery"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

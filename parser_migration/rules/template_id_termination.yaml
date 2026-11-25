@@ -1,0 +1,55 @@
+schema_version: 1
+peg:
+  rule: "template_id_termination"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 438
+  end_line: 440
+  ownership: "enaml"
+  return_type: null
+  memoized: false
+  body_sha256: "ea59ce67c9a0e5ba5fe2124ef739e9e387d9b76b79d81fe344107cdf9da11af6"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references: []
+  literals:
+    - ":"
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "not-in-cst"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "not-in-cst"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,58 @@
+schema_version: 1
+peg:
+  rule: "yield_stmt"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 581
+  end_line: 582
+  ownership: "python"
+  return_type: "ast.Expr"
+  memoized: false
+  body_sha256: "8b20c8d4dac3eb7d8c42fcc226251cd9e045d90533e3826cac1fbdc86319d109"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 0
+  left_recursive: false
+  references:
+    - "yield_expr"
+  literals: []
+  soft_keywords: []
+  ast_targets:
+    - "Expr"
+  ast_references:
+    - "Expr"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "EXPR_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

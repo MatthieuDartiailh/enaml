@@ -1,0 +1,64 @@
+schema_version: 1
+peg:
+  rule: "with_item"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 911
+  end_line: 920
+  ownership: "python"
+  return_type: "ast.withitem"
+  memoized: false
+  body_sha256: "7db89ba0f96b3f198e376fd98277a8ab7d76e5fbcb800f178270deb9ea7d7203"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "expression"
+    - "invalid_with_item"
+    - "star_target"
+  literals:
+    - ")"
+    - ","
+    - ":"
+    - "as"
+  soft_keywords: []
+  ast_targets:
+    - "withitem"
+  ast_references:
+    - "withitem"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "WITH_ITEM"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

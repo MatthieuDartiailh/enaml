@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "type_alias"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1197
+  end_line: 1224
+  ownership: "python"
+  return_type: "\"ast.TypeAlias\""
+  memoized: false
+  body_sha256: "d8dba0475e4ff7cfc5037a312fdec006044ac18a79fd02492ae7a9ded191b53c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "expression"
+    - "type_params"
+  literals:
+    - "="
+    - "type"
+  soft_keywords:
+    - "type"
+  ast_targets:
+    - "Name"
+    - "TypeAlias"
+  ast_references:
+    - "Name"
+    - "TypeAlias"
+  version_gates:
+    - "3.12"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "TYPE_ALIAS_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

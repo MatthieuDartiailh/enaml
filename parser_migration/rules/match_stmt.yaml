@@ -1,0 +1,63 @@
+schema_version: 1
+peg:
+  rule: "match_stmt"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 974
+  end_line: 980
+  ownership: "python"
+  return_type: "\"ast.Match\""
+  memoized: false
+  body_sha256: "bccfc9eb1b268596a3923be4ac76a634f4e7da06bc417f7f5cd471a04d7060c2"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "case_block"
+    - "invalid_match_stmt"
+    - "subject_expr"
+  literals:
+    - ":"
+    - "match"
+  soft_keywords:
+    - "match"
+  ast_targets:
+    - "Match"
+  ast_references:
+    - "Match"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "MATCH_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

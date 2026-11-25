@@ -1,0 +1,62 @@
+schema_version: 1
+peg:
+  rule: "assignment_expression"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1308
+  end_line: 1327
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "8781dc7e8fff780d6bf3b1a5fd1eba8eaaf3248d7c1610c4a09ce91690bf6fdd"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "expression"
+  literals:
+    - ":="
+  soft_keywords: []
+  ast_targets:
+    - "Name"
+    - "NamedExpr"
+  ast_references:
+    - "Name"
+    - "NamedExpr"
+  version_gates:
+    - "3.8"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "NAMED_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

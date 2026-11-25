@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "invalid_lambda_parameters"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 2088
+  end_line: 2110
+  ownership: "python-recovery"
+  return_type: "NoReturn"
+  memoized: false
+  body_sha256: "2a418e4f10d066daa367808f8e56437ddc22e85d34ea74c7cccaddf0afd02c59"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 6
+  left_recursive: false
+  references:
+    - "invalid_lambda_parameters_helper"
+    - "lambda_param"
+    - "lambda_param_maybe_default"
+    - "lambda_param_no_default"
+    - "lambda_slash_no_default"
+    - "lambda_slash_with_default"
+  literals:
+    - "("
+    - ")"
+    - "*"
+    - ","
+    - "/"
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recovery"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recovery"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

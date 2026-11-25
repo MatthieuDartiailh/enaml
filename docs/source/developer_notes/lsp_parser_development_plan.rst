@@ -28,7 +28,9 @@ Deliverables:
 * a parser token adapter;
 * lexer reconstruction tests;
 * a test helper that renders the entire Rowan tree, ranges, tokens, and text;
-* the rule mapping manifest skeleton.
+* the generated YAML rule specifications in ``parser_migration/rules/``;
+* the deterministic generator and schema/content checker in
+  ``parser_migration/scripts/``;
 * the normative node inventory in :ref:`lsp_parser_rowan_nodes`;
 * the lowering contract in :ref:`lsp_parser_ast_lowering`.
 
@@ -39,6 +41,8 @@ Exit criteria:
   have explicit token snapshots;
 * no parser code depends directly on Logos internals other than through the
   adapter.
+* all top-level PEG rules have exactly one specification, and both generation
+  and non-strict validation pass.
 
 Phase 1: parser and Rowan infrastructure
 ----------------------------------------
@@ -287,6 +291,8 @@ The reusable lexer and parser are complete enough to support the LSP when:
 * the lexer is the only lexical implementation;
 * lexing and Rowan parsing both reconstruct source exactly;
 * every PEG rule is classified in the manifest;
+* every rule specification has a confirmed parser, Rowan, recovery, PyO3
+  conversion, and test decision before its parser implementation is merged;
 * all expression precedence is data-driven and special cases are documented;
 * all indentation and soft-keyword behavior is explicit;
 * current Python and Enaml valid fixtures parse;

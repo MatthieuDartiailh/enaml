@@ -1,0 +1,64 @@
+schema_version: 1
+peg:
+  rule: "pragma"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 86
+  end_line: 89
+  ownership: "enaml"
+  return_type: "enaml_ast.Pragma"
+  memoized: false
+  body_sha256: "f4e62a030e10867f9c29012b31f3827f3c208ccb093c1120a3161b89c812dcc3"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "args"
+    - "pragma_arg"
+  literals:
+    - "("
+    - ")"
+    - ","
+    - "pragma"
+  soft_keywords:
+    - "pragma"
+  ast_targets:
+    - "Pragma"
+  ast_references:
+    - "Pragma"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "PRAGMA"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

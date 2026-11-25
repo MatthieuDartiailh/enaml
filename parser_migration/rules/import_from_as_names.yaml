@@ -1,0 +1,57 @@
+schema_version: 1
+peg:
+  rule: "import_from_as_names"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 629
+  end_line: 630
+  ownership: "python"
+  return_type: "List[ast.alias]"
+  memoized: false
+  body_sha256: "c23e9b681b2ebd582c91fae09cbded34613609f2adfd448ade4c33d0e73a57b9"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "import_from_as_name"
+  literals:
+    - ","
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "alias"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,62 @@
+schema_version: 1
+peg:
+  rule: "closed_pattern"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1020
+  end_line: 1030
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "83316a9c662d0b366f002bb7ea1fce76ce654bbc4817ff88b977460eac2ccd02"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 8
+  left_recursive: false
+  references:
+    - "capture_pattern"
+    - "class_pattern"
+    - "group_pattern"
+    - "literal_pattern"
+    - "mapping_pattern"
+    - "sequence_pattern"
+    - "value_pattern"
+    - "wildcard_pattern"
+  literals: []
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

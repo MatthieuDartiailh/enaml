@@ -1,0 +1,60 @@
+schema_version: 1
+peg:
+  rule: "assert_stmt"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 583
+  end_line: 586
+  ownership: "python"
+  return_type: "ast.Assert"
+  memoized: false
+  body_sha256: "3716a5be948d0cd6870b9f90c81315aefdcf828744649fa969138c6fc7b8de4c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 0
+  left_recursive: false
+  references:
+    - "expression"
+  literals:
+    - ","
+    - "assert"
+  soft_keywords: []
+  ast_targets:
+    - "Assert"
+  ast_references:
+    - "Assert"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "ASSERT_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

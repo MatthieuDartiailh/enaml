@@ -1,0 +1,68 @@
+schema_version: 1
+peg:
+  rule: "try_stmt"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 921
+  end_line: 943
+  ownership: "python"
+  return_type: "ast.Try"
+  memoized: false
+  body_sha256: "f3e4480f657da43b9c1f27c2c07dfeed006631120a7e533c3c8d891fc1ae7d0a"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 4
+  left_recursive: false
+  references:
+    - "block"
+    - "else_block"
+    - "except_block"
+    - "except_star_block"
+    - "finally_block"
+    - "invalid_try_stmt"
+  literals:
+    - ":"
+    - "try"
+  soft_keywords: []
+  ast_targets:
+    - "Try"
+    - "TryStar"
+  ast_references:
+    - "Try"
+    - "TryStar"
+  version_gates:
+    - "3.11"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "TRY_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

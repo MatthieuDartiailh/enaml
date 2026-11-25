@@ -1,0 +1,64 @@
+schema_version: 1
+peg:
+  rule: "expression"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1279
+  end_line: 1287
+  ownership: "python"
+  return_type: null
+  memoized: true
+  body_sha256: "1a3524cc1aadfbaae2f6acff98d2c43a51f287455ea864c9034fc4c7250f2931"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 5
+  left_recursive: false
+  references:
+    - "disjunction"
+    - "expression"
+    - "invalid_expression"
+    - "invalid_legacy_expression"
+    - "lambdef"
+  literals:
+    - "else"
+    - "if"
+  soft_keywords: []
+  ast_targets:
+    - "IfExp"
+  ast_references:
+    - "IfExp"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "COND_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

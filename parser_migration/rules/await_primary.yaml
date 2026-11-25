@@ -1,0 +1,60 @@
+schema_version: 1
+peg:
+  rule: "await_primary"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1433
+  end_line: 1436
+  ownership: "python"
+  return_type: null
+  memoized: true
+  body_sha256: "c21d7ad744b29cb2e780fbed6dc73b41a2ade55378aa3492a7d19900933c634a"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "primary"
+  literals:
+    - "await"
+  soft_keywords: []
+  ast_targets:
+    - "Await"
+  ast_references:
+    - "Await"
+  version_gates:
+    - "3.5"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-prefix"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-prefix"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "AWAIT_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

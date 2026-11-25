@@ -1,0 +1,57 @@
+schema_version: 1
+peg:
+  rule: "kwargs"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1740
+  end_line: 1744
+  ownership: "python"
+  return_type: "list"
+  memoized: false
+  body_sha256: "5f6b45cd7eb319abdb6b51f8c9757fb830ea2bf15d58c56f890ebbb322a8c65d"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "kwarg_or_double_starred"
+    - "kwarg_or_starred"
+  literals:
+    - ","
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,79 @@
+schema_version: 1
+peg:
+  rule: "assignment"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 503
+  end_line: 544
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "7ffb0e1a7cb73df531d3f8f6e1e73786aa647d9b4e3dd6a0a2e5ef1d1866eda0"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 6
+  left_recursive: false
+  references:
+    - "annotated_rhs"
+    - "augassign"
+    - "expression"
+    - "invalid_assignment"
+    - "single_subscript_attribute_target"
+    - "single_target"
+    - "star_expressions"
+    - "star_targets"
+    - "yield_expr"
+  literals:
+    - "("
+    - ")"
+    - ":"
+    - "="
+  soft_keywords: []
+  ast_targets:
+    - "AnnAssign"
+    - "Assign"
+    - "AugAssign"
+    - "Name"
+  ast_references:
+    - "AnnAssign"
+    - "Assign"
+    - "AugAssign"
+    - "Name"
+  version_gates:
+    - "3.6"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "ANN_ASSIGN_STMT"
+      - "ASSIGN_STMT"
+      - "AUG_ASSIGN_STMT"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "dictcomp"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1713
+  end_line: 1724
+  ownership: "python"
+  return_type: "ast.DictComp"
+  memoized: false
+  body_sha256: "d00498bc893ae29316078d213ee8c63ab051c00d7ad4908ba201b9ca2c2b3c2b"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 3
+  left_recursive: false
+  references:
+    - "bitwise_or"
+    - "for_if_clauses"
+    - "invalid_dict_comprehension"
+    - "kvpair"
+  literals:
+    - "**"
+    - "{"
+    - "}"
+  soft_keywords: []
+  ast_targets:
+    - "DictComp"
+  ast_references:
+    - "DictComp"
+  version_gates:
+    - "3.15"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "pratt-special"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "pratt-special"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "DICT_COMP"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

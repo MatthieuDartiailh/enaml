@@ -1,0 +1,68 @@
+schema_version: 1
+peg:
+  rule: "template_inst"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 378
+  end_line: 396
+  ownership: "enaml"
+  return_type: null
+  memoized: false
+  body_sha256: "eb7d078e4d65abfd44528d362289007b96f3c33053f6622306932d804103758c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "pragmas"
+    - "template_args"
+    - "template_ids"
+    - "template_inst_body"
+  literals:
+    - "("
+    - ")"
+    - ":"
+  soft_keywords: []
+  ast_targets:
+    - "TemplateArguments"
+    - "TemplateInst"
+  ast_references:
+    - "Pass"
+    - "TemplateArguments"
+    - "TemplateInst"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "TEMPLATE_ARG_LIST"
+      - "TEMPLATE_INST"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

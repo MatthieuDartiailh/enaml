@@ -1,0 +1,63 @@
+schema_version: 1
+peg:
+  rule: "invalid_tstring_replacement_field"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 2407
+  end_line: 2432
+  ownership: "python-recovery"
+  return_type: null
+  memoized: false
+  body_sha256: "ace548444e9fa80c41104988513475ef4d4abbef995c18ae4456992be4c8eeec"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 11
+  left_recursive: false
+  references:
+    - "invalid_tstring_conversion_character"
+    - "star_expressions"
+    - "tstring_format_spec"
+    - "yield_expr"
+  literals:
+    - "!"
+    - ":"
+    - "="
+    - "{"
+    - "}"
+  soft_keywords: []
+  ast_targets: []
+  ast_references: []
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recovery"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recovery"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

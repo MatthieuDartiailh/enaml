@@ -1,0 +1,65 @@
+schema_version: 1
+peg:
+  rule: "operator_expr"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 183
+  end_line: 219
+  ownership: "enaml"
+  return_type: null
+  memoized: false
+  body_sha256: "d56d4ead43e5149e62356543b1f7840d935f71669e7c76794e71c8cd42e99c8c"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 4
+  left_recursive: false
+  references:
+    - "block"
+    - "py_expr"
+  literals:
+    - ":"
+    - ":="
+    - "<<"
+    - "="
+    - ">>"
+  soft_keywords: []
+  ast_targets:
+    - "OperatorExpr"
+  ast_references:
+    - "OperatorExpr"
+    - "body"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "OPERATOR_EXPR"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

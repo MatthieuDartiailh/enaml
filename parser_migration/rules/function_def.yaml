@@ -1,0 +1,58 @@
+schema_version: 1
+peg:
+  rule: "function_def"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 702
+  end_line: 705
+  ownership: "python"
+  return_type: "Union[ast.FunctionDef, ast.AsyncFunctionDef]"
+  memoized: false
+  body_sha256: "bb2a4b42869a36159c38e1c2b089ca9c30d778dda7d97f93b0d114f9322d17d6"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 2
+  left_recursive: false
+  references:
+    - "decorators"
+    - "function_def_raw"
+  literals: []
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "AsyncFunctionDef"
+    - "FunctionDef"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

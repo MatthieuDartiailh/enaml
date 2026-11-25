@@ -1,0 +1,78 @@
+schema_version: 1
+peg:
+  rule: "atom"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1479
+  end_line: 1510
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "0f291b478b9b869395ea22940a1daffed63ae3b54d2b5abb25ec569948a8ec08"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 10
+  left_recursive: false
+  references:
+    - "dict"
+    - "dictcomp"
+    - "genexp"
+    - "group"
+    - "list"
+    - "listcomp"
+    - "set"
+    - "setcomp"
+    - "strings"
+    - "tuple"
+  literals:
+    - "("
+    - "..."
+    - "False"
+    - "None"
+    - "True"
+    - "["
+    - "{"
+  soft_keywords: []
+  ast_targets:
+    - "Constant"
+    - "Name"
+    - "literal_eval"
+  ast_references:
+    - "Constant"
+    - "Name"
+    - "literal_eval"
+  version_gates:
+    - "3.9"
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

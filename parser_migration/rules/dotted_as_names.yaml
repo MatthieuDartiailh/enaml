@@ -1,0 +1,57 @@
+schema_version: 1
+peg:
+  rule: "dotted_as_names"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 633
+  end_line: 634
+  ownership: "python"
+  return_type: "List[ast.alias]"
+  memoized: false
+  body_sha256: "06eb04fc789b887f02bdd73de89ef103ca8057448264a0fc74de80f01ea3e075"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "dotted_as_name"
+  literals:
+    - ","
+  soft_keywords: []
+  ast_targets: []
+  ast_references:
+    - "alias"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "list"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "list"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes: []
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "no-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

@@ -1,0 +1,59 @@
+schema_version: 1
+peg:
+  rule: "fstring_full_format_spec"
+  file: "enaml/core/parser/enaml.gram"
+  start_line: 1596
+  end_line: 1602
+  ownership: "python"
+  return_type: null
+  memoized: false
+  body_sha256: "07bd83425ccbe63b1d54bdbd168aa5864ccf3346bc70eec8151f593fdd044465"
+  previous_body_sha256: null
+grammar:
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+evidence:
+  alternatives: 1
+  left_recursive: false
+  references:
+    - "fstring_format_spec"
+  literals:
+    - ":"
+  soft_keywords: []
+  ast_targets:
+    - "JoinedStr"
+  ast_references:
+    - "JoinedStr"
+  version_gates: []
+migration:
+  status: "needs-review"
+  classification:
+    suggested: "recursive-descent"
+    confirmed: null
+  parser:
+    entry: null
+    strategy: "recursive-descent"
+    binding_power: null
+    associativity: null
+    expression_context: null
+  syntax:
+    nodes:
+      - "FSTRING"
+    trivia_contract_reviewed: false
+    first_tokens: []
+    follow_tokens: []
+  recovery:
+    sync_tokens: []
+    diagnostic: null
+  pyo3_conversion:
+    route: "direct-python-ast"
+    reviewed: false
+  tests:
+    valid_fixtures: []
+    invalid_fixtures: []
+    round_trip: false
+    precedence: false
+    version_gate: false
+  review:
+    owner: null
+    notes: []

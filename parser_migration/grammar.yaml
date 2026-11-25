@@ -1,0 +1,9 @@
+schema_version: 1
+grammar:
+  file: "enaml/core/parser/enaml.gram"
+  sha256: "7f82701a25624af315abb8c9052d9cbd19b0bfdd7a1fda8c7d22de59f5b20bf6"
+  rule_count: 285
+  spec_directory: "parser_migration/rules"
+inventory:
+  reviewed: 0
+  implemented: 0
