@@ -283,8 +283,15 @@ fn collect_scope_keys(py: Python<'_>, scope: &Bound<'_, DynamicScope>) -> PyResu
         push_key(&mut keys, &mut seen, key);
     }
 
-    for special in ["self", "change"] {
-        push_key(&mut keys, &mut seen, special.to_string());
+    for special in ["self", "change", "__scope__"] {
+        if special == "__scope__" {
+            if !seen.contains(special) {
+                seen.insert(special.to_string());
+                keys.push(special.to_string());
+            }
+        } else {
+            push_key(&mut keys, &mut seen, special.to_string());
+        }
     }
 
     let scope_borrow = scope.borrow();
@@ -483,8 +490,17 @@ impl DynamicScope {
         let mut current = Some(scope_borrow.owner.clone_ref(py));
         while let Some(obj) = current {
             let obj_bound = obj.bind(py);
-            match resolve_owner_attribute(py, obj_bound, &PyString::new(py, key_str)) {
-                Ok(value) => return Ok(value),
+            match obj_bound.getattr(PyString::new(py, key_str)) {
+                Ok(value) => {
+                    let tracer = scope_borrow.tracer.bind(py);
+                    if !tracer.is_none() {
+                        tracer.call_method1(
+                            "dynamic_load",
+                            (obj_bound, PyString::new(py, key_str), value.clone()),
+                        )?;
+                    }
+                    return Ok(value);
+                }
                 Err(err) => {
                     if err.is_instance_of::<PyAttributeError>(py) {
                         current = if let Ok(parent) = obj_bound.getattr("_parent") {

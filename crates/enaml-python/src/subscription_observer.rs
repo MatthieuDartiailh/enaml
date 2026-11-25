@@ -7,7 +7,7 @@
 // --------------------------------------------------------------------------------------
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyAnyMethods, PyString};
+use pyo3::types::{PyAnyMethods, PyDict, PyString, PyTuple};
 
 /// Small callable wrapper used when the observed owner cannot be weak-referenced.
 #[pyclass(module = "enaml._rust")]
@@ -22,7 +22,13 @@ impl SubscriptionCallableRef {
         Self { value }
     }
 
-    pub fn __call__(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+    #[pyo3(name = "__call__", signature = (*_args, **_kwargs))]
+    pub fn __call__(
+        &self,
+        py: Python<'_>,
+        _args: &Bound<'_, PyTuple>,
+        _kwargs: Option<&Bound<'_, PyDict>>,
+    ) -> PyResult<Py<PyAny>> {
         Ok(self.value.clone_ref(py))
     }
 }
@@ -32,11 +38,8 @@ impl SubscriptionCallableRef {
 /// Observes object subscriptions and triggers reactive updates when subscribed
 /// attributes change. Stores a reference to the observed object (via weakref if
 /// possible, otherwise via a callable adapter) and the attribute name.
-#[pyclass(immutable_type, module = "enaml.core.subscription_observer")]
-pub struct SubscriptionObserver {
-    ref_obj: Py<PyAny>,
-    attribute: Py<PyAny>,
-}
+#[pyclass(subclass, weakref, dict, module = "enaml.core.subscription_observer")]
+pub struct SubscriptionObserver {}
 
 fn make_ref(py: Python<'_>, owner: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
     let weakref_module = py.import("weakref")?;
@@ -59,7 +62,7 @@ impl SubscriptionObserver {
         py: Python<'_>,
         owner: &Bound<'_, PyAny>,
         attribute: &Bound<'_, PyAny>,
-    ) -> PyResult<Self> {
+    ) -> PyResult<Py<SubscriptionObserver>> {
         if !attribute.is_instance_of::<PyString>() {
             return Err(PyTypeError::new_err("attribute must be a string"));
         }
@@ -68,29 +71,34 @@ impl SubscriptionObserver {
             return Err(PyTypeError::new_err("owner must not be None"));
         }
 
-        Ok(SubscriptionObserver {
-            ref_obj: make_ref(py, owner)?,
-            attribute: attribute.into(),
-        })
+        let observer = Py::new(py, SubscriptionObserver {})?;
+        let bound = observer.bind(py);
+        bound.setattr("_ref_obj", make_ref(py, owner)?)?;
+        bound.setattr("_attribute", attribute.clone())?;
+        Ok(observer)
     }
 
     /// Return the attribute name.
     #[getter]
-    pub fn name(&self, py: Python<'_>) -> Py<PyAny> {
-        self.attribute.clone_ref(py)
+    pub fn name(slf: &Bound<'_, Self>) -> PyResult<Py<PyAny>> {
+        Ok(slf.getattr("_attribute")?.unbind())
     }
 
     /// Return the callable ref object used to resolve the owner.
     #[getter]
-    pub fn get_ref(&self, py: Python<'_>) -> Py<PyAny> {
-        self.ref_obj.clone_ref(py)
+    pub fn get_ref(slf: &Bound<'_, Self>) -> PyResult<Py<PyAny>> {
+        Ok(slf.getattr("_ref_obj")?.unbind())
     }
 
     /// Set the ref property - can only be set to None.
     #[setter]
-    pub fn set_ref(&mut self, py: Python<'_>, value: &Bound<'_, PyAny>) -> PyResult<()> {
+    pub fn set_ref(
+        slf: &Bound<'_, Self>,
+        py: Python<'_>,
+        value: &Bound<'_, PyAny>,
+    ) -> PyResult<()> {
         if value.is_none() {
-            self.ref_obj = py.None();
+            slf.setattr("_ref_obj", py.None())?;
             Ok(())
         } else {
             Err(PyTypeError::new_err("ref can only be set to None"))
@@ -98,27 +106,34 @@ impl SubscriptionObserver {
     }
 
     /// Return True when the owner is still available.
-    pub fn __bool__(&self, py: Python<'_>) -> bool {
-        if self.ref_obj.is_none(py) {
+    pub fn __bool__(slf: &Bound<'_, Self>) -> bool {
+        let Ok(ref_obj) = slf.getattr("_ref_obj") else {
+            return false;
+        };
+        if ref_obj.is_none() {
             return false;
         }
 
-        self.ref_obj
-            .bind(py)
-            .call0()
-            .is_ok_and(|owner| !owner.is_none())
+        ref_obj.call0().is_ok_and(|owner| !owner.is_none())
     }
 
     /// Call the subscription observer callback.
-    pub fn __call__(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let owner = self.ref_obj.bind(py).call0()?;
+    #[pyo3(name = "__call__", signature = (*_args, **_kwargs))]
+    pub fn __call__(
+        slf: &Bound<'_, Self>,
+        py: Python<'_>,
+        _args: &Bound<'_, PyTuple>,
+        _kwargs: Option<&Bound<'_, PyDict>>,
+    ) -> PyResult<Py<PyAny>> {
+        let ref_obj = slf.getattr("_ref_obj")?;
+        let owner = ref_obj.call0()?;
         if owner.is_none() {
             return Ok(py.None());
         }
 
         match owner.getattr("_d_engine") {
             Ok(engine) => {
-                let attr_bound = self.attribute.bind(py);
+                let attr_bound = slf.getattr("_attribute")?;
                 Ok(engine
                     .call_method("update", (owner, attr_bound), None)?
                     .unbind())
@@ -128,10 +143,10 @@ impl SubscriptionObserver {
     }
 
     /// Return string representation.
-    pub fn __repr__(&self) -> String {
-        format!(
+    pub fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        Ok(format!(
             "<enaml.core.subscription_observer.SubscriptionObserver object at {:p}>",
-            self
-        )
+            slf.as_ptr()
+        ))
     }
 }

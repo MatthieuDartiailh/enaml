@@ -27,7 +27,6 @@ pub fn call_func(
     let code = func.getattr(intern!(py, "__code__"))?;
     let globals = func.getattr(intern!(py, "__globals__"))?;
     let defaults = func.getattr(intern!(py, "__defaults__"))?;
-    let kwdefaults = func.getattr(intern!(py, "__kwdefaults__"))?;
     let closure = func.getattr(intern!(py, "__closure__"))?;
 
     let mut kw_values = Vec::new();
@@ -54,34 +53,14 @@ pub fn call_func(
     }
     let args_ptr = unsafe { ffi::PySequence_Fast_ITEMS(fast_args) };
 
-    let locals_dict = if let Some(locals) = func_locals {
-        let dict = PyDict::new(py);
-        let items = locals.call_method0("items")?;
-        for item in items.try_iter()? {
-            let item = item?;
-            let pair = item.cast::<PyTuple>()?;
-            if pair.len() == 2 {
-                dict.set_item(pair.get_item(0)?, pair.get_item(1)?)?;
-            }
-        }
-        Some(dict)
-    } else {
-        None
-    };
-    let locals_ptr = locals_dict
-        .as_ref()
-        .map_or(std::ptr::null_mut(), |dict| dict.as_ptr());
+    let locals_ptr = func_locals.map_or(std::ptr::null_mut(), |locals| locals.as_ptr());
 
     let closure_ptr = if closure.is_none() {
         std::ptr::null_mut()
     } else {
         closure.as_ptr()
     };
-    let kwdefaults_ptr = if kwdefaults.is_none() {
-        std::ptr::null_mut()
-    } else {
-        kwdefaults.as_ptr()
-    };
+    let kwdefaults_ptr = std::ptr::null_mut();
     let kwds_ptr = if kw_values.is_empty() {
         std::ptr::null_mut()
     } else {

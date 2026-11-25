@@ -1,5 +1,12 @@
 # Enaml Atom to Ators Migration Plan
 
+## Implementation status
+
+This plan is persisted for the later ators migration and is not implementation
+work for the Rust migration. It remains gated on the upstream ators repository
+providing dynamic member creation, public metaclass/member APIs, observer/change
+kinds, and a tagged supported release.
+
 This plan starts after the Rust extension migration is stable.
 
 ## Runtime and dependency decisions
