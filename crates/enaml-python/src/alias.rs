@@ -7,7 +7,9 @@
 // --------------------------------------------------------------------------------------
 use pyo3::exceptions::{PyAttributeError, PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
+use pyo3::pyclass::PyTraverseError;
 use pyo3::types::{PyAny, PyBool, PyString, PyTuple};
+use pyo3::PyVisit;
 
 /// Alias descriptor for aliasing attributes from one object to another.
 ///
@@ -16,7 +18,7 @@ use pyo3::types::{PyAny, PyBool, PyString, PyTuple};
 /// - chain: A tuple of attribute names to traverse to reach the final attribute
 /// - key: The scope key for looking up in storage
 /// - canset: Whether the alias can be set
-#[pyclass(immutable_type, module = "enaml._rust")]
+#[pyclass(subclass, weakref, module = "enaml._rust")]
 pub struct Alias {
     #[pyo3(get)]
     target: Py<PyString>,
@@ -113,6 +115,20 @@ impl Alias {
             key: key.clone().unbind(),
             canset: false,
         })
+    }
+
+    pub fn __traverse__(&self, visit: PyVisit<'_>) -> Result<(), PyTraverseError> {
+        visit.call(&self.target)?;
+        visit.call(&self.chain)?;
+        visit.call(&self.key)?;
+        Ok(())
+    }
+
+    fn __clear__(slf: &Bound<'_, Self>, py: Python<'_>) {
+        let mut borrow = slf.borrow_mut();
+        borrow.target = PyString::new(py, "").unbind();
+        borrow.chain = PyTuple::empty(py).unbind();
+        borrow.key = py.None();
     }
 
     #[getter]

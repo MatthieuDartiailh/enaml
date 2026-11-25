@@ -95,16 +95,22 @@ impl DeclarativeFunction {
         Ok(())
     }
 
-    #[pyo3(signature = (obj, *args, **kwargs))]
+    #[pyo3(signature = (*args, **kwargs))]
     pub fn __call__<'py>(
         &self,
         py: Python<'py>,
-        obj: &Bound<'py, PyAny>,
         args: &Bound<'py, PyTuple>,
         kwargs: Option<&Bound<'py, PyDict>>,
     ) -> PyResult<Py<PyAny>> {
+        if args.is_empty() {
+            return Err(PyTypeError::new_err(
+                "DeclarativeFunction.__call__() takes at least 1 argument (0 given)",
+            ));
+        }
+        let obj = args.get_item(0)?;
+        let remaining = args.get_slice(1, args.len());
         let func = self.func.bind(py).cast::<PyFunction>()?;
-        let scope = build_scope_locals(py, obj, &self.key.bind(py))?;
+        let scope = build_scope_locals(py, &obj, self.key.bind(py))?;
         let empty_kwargs = PyDict::new(py);
         let kwargs_arg = kwargs.unwrap_or(&empty_kwargs);
 
@@ -115,7 +121,7 @@ impl DeclarativeFunction {
         }
 
         let scope_mapping = scope.cast::<PyMapping>()?;
-        let result = funchelper::call_func(py, func, args, kwargs_arg, Some(scope_mapping));
+        let result = funchelper::call_func(py, func, &remaining, kwargs_arg, Some(scope_mapping));
         match result {
             Ok(value) => Ok(value),
             Err(err) => {
@@ -209,7 +215,7 @@ impl BoundDeclarativeMethod {
         kwargs: Option<&Bound<'py, PyDict>>,
     ) -> PyResult<Py<PyAny>> {
         let self_bound = slf.obj.bind(py);
-        let scope = build_scope_locals(py, self_bound, &slf.key.bind(py))?;
+        let scope = build_scope_locals(py, self_bound, slf.key.bind(py))?;
         let empty_kwargs = PyDict::new(py);
         let kwargs_arg = kwargs.unwrap_or(&empty_kwargs);
 

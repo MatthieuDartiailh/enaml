@@ -13,18 +13,15 @@ The Python codebase currently targets Python 3.6+, strives to follow PEP 8 and
 uses Numpy style docstring.
 
 
-Python C++ bindings
--------------------
+Python Rust bindings
+--------------------
 
-The bindings are hand-written and relies on cppy (https://github.com/nucleic/cppy).
-Enaml tries to use a reasonably modern C API and to support sub-interpreter,
-this has a couple of consequences:
+Native Python bindings live in ``crates/enaml-python`` and are built with
+PyO3 and Maturin. The workspace can be checked and formatted with:
 
-- static variables use is limited to cases that cannot lead to state leakage
-  between multiple sub-interpreters. Note that this is currently not heavily
-  tested and may require some improvements.
-- all the non exported symbol are enclosed in anonymous namespaces
-- enaml does not use static types and only dynamical types (note that the
-  type slots and related structures are stored in a static variable)
-- modules use the multi-phases initialization mechanism as defined in
-  PEP 489 -- Multi-phase extension module initialization
+.. code-block:: console
+
+    cargo fmt --check
+    cargo clippy --workspace --all-targets -- -D warnings
+    cargo test --workspace
+    maturin develop

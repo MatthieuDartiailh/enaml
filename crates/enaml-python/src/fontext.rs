@@ -7,9 +7,11 @@
 // --------------------------------------------------------------------------------------
 use pyo3::prelude::*;
 
+type FontReduceArgs = (String, i32, i32, i32, i32, i32, i32);
+
 // --------------------------------------------------------------------------------------
 // FontStyle - represents text style (normal, italic, oblique)
-#[pyclass(immutable_type, skip_from_py_object, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml._rust")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStyle {
     Normal = 0,
@@ -19,7 +21,7 @@ pub enum FontStyle {
 
 // --------------------------------------------------------------------------------------
 // FontStretch - represents font width variations
-#[pyclass(immutable_type, skip_from_py_object, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml._rust")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontStretch {
     UltraCondensed = 0,
@@ -35,7 +37,7 @@ pub enum FontStretch {
 
 // --------------------------------------------------------------------------------------
 // FontCaps - represents font capitalization variants
-#[pyclass(immutable_type, skip_from_py_object, module = "enaml._rust")]
+#[pyclass(immutable_type, module = "enaml._rust")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FontCaps {
     MixedCase = 0,
@@ -138,10 +140,7 @@ impl Font {
         )
     }
 
-    fn __reduce__(
-        &self,
-        py: Python<'_>,
-    ) -> PyResult<(Py<PyAny>, (String, i32, i32, i32, i32, i32, i32))> {
+    fn __reduce__(&self, py: Python<'_>) -> PyResult<(Py<PyAny>, FontReduceArgs)> {
         // Return (_reconstruct_font, (family, pointsize, pixelsize, weight, style, stretch, caps))
         let fonts_module = py.import("enaml.fonts")?;
         let reconstruct = fonts_module.getattr("_reconstruct_font")?;

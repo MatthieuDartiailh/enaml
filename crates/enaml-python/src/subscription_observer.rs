@@ -106,7 +106,7 @@ impl SubscriptionObserver {
         self.ref_obj
             .bind(py)
             .call0()
-            .map_or(false, |owner| !owner.is_none())
+            .is_ok_and(|owner| !owner.is_none())
     }
 
     /// Call the subscription observer callback.

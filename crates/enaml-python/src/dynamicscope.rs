@@ -37,7 +37,7 @@ fn resolve_owner_attribute<'py>(
                 if parent.is_none() {
                     Err(PyAttributeError::new_err(format!(
                         "attribute '{}' not found",
-                        name.to_string()
+                        name
                     )))
                 } else {
                     resolve_owner_attribute(py, &parent, name)
@@ -58,7 +58,7 @@ fn locate_owner_for_assignment<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let mut current = Some(owner.clone());
     while let Some(obj) = current {
-        if let Ok(_) = obj.getattr(name) {
+        if obj.getattr(name).is_ok() {
             return Ok(obj);
         }
 
@@ -85,13 +85,13 @@ impl Nonlocals {
     pub fn new(py: Python<'_>, owner: Py<PyAny>, tracer: Option<Py<PyAny>>) -> Self {
         Nonlocals {
             owner_obj: owner,
-            tracer_obj: tracer.unwrap_or_else(|| py.None().into()),
+            tracer_obj: tracer.unwrap_or_else(|| py.None()),
         }
     }
 
     pub fn __contains__(&self, py: Python<'_>, key: &Bound<'_, PyString>) -> PyResult<bool> {
         let owner = self.owner_obj.bind(py);
-        match resolve_owner_attribute(py, &owner, key) {
+        match resolve_owner_attribute(py, owner, key) {
             Ok(_) => Ok(true),
             Err(err) => {
                 if err.is_instance_of::<PyAttributeError>(py) {
@@ -111,7 +111,7 @@ impl Nonlocals {
         name: &Bound<'py, PyString>,
     ) -> PyResult<Bound<'py, PyAny>> {
         let owner = self.owner_obj.bind(py);
-        match resolve_owner_attribute(py, &owner, name) {
+        match resolve_owner_attribute(py, owner, name) {
             Ok(value) => {
                 let tracer = self.tracer_obj.bind(py);
                 if !tracer.is_none() && tracer.hasattr(intern!(py, "dynamic_load"))? {
@@ -141,7 +141,7 @@ impl Nonlocals {
         key: &Bound<'py, PyString>,
     ) -> PyResult<Bound<'py, PyAny>> {
         let owner = self.owner_obj.bind(py);
-        match resolve_owner_attribute(py, &owner, key) {
+        match resolve_owner_attribute(py, owner, key) {
             Ok(value) => {
                 let tracer = self.tracer_obj.bind(py);
                 if !tracer.is_none() && tracer.hasattr(intern!(py, "dynamic_load"))? {
@@ -168,13 +168,13 @@ impl Nonlocals {
         key: &Bound<'py, PyString>,
         value: &Bound<'py, PyAny>,
     ) -> PyResult<()> {
-        let owner = locate_owner_for_assignment(py, &self.owner_obj.bind(py), key)?;
+        let owner = locate_owner_for_assignment(py, self.owner_obj.bind(py), key)?;
         owner.setattr(key, value)?;
         Ok(())
     }
 
     pub fn __delitem__<'py>(&self, py: Python<'py>, key: &Bound<'py, PyString>) -> PyResult<()> {
-        let owner = locate_owner_for_assignment(py, &self.owner_obj.bind(py), key)?;
+        let owner = locate_owner_for_assignment(py, self.owner_obj.bind(py), key)?;
         owner.delattr(key)?;
         Ok(())
     }
@@ -185,13 +185,13 @@ impl Nonlocals {
         name: &Bound<'py, PyString>,
         value: &Bound<'py, PyAny>,
     ) -> PyResult<()> {
-        let owner = locate_owner_for_assignment(py, &self.owner_obj.bind(py), name)?;
+        let owner = locate_owner_for_assignment(py, self.owner_obj.bind(py), name)?;
         owner.setattr(name, value)?;
         Ok(())
     }
 
     pub fn __delattr__<'py>(&self, py: Python<'py>, name: &Bound<'py, PyString>) -> PyResult<()> {
-        let owner = locate_owner_for_assignment(py, &self.owner_obj.bind(py), name)?;
+        let owner = locate_owner_for_assignment(py, self.owner_obj.bind(py), name)?;
         owner.delattr(name)?;
         Ok(())
     }
@@ -229,8 +229,8 @@ impl Nonlocals {
     fn __clear__(slf: &Bound<'_, Self>) {
         let py = slf.py();
         let mut borrow = slf.borrow_mut();
-        borrow.owner_obj = py.None().into();
-        borrow.tracer_obj = py.None().into();
+        borrow.owner_obj = py.None();
+        borrow.tracer_obj = py.None();
     }
 
     pub fn __repr__(&self) -> String {
@@ -284,7 +284,14 @@ fn collect_scope_keys(py: Python<'_>, scope: &Bound<'_, DynamicScope>) -> PyResu
     }
 
     for special in ["self", "change", "__scope__", "_[tracer]", "nonlocals"] {
-        push_key(&mut keys, &mut seen, special.to_string());
+        if special == "__scope__" {
+            if !seen.contains(special) {
+                seen.insert(special.to_string());
+                keys.push(special.to_string());
+            }
+        } else {
+            push_key(&mut keys, &mut seen, special.to_string());
+        }
     }
 
     let scope_borrow = scope.borrow();
@@ -483,7 +490,7 @@ impl DynamicScope {
         let mut current = Some(scope_borrow.owner.clone_ref(py));
         while let Some(obj) = current {
             let obj_bound = obj.bind(py);
-            match resolve_owner_attribute(py, &obj_bound, &PyString::new(py, key_str)) {
+            match resolve_owner_attribute(py, obj_bound, &PyString::new(py, key_str)) {
                 Ok(value) => return Ok(value),
                 Err(err) => {
                     if err.is_instance_of::<PyAttributeError>(py) {
@@ -694,11 +701,12 @@ impl DynamicScope {
         Ok(pyo3::types::PyList::new(py, items)?.into_any())
     }
 
-    pub fn update(
-        slf: &Bound<'_, Self>,
-        py: Python<'_>,
-        other: &Bound<'_, PyMapping>,
-    ) -> PyResult<()> {
+    pub fn update(slf: &Bound<'_, Self>, py: Python<'_>, other: &Bound<'_, PyAny>) -> PyResult<()> {
+        let Ok(other) = other.cast::<PyMapping>() else {
+            return Err(PyAttributeError::new_err(
+                "update() argument must be a mapping",
+            ));
+        };
         let items_obj = other.call_method0("items")?;
         let items_iter = items_obj.try_iter()?;
         for item_result in items_iter {

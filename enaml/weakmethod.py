@@ -18,7 +18,14 @@ class WeakMethod(_WeakMethod):
     __module__ = "enaml.weakmethod"
     _cache = WeakKeyDictionary()
 
-    def __new__(cls, method):
+    def __new__(cls, *args, **kwargs):
+        if kwargs:
+            raise TypeError("WeakMethod() takes no keyword arguments")
+        if len(args) != 1:
+            raise TypeError("WeakMethod() takes 1 argument")
+        method = args[0]
+        if getattr(method, "__self__", None) is None:
+            raise TypeError("WeakMethod() argument must be a MethodType")
         owner = getattr(method, "__self__", None)
         function = getattr(method, "__func__", None)
         if owner is None or function is None:

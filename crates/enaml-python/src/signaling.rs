@@ -17,13 +17,10 @@ pub struct Signal {}
 
 impl Signal {
     fn disconnect_owner(_py: Python<'_>, owner: &Bound<'_, PyAny>) -> PyResult<()> {
-        match owner.getattr(SLOTS_ATTR) {
-            Ok(slots) => {
-                if slots.cast::<PyDict>().is_ok() {
-                    owner.delattr(SLOTS_ATTR)?;
-                }
+        if let Ok(slots) = owner.getattr(SLOTS_ATTR) {
+            if slots.cast::<PyDict>().is_ok() {
+                owner.delattr(SLOTS_ATTR)?;
             }
-            Err(_) => {}
         }
         Ok(())
     }
@@ -71,8 +68,11 @@ impl Signal {
         }
     }
 
-    fn resolve_slot(_py: Python<'_>, slot: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
-        if slot.hasattr("__call__")? {
+    fn resolve_slot(py: Python<'_>, slot: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+        let weakref = py.import("weakref")?;
+        let reference_type = weakref.getattr("ReferenceType")?;
+        let weak_method_type = weakref.getattr("WeakMethod")?;
+        if slot.is_instance(&reference_type)? || slot.is_instance(&weak_method_type)? {
             if let Ok(value) = slot.call0() {
                 return Ok(value.unbind());
             }
@@ -133,26 +133,19 @@ impl Signal {
             Err(_) => owner,
         };
         let signal = slf.into_pyobject(py)?.into_any().unbind();
-        let bound = Py::new(py, BoundSignal::new(signal, objref)?)?;
+        let bound = Py::new(py, BoundSignal::new(py, signal.bind(py), objref.bind(py))?)?;
         Ok(bound.into_bound(py).into_any())
     }
 
-    pub fn __set__(
-        &self,
-        _obj: &Bound<'_, PyAny>,
-        _value: &Bound<'_, PyAny>,
-    ) -> PyResult<()> {
+    pub fn __set__(&self, _obj: &Bound<'_, PyAny>, _value: &Bound<'_, PyAny>) -> PyResult<()> {
         Err(PyAttributeError::new_err("can't set read only Signal"))
     }
 
     pub fn __delete__(&self, _py: Python<'_>, obj: &Bound<'_, PyAny>) -> PyResult<()> {
-        match obj.getattr(SLOTS_ATTR) {
-            Ok(value) => {
-                if let Ok(slots) = value.cast::<PyDict>() {
-                    slots.clear();
-                }
+        if let Ok(value) = obj.getattr(SLOTS_ATTR) {
+            if let Ok(slots) = value.cast::<PyDict>() {
+                slots.clear();
             }
-            Err(_) => {}
         }
         Ok(())
     }
@@ -196,8 +189,25 @@ impl BoundSignal {
 #[pymethods]
 impl BoundSignal {
     #[new]
-    pub fn new(signal: Py<PyAny>, objref: Py<PyAny>) -> PyResult<Self> {
-        Ok(Self { signal, objref })
+    pub fn new(
+        _py: Python<'_>,
+        signal: &Bound<'_, PyAny>,
+        objref: &Bound<'_, PyAny>,
+    ) -> PyResult<Self> {
+        if signal.cast::<Signal>().is_err() {
+            return Err(pyo3::exceptions::PyAttributeError::new_err(
+                "BoundSignal() argument 1 must be a Signal",
+            ));
+        }
+        if !objref.hasattr("__call__")? {
+            return Err(pyo3::exceptions::PyTypeError::new_err(
+                "BoundSignal() argument 2 must be a weak reference",
+            ));
+        }
+        Ok(Self {
+            signal: signal.clone().unbind(),
+            objref: objref.clone().unbind(),
+        })
     }
 
     pub fn _owner(&self, py: Python<'_>) -> Py<PyAny> {
@@ -210,17 +220,10 @@ impl BoundSignal {
             return Ok(());
         }
         let signal = self.signal.bind(py);
-        let Some(slots) =
-            Signal::slots_for_owner(py, &owner.bind(py), signal, true)?
-        else {
+        let Some(slots) = Signal::slots_for_owner(py, owner.bind(py), signal, true)? else {
             return Ok(());
         };
         let slot_ref = Signal::slot_for(py, slot)?;
-        for existing in slots.iter() {
-            if Signal::same_slot(py, &existing, slot)? {
-                return Ok(());
-            }
-        }
         slots.append(slot_ref.bind(py))?;
         Ok(())
     }
@@ -231,9 +234,7 @@ impl BoundSignal {
             return Ok(());
         }
         let signal = self.signal.bind(py);
-        let Some(slots) =
-            Signal::slots_for_owner(py, &owner.bind(py), signal, false)?
-        else {
+        let Some(slots) = Signal::slots_for_owner(py, owner.bind(py), signal, false)? else {
             return Ok(());
         };
         let mut index = 0;
@@ -260,9 +261,7 @@ impl BoundSignal {
             return Ok(py.None());
         }
         let signal = self.signal.bind(py);
-        let Some(slots) =
-            Signal::slots_for_owner(py, &owner.bind(py), signal, false)?
-        else {
+        let Some(slots) = Signal::slots_for_owner(py, owner.bind(py), signal, false)? else {
             return Ok(py.None());
         };
         let mut last = py.None();

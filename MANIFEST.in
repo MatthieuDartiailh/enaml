@@ -14,8 +14,10 @@ recursive-include examples *.*
 recursive-include licenses *.txt
 recursive-include tools *.*
 recursive-include tests *.py
-recursive-include enaml/src *.cpp
-recursive-include enaml/src *.h
+include Cargo.toml
+include Cargo.lock
+recursive-include crates *.toml
+recursive-include crates *.rs
 prune .git
 prune docs/build
 prune dist

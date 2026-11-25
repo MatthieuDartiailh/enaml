@@ -78,7 +78,7 @@ impl WeakMethod {
         self.owner_ref
             .bind(py)
             .call0()
-            .map_or(false, |owner| !owner.is_none())
+            .is_ok_and(|owner| !owner.is_none())
     }
 
     pub fn __repr__(&self, py: Python<'_>) -> String {

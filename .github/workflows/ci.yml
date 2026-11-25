@@ -13,7 +13,9 @@ on:
       - "enaml/**"
       - "examples/**"
       - "tests/**"
-      - setup.py
+      - Cargo.toml
+      - Cargo.lock
+      - "crates/**"
       - pyproject.toml
 
 jobs:
@@ -65,20 +67,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools
           pip install setuptools-scm[toml]
+          pip install maturin
           pip install numpy
-          pip install git+https://github.com/nucleic/cppy@main
           pip install git+https://github.com/nucleic/atom@main
           pip install git+https://github.com/MatthieuDartiailh/bytecode@main
           pip install git+https://github.com/nucleic/kiwi@main
-      - name: Install project
-        env:
-          CPPFLAGS: --coverage
-        # Use legacy command to install the library to be able to measure
-        # coverage of C++ code.
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Check Rust
         run: |
-          pip install .[qt${{ matrix.qt-version }}-${{ matrix.qt-binding }}]
-          pip uninstall enaml --yes
-          python setup.py develop
+          cargo fmt --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
+      - name: Install project
+        run: pip install .[qt${{ matrix.qt-version }}-${{ matrix.qt-binding }}]
       - name: Install test requirements
         run: |
           pip install -r test_requirements.txt

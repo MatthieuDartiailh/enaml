@@ -13,7 +13,9 @@ on:
       - "enaml/**"
       - "examples/**"
       - "docs/**"
-      - setup.py
+      - Cargo.toml
+      - Cargo.lock
+      - "crates/**"
       - pyproject.toml
 
 jobs:

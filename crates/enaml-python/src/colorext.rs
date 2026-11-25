@@ -7,6 +7,8 @@
 // --------------------------------------------------------------------------------------
 use pyo3::prelude::*;
 
+type ColorArgs = (u32, u32, u32, u32);
+
 /// Color class wrapping ARGB value in Qt's #AARRGGBB byte order
 #[pyclass(immutable_type, module = "enaml._rust")]
 pub struct Color {
@@ -25,10 +27,10 @@ impl Color {
             (0, 0, 0, 0)
         } else {
             (
-                (red.max(0).min(255)) as u32,
-                (green.max(0).min(255)) as u32,
-                (blue.max(0).min(255)) as u32,
-                (alpha.max(0).min(255)) as u32,
+                red.clamp(0, 255) as u32,
+                green.clamp(0, 255) as u32,
+                blue.clamp(0, 255) as u32,
+                alpha.clamp(0, 255) as u32,
             )
         };
 
@@ -69,7 +71,7 @@ impl Color {
         )
     }
 
-    fn __reduce__(&self, py: Python<'_>) -> PyResult<(Py<PyAny>, (u32, u32, u32, u32))> {
+    fn __reduce__(&self, py: Python<'_>) -> PyResult<(Py<PyAny>, ColorArgs)> {
         // Return (_reconstruct_color, (red, green, blue, alpha))
         // _reconstruct_color is imported from enaml.colors module
         let colors_module = py.import("enaml.colors")?;

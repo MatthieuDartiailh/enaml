@@ -9,28 +9,28 @@ use pyo3::prelude::*;
 use pyo3::types::PyMapping;
 
 mod alias;
+mod callableref;
 mod colorext;
 mod declarative_function;
 mod dynamicscope;
 mod fontext;
 mod funchelper;
-mod subscription_observer;
-mod winutil;
-mod weakmethod;
-mod callableref;
 mod signaling;
+mod subscription_observer;
+mod weakmethod;
+mod winutil;
 
 use alias::Alias;
+use callableref::CallableRef as PublicCallableRef;
 use colorext::Color;
 use declarative_function::{BoundDeclarativeMethod, DeclarativeFunction};
 use dynamicscope::{DynamicScope, Nonlocals, UserKeyError};
 use fontext::Font;
 use funchelper::call_func;
-use subscription_observer::{SubscriptionCallableRef, SubscriptionObserver};
-use winutil::WinEnum;
-use weakmethod::WeakMethod;
-use callableref::CallableRef as PublicCallableRef;
 use signaling::{BoundSignal, Signal};
+use subscription_observer::{SubscriptionCallableRef, SubscriptionObserver};
+use weakmethod::WeakMethod;
+use winutil::WinEnum;
 
 /// Python module entry point for enaml Rust extensions
 #[pymodule]

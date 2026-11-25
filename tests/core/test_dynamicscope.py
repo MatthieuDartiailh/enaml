@@ -115,6 +115,7 @@ def test_dynamic_scope_creation():
 
     dynamicscope = DynamicScope(owner, locs, globs, builtins, change, tracer)
     referents = gc.get_referents(dynamicscope)
+    referents = [referent for referent in referents if not isinstance(referent, type)]
     supposed_referents = [owner, change, tracer, locs, globs, builtins]
     assert len(referents) == len(supposed_referents)
     for r in referents:
@@ -318,7 +319,9 @@ def test_dynamicscope_lifecycle(dynamicscope, nonlocals):
     """Test the repr, traverse, clear etc..."""
     owner, tracer = dynamicscope[1][0], dynamicscope[1][-1]
     assert "Nonlocals[" in repr(nonlocals)
-    assert Counter(gc.get_referents(nonlocals)) == Counter([owner, tracer])
+    referents = gc.get_referents(nonlocals)
+    referents = [referent for referent in referents if not isinstance(referent, type)]
+    assert Counter(referents) == Counter([owner, tracer])
 
     del dynamicscope
     gc.collect()

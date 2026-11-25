@@ -12,10 +12,6 @@ This module maintains backward compatibility with the C++ implementation by
 re-exporting the Font class and font-related enums from the Rust extension.
 """
 
-try:
-    from enaml._rust import Font, FontStyle, FontStretch, FontCaps
-except ImportError:
-    # Fallback for development or if Rust extension not available
-    pass
+from enaml._rust import Font, FontStyle, FontStretch, FontCaps
 
 __all__ = ['Font', 'FontStyle', 'FontStretch', 'FontCaps']

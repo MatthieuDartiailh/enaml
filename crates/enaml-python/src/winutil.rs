@@ -69,7 +69,7 @@ pub fn load_icon(
     {
         let _ = py;
         let _ = icon_enum;
-        return Ok((vec![], (-1, -1)));
+        Ok((vec![], (-1, -1)))
     }
 
     #[cfg(windows)]

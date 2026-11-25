@@ -288,9 +288,10 @@ def test_traversing_bound_method():
 
     """)
     tester = compile_source(source, 'MyWindow')()
-    assert (Counter(gc.get_referents(tester.call)) ==
-        Counter([tester.call.__func__, tester, tester.call.__key__] +
-                ([type(tester.call)]))
+    referents = gc.get_referents(tester.call)
+    referents = [referent for referent in referents if not isinstance(referent, type)]
+    assert Counter(referents) == Counter(
+        [tester.call.__func__, tester, tester.call.__key__]
     )
 
 

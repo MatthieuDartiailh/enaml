@@ -31,72 +31,84 @@ pub fn call_func(
     let closure = func.getattr(intern!(py, "__closure__"))?;
 
     let mut kw_values = Vec::new();
-    for (key, val) in func_kwargs.iter() {
+    for (key, value) in func_kwargs.iter() {
         kw_values.push(key.as_ptr());
-        kw_values.push(val.as_ptr());
+        kw_values.push(value.as_ptr());
     }
 
-    let defaults_ptr = if defaults.is_none() {
-        std::ptr::null_mut()
+    let defaults_values = if defaults.is_none() {
+        None
     } else {
-        let defaults_tuple = defaults.cast::<PyTuple>()?;
-        let defaults_values: Vec<*mut ffi::PyObject> =
-            defaults_tuple.iter().map(|item| item.as_ptr()).collect();
-        defaults_values.as_ptr() as *mut *mut ffi::PyObject
+        let tuple = defaults.cast::<PyTuple>()?;
+        Some(tuple.iter().map(|item| item.as_ptr()).collect::<Vec<_>>())
     };
-    let default_count = if defaults.is_none() {
-        0
-    } else {
-        defaults.cast::<PyTuple>()?.len()
-    };
-
-    let args_ptr = unsafe {
-        // Cannot fails since we know we have a tuple,
-        // so we provide an empty string for the error message.
-        pyo3::ffi::PySequence_Fast_ITEMS(pyo3::ffi::PySequence_Fast(
-            func_args.as_ptr(),
-            c"".as_ptr(),
-        ))
-    };
-
-    let locals_ptr = match func_locals {
-        Some(locals) => locals.as_ptr(),
+    let defaults_ptr = match defaults_values.as_ref() {
+        Some(values) => values.as_ptr(),
         None => std::ptr::null_mut(),
     };
+    let default_count = defaults_values.as_ref().map_or(0, |values| values.len()) as c_int;
+
+    let fast_args = unsafe { ffi::PySequence_Fast(func_args.as_ptr(), c"".as_ptr()) };
+    if fast_args.is_null() {
+        return Err(PyErr::fetch(py));
+    }
+    let args_ptr = unsafe { ffi::PySequence_Fast_ITEMS(fast_args) };
+
+    let locals_dict = if let Some(locals) = func_locals {
+        let dict = PyDict::new(py);
+        let items = locals.call_method0("items")?;
+        for item in items.try_iter()? {
+            let item = item?;
+            let pair = item.cast::<PyTuple>()?;
+            if pair.len() == 2 {
+                dict.set_item(pair.get_item(0)?, pair.get_item(1)?)?;
+            }
+        }
+        Some(dict)
+    } else {
+        None
+    };
+    let locals_ptr = locals_dict
+        .as_ref()
+        .map_or(std::ptr::null_mut(), |dict| dict.as_ptr());
 
     let closure_ptr = if closure.is_none() {
         std::ptr::null_mut()
     } else {
         closure.as_ptr()
     };
-
+    let kwdefaults_ptr = if kwdefaults.is_none() {
+        std::ptr::null_mut()
+    } else {
+        kwdefaults.as_ptr()
+    };
     let kwds_ptr = if kw_values.is_empty() {
         std::ptr::null_mut()
     } else {
-        kw_values.as_ptr() as *const *mut ffi::PyObject
+        kw_values.as_ptr()
     };
 
-    let kwdc = kw_values.len() as c_int / 2;
-
-    unsafe {
-        let result = ffi::PyEval_EvalCodeEx(
+    let result = unsafe {
+        ffi::PyEval_EvalCodeEx(
             code.as_ptr(),
             globals.as_ptr(),
             locals_ptr,
             args_ptr,
             func_args.len() as c_int,
             kwds_ptr,
-            kwdc,
+            (kw_values.len() / 2) as c_int,
             defaults_ptr,
-            default_count as c_int,
-            kwdefaults.as_ptr(),
+            default_count,
+            kwdefaults_ptr,
             closure_ptr,
-        );
+        )
+    };
 
-        if result.is_null() {
-            return Err(PyErr::fetch(py));
-        }
-
-        Ok(Bound::from_owned_ptr(py, result).into())
+    unsafe {
+        ffi::Py_DecRef(fast_args);
     }
+    if result.is_null() {
+        return Err(PyErr::fetch(py));
+    }
+    Ok(unsafe { Bound::from_owned_ptr(py, result).unbind() })
 }

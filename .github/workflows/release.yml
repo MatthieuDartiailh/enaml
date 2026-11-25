@@ -29,10 +29,9 @@ jobs:
           python -m build . -s
       - name: Test sdist
         run: |
-          pip install pytest
+          pip install pytest atom kiwisolver bytecode pegen numpy qtpy PyQt6
           pip install dist/*.tar.gz
-          cd ..
-          python -m pytest enaml/tests
+          python -m pytest tests -v
       - name: Store artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -65,7 +64,7 @@ jobs:
           CIBW_BUILD: "cp311-* cp312-* cp313-* cp314-* cp315-*"
           CIBW_ARCHS_MACOS: x86_64 universal2 arm64
           CIBW_ARCHS_WINDOWS: auto64
-          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_REQUIRES: "pytest atom kiwisolver bytecode pegen numpy qtpy PyQt6"
           CIBW_TEST_COMMAND: python -m pytest {package}/tests -v
         run: |
           python -m cibuildwheel . --output-dir dist

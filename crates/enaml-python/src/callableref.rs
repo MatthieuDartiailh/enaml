@@ -5,10 +5,10 @@
 //
 // The license is in the LICENSE file in the project root.
 // --------------------------------------------------------------------------------------
+use pyo3::basic::CompareOp;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyBool, PyDict, PyTuple};
-use pyo3::basic::CompareOp;
 
 /// A weak callable reference with an optional weak callback.
 #[pyclass(subclass, weakref, module = "enaml.callableref")]
@@ -39,6 +39,7 @@ impl CallableRef {
 #[pymethods]
 impl CallableRef {
     #[new]
+    #[pyo3(signature = (value, callback=None))]
     pub fn new(
         py: Python<'_>,
         value: &Bound<'_, PyAny>,
