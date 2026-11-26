@@ -13,9 +13,7 @@ on:
       - "enaml/**"
       - "examples/**"
       - "docs/**"
-      - Cargo.toml
-      - Cargo.lock
-      - "crates/**"
+      - setup.py
       - pyproject.toml
 
 jobs:
@@ -39,8 +37,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel
           pip install -r docs/requirements.txt
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
       - name: Install project
         run: |
           pip install .
